@@ -1,0 +1,14 @@
+release/main.o
+release/database.o
+release/managerconnectdb.o
+release/sqlquery.o
+release/waitdb_thread.o
+release/sqlquerymodel.o
+release/createreport_test.o
+release/qrc_qml.o
+release/moc_database.o
+release/moc_managerconnectdb.o
+release/moc_sqlquery.o
+release/moc_waitdb_thread.o
+release/moc_sqlquerymodel.o
+release/moc_createreport_test.o

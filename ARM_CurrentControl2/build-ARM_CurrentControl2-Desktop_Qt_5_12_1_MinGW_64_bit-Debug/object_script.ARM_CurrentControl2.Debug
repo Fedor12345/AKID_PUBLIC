@@ -1,0 +1,14 @@
+debug/main.o
+debug/database.o
+debug/managerconnectdb.o
+debug/sqlquery.o
+debug/waitdb_thread.o
+debug/sqlquerymodel.o
+debug/createreport_test.o
+debug/qrc_qml.o
+debug/moc_database.o
+debug/moc_managerconnectdb.o
+debug/moc_sqlquery.o
+debug/moc_waitdb_thread.o
+debug/moc_sqlquerymodel.o
+debug/moc_createreport_test.o
