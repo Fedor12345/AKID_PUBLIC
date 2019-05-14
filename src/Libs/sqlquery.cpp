@@ -1,4 +1,4 @@
-#include "sqlquery.h"
+#include "../Libs/sqlquery.h"
 #include <QVariant>
 #include <QMap>
 #include <QDate>

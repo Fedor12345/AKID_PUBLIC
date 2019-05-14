@@ -24,17 +24,17 @@ TARGET = ARM_CurrentControl2
 TEMPLATE = app
 CODECFORTR = UTF-8
 
-
+INCLUDEPATH += ../Libs/
 
 
 SOURCES += \
         main.cpp \
-    database.cpp \
-    managerconnectdb.cpp \
-    sqlquery.cpp \
-    waitdb_thread.cpp \
-    sqlquerymodel.cpp \
-    createreport_test.cpp
+    createreport_test.cpp \
+    ../Libs/database.cpp \
+    ../Libs/managerconnectdb.cpp \
+    ../Libs/sqlquery.cpp \
+    ../Libs/sqlquerymodel.cpp \
+    ../Libs/waitdb_thread.cpp
 
 RESOURCES += qml.qrc
 
@@ -50,11 +50,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    database.h \
-    managerconnectdb.h \
-    sqlquery.h \
-    waitdb_thread.h \
-    sqlquerymodel.h \
-    createreport_test.h
+    createreport_test.h \
+    ../Libs/database.h \
+    ../Libs/managerconnectdb.h \
+    ../Libs/sqlquery.h \
+    ../Libs/sqlquerymodel.h \
+    ../Libs/waitdb_thread.h
 
 DISTFILES +=

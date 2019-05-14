@@ -2,28 +2,30 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>qtquickcontrols2.conf</file>
+        <file>AddWorker.qml</file>
         <file>CurrentControl.qml</file>
-        <file>StartPage.qml</file>
+        <file>LightIndicator.qml</file>
         <file>Login.qml</file>
         <file>MyBusyIndicator.qml</file>
+        <file>MyCalendar.qml</file>
+        <file>MyFindField.qml</file>
         <file>MyListViewUnfolding.qml</file>
+        <file>RectangleWithHeader.qml</file>
+        <file>Report_ESKID.qml</file>
+        <file>StartPage.qml</file>
+        <file>TestPage.qml</file>
+        <file>WorkersCard.qml</file>
         <file>icons/arrow-down-drop.svg</file>
         <file>icons/arrow-right-bold-circle-outline.svg</file>
         <file>icons/calendar.svg</file>
         <file>icons/eraser-variant.svg</file>
         <file>icons/face.svg</file>
+        <file>icons/faces.svg</file>
+        <file>icons/faces_2.svg</file>
+        <file>icons/faces_3.svg</file>
         <file>icons/menu-left.svg</file>
         <file>icons/menu-right.svg</file>
         <file>icons/Minus.svg</file>
         <file>icons/Plus.svg</file>
-        <file>WorkersCard.qml</file>
-        <file>TestPage.qml</file>
-        <file>AddWorker.qml</file>
-        <file>MyCalendar.qml</file>
-        <file>MyFindField.qml</file>
-        <file>RectangleWithHeader.qml</file>
-        <file>Report_ESKID.qml</file>
-        <file>icons/faces_2.svg</file>
-        <file>LightIndicator.qml</file>
     </qresource>
 </RCC>

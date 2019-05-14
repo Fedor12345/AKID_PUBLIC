@@ -128,7 +128,7 @@ Page {
         border.color: "LightGray"
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-        width: 190
+        width: 170
         height: 40
         anchors.margins: 15
 
@@ -141,7 +141,7 @@ Page {
                         txt_statusConnection.append("<p style='color:#9cc17f'>" + message + "</p>") //txt_statusConnection.text = message;
                         indicatorConnect_0.lightOff();
                         indicatorConnect_1.lightOff();
-                        indicatorConnect_local.lightOff();
+                        //indicatorConnect_local.lightOff();
                     }
                     else
                     {
@@ -150,7 +150,7 @@ Page {
 
                     if(status) {
                         txt_nameConnection.text = currentConnectionName;
-                        indicatorConnect_local.lightOff();
+                        //indicatorConnect_local.lightOff();
 
                         if(currentConnectionName=="machine 0") {
                             indicatorConnect_0.lightTrue();
@@ -159,13 +159,13 @@ Page {
                             indicatorConnect_1.lightTrue();
                         }
                         if(currentConnectionName=="0") {
-                            indicatorConnect_local.lightTrue();
+                            //indicatorConnect_local.lightTrue();
                             txt_nameConnection.text = "local machine"
                         }
 
                     }
                     else {
-                        indicatorConnect_local.lightOff();
+                        //indicatorConnect_local.lightOff();
                         if(currentConnectionName=="machine 0") {
                             indicatorConnect_0.lightFalse();
                         }
@@ -292,15 +292,15 @@ Page {
 
                 border.color: "LightGray"
                 radius: 5
-                width: 90
+                width: 70
                 height: 25
                 Row {
                     anchors.centerIn: parent
                     spacing: 10
                     LightIndicator { id: indicatorConnect_0;  height: 15; width: 15 }
                     LightIndicator { id: indicatorConnect_1;  height: 15; width: 15 }
-                    Rectangle      { height: 15; width: 1; color: "LightGray" }
-                    LightIndicator { id: indicatorConnect_local;  height: 15; width: 15; style: false }
+//                    Rectangle      { height: 15; width: 1; color: "LightGray" }
+//                    LightIndicator { id: indicatorConnect_local;  height: 15; width: 15; style: false }
 
                 }
             }

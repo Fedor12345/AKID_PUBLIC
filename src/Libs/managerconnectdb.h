@@ -4,8 +4,8 @@
 #include <QObject>
 #include <QThread>
 
-#include <waitdb_thread.h>
-#include <database.h>
+#include <../Libs/waitdb_thread.h>
+#include <../Libs/database.h>
 //#include <object_thread.h>
 //#include <modeldb_thread.h>
 

@@ -2,7 +2,7 @@
 
 #include <QTimer> //удалить в финальной версии
 
-#include "sqlquerymodel.h"
+#include "../Libs/sqlquerymodel.h"
 
 ManagerConnectDB::ManagerConnectDB()
 {

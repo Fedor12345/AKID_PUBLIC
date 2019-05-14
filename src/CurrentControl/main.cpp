@@ -7,9 +7,9 @@
 #include <QThread>
 
 
-#include <managerconnectdb.h>
-#include <sqlquery.h>
-#include <sqlquerymodel.h>
+#include <../Libs/managerconnectdb.h>
+#include <../Libs/sqlquery.h>
+#include <../Libs/sqlquerymodel.h>
 #include <createreport_test.h>
 
 

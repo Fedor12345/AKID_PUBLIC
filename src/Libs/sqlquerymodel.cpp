@@ -1,4 +1,4 @@
-#include "sqlquerymodel.h"
+#include "../Libs/sqlquerymodel.h"
 
 #include <QThread>
 #include <QMutex>

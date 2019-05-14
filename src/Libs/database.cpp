@@ -1,4 +1,4 @@
-#include "database.h"
+#include "../Libs/database.h"
 
 
 Database::Database(QString connectionName, QString hostName, QString databaseName, QObject *parent) : QObject(parent) //
