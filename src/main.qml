@@ -6,7 +6,7 @@ import QtQuick.Controls.Material 2.3
 ApplicationWindow {
     id: window
     visible: true
-    width: 1400
+    width: 1500
     height: 800
     title: qsTr(".: АРМ Текущий контроль")
 

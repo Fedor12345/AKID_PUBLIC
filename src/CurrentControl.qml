@@ -85,9 +85,10 @@ Page {
         id: stackview_mainwindow
         anchors.left: frame1.right
         anchors.right: parent.right
+        //anchors.rightMargin: 250
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 50
+        anchors.bottomMargin: 70
 
         initialItem: "WorkersCard.qml"
 
@@ -110,12 +111,24 @@ Page {
 
     }
 
+
+    /// индикаторы сосотояний подключения
+    Rectangle {
+        anchors.bottom: rect_status_.top
+
+        anchors.right: parent.right
+        anchors.margins: 10
+        width: 1100
+        height: 1
+        color: "LightGray"
+
+    }
     Rectangle {
         id: rect_status_
         border.color: "LightGray"
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-        width: 180
+        width: 190
         height: 40
         anchors.margins: 15
 
@@ -123,14 +136,21 @@ Page {
                 target: managerDB
 
                 onSignalSendGUI_status: {
+                    //txt_statusConnection.text = message;
                     if(message=="begin"){
+                        txt_statusConnection.append("<p style='color:#9cc17f'>" + message + "</p>") //txt_statusConnection.text = message;
                         indicatorConnect_0.lightOff();
                         indicatorConnect_1.lightOff();
                         indicatorConnect_local.lightOff();
                     }
+                    else
+                    {
+                        txt_statusConnection.append(message);
+                    }
 
                     if(status) {
                         txt_nameConnection.text = currentConnectionName;
+                        indicatorConnect_local.lightOff();
 
                         if(currentConnectionName=="machine 0") {
                             indicatorConnect_0.lightTrue();
@@ -145,6 +165,7 @@ Page {
 
                     }
                     else {
+                        indicatorConnect_local.lightOff();
                         if(currentConnectionName=="machine 0") {
                             indicatorConnect_0.lightFalse();
                         }
@@ -154,43 +175,92 @@ Page {
                     }
 
 
-//                    if(status) txt_nameConnection.text = currentConnectionName; //.append(currentConnectionName)
-//                    if(currentConnectionName=="0") {
-//                        txt_nameConnection.text = "local machine"
-//                        indicatorConnect_0.lightOff();
-//                        indicatorConnect_1.lightOff();
-//                        indicatorConnect_local.lightTrue();
-//                    }
-//                    if(currentConnectionName=="machine 0") {
-//                        indicatorConnect_local.lightOff();
-//                        if(status) {
-//                            //indicatorConnect_1.lightOff();
-//                            indicatorConnect_0.lightOff();
-//                            indicatorConnect_0.lightTrue();
-//                        }
-//                        else {
-//                            //indicatorConnect_1.lightOff();
-//                            indicatorConnect_0.lightOff();
-//                            indicatorConnect_0.lightFalse();
-//                        }
-//                    }
-//                    if(currentConnectionName=="machine 1") {
-//                        indicatorConnect_local.lightOff();
-//                        if(status) {
-//                            //indicatorConnect_0.lightOff();
-//                            indicatorConnect_1.lightOff();
-//                            indicatorConnect_1.lightTrue();
-//                        }
-//                        else {
-//                            //indicatorConnect_0.lightOff();
-//                            indicatorConnect_1.lightOff();
-//                            indicatorConnect_1.lightFalse();
-//                        }
-//                    }
+
                 }
 
          }
 
+
+        Rectangle {
+            id: rect_statusConnection
+            property bool isButton_clear: false
+            anchors.right: parent.left
+            anchors.rightMargin: 10
+            anchors.bottom: parent.bottom
+            //anchors.top: parent.top
+            width: 300
+            height: 40
+            border.color: "LightGray"
+
+            Flickable {
+                id: flickable_txt_STATUSCONNECT
+                anchors.fill: parent
+                //anchors.margins: 2
+                anchors.leftMargin: 20
+
+                TextArea.flickable: TextArea {
+                    id: txt_statusConnection
+                    font.pointSize: 10
+                    textFormat: Text.RichText /// для использования html форматирования текста
+                    //anchors.fill: parent
+                    wrapMode: TextArea.Wrap
+                    color: Material.color(Material.Grey)
+                }
+
+                ScrollBar.vertical: ScrollBar { }
+            }
+            MouseArea {
+                anchors.fill:parent
+                hoverEnabled: true
+
+                //onClicked: {rect_statusConnection.height = 400}
+                onEntered: {
+                    rect_statusConnection.height = 400
+                    flickable_txt_STATUSCONNECT.anchors.margins = 20
+                    txt_statusConnection.font.pointSize = 9
+                    txt_button_clear.opacity = 0.2
+                }
+                onExited:  {
+                    rect_statusConnection.height = 40
+                    flickable_txt_STATUSCONNECT.anchors.margins = 0
+                    txt_statusConnection.font.pointSize = 10
+                    txt_button_clear.opacity = 0.0
+                }
+                onPositionChanged: {
+                    if(    mouseX >= button_clear.x && mouseX <= (button_clear.x+button_clear.width)
+                        && mouseY >= button_clear.y && mouseY <= (button_clear.y+button_clear.height) )
+                    {
+                        button_clear.border.color = "LightGray"
+                        txt_button_clear.opacity = 0.6
+                        rect_statusConnection.isButton_clear = true
+                    }
+                    else {
+                        button_clear.border.color = "transparent"
+                        txt_button_clear.opacity = 0.2
+                        rect_statusConnection.isButton_clear = false
+                    }
+                }
+                onClicked: {
+                    if(rect_statusConnection.isButton_clear) {txt_statusConnection.clear()}
+                }
+
+            }
+            Rectangle {
+                id: button_clear
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.margins: 14
+                width: 50
+                height: 20
+                Text {
+                    id: txt_button_clear
+                    anchors.centerIn: parent
+                    text: qsTr("Clear")
+                    opacity: 0.0
+                }
+
+            }
+        }
 
 
 
@@ -206,6 +276,8 @@ Page {
                 anchors.left: parent.left
                 anchors.leftMargin: 10
 
+
+
                 font.pixelSize: 12
                 text: "-"
                 color: Material.color(Material.Grey)
@@ -220,13 +292,14 @@ Page {
 
                 border.color: "LightGray"
                 radius: 5
-                width: 80
+                width: 90
                 height: 25
                 Row {
                     anchors.centerIn: parent
                     spacing: 10
                     LightIndicator { id: indicatorConnect_0;  height: 15; width: 15 }
                     LightIndicator { id: indicatorConnect_1;  height: 15; width: 15 }
+                    Rectangle      { height: 15; width: 1; color: "LightGray" }
                     LightIndicator { id: indicatorConnect_local;  height: 15; width: 15; style: false }
 
                 }
@@ -234,102 +307,8 @@ Page {
 
         }
 
-
-
     }
 
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*##^## Designer {
-    D{i:0;height:800;width:1200}
-}
- ##^##*/

@@ -7,6 +7,7 @@ import QtQuick.Controls.Material 2.3
 import QtQuick.Dialogs 1.2
 
 Page {
+    id: main_
     property int space_margin: 15
 
     Label {
@@ -142,7 +143,14 @@ Page {
     }
 
 
-
+/// группа основных элементов данных
+Item {
+    id: main_2
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.rightMargin: 200
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
 
     Frame {
         id:frame_wmenu
@@ -164,8 +172,6 @@ Page {
             radius: 7
             //border.width: 1
         }
-
-
 
 
 
@@ -206,27 +212,6 @@ Page {
                 flat: true
             }
             ToolSeparator {}
-            Button {
-                text:"testQuery"
-                onClicked: { Query1.setQuery(" SELECT (w_surname + ' ' + SUBSTR(w_name, 1, 1) + '. ' + SUBSTR(w_patronymic, 1, 1) + '.') fname,
-                                  id_tld tld, PERSON_NUMBER, id_person ID
-                                  FROM ext_person
-                                  WHERE (LOWER(w_surname) LIKE '"+ "I" +"%')
-                                  ORDER BY w_surname "); }
-                           //{ Query1.setQuery("SELECT tek_postanovka.w_name FROM tek_postanovka WHERE id_person=1"); }
-                           //{ Query1.setQuery("SELECT ADM_DEPARTMENT.DEPARTMENT FROM ADM_DEPARTMENT WHERE ID=1"); }
-                           //{ Query1.setQuery("SELECT max(id_person) max_id FROM tek_postanovka WHERE id_tld = 1001"); }
-            }
-            Label{
-                id:testTXT
-                text:"---"
-            }
-            Connections {
-                target: Query1
-                onSignalSendResult: {
-                    testTXT.text = var_res;
-                }
-            }
         }
 
         MyFindField {
@@ -263,60 +248,6 @@ Page {
                                            FROM ext_person
                                            LEFT JOIN adm_status ON ext_person.STATUS_CODE = adm_status.STATUS_CODE
                                            WHERE ext_person.ID_PERSON = " + id_rec;
-
-//                    workersModel.query = " SELECT W_SURNAME, W_NAME, W_PATRONYMIC, id_person,
-//                                           sex, birth_date, dose_before_npp, dose_chnpp, iku_year, iku_month,
-//                                           weight, height, date_on, date_off, emergency_dose,disable_radiation,
-//                                           id_tld, STAFF_TYPE,
-
-//                                           passport_number,  passport_give,
-//                                           passport_date, policy_number, snils,
-//                                           home_address,
-//                                           work_tel, work_address, E_MAIL,
-
-//                                           adm_status.status
-
-//                                           FROM ext_person, adm_status
-//                                           WHERE ext_person.id_person = " + id_rec +
-//                                    " and
-//                                           adm_status.status_code = ext_person.status_code
-
-//                                           "
-//                                         " and adm_person_type.ID = workers.person_type
-//                                           and adm_department.ID = workers.department
-//                                           and tek_person.id_person = workers.id_person "
-
-
-
-//                    workersModel.query = " SELECT W_SURNAME, W_NAME, W_PATRONYMIC, workers.id_person,
-//                                           gender, birth_date, dose_before_npp, dose_chnpp, iku_year, iku_month,
-//                                           weight, height, date_on, date_of, emergency_dose,disable_radiation,
-//                                           id_tld, doznarad_position,
-
-//                                           tek_person.passport_series, tek_person.passport_number, tek_person.passport_vydan,
-//                                           tek_person.passport_date, tek_person.polis_number, tek_person.polis_series,
-//                                           tek_person.pension_number, tek_person.home_tel, tek_person.home_address,
-//                                           tek_person.work_tel, tek_person.work_address,
-
-//                                           adm_person_type.person_type, adm_department.department
-
-//                                           FROM workers, adm_person_type, adm_department, tek_person
-//                                           WHERE workers.id_person = " + id_rec +
-//                                         " and adm_person_type.ID = workers.person_type
-//                                           and adm_department.ID = workers.department
-//                                           and tek_person.id_person = workers.id_person "
-
-
-//                    workersModel.query = "SELECT (W_SURNAME || ' ' || W_NAME || ' ' || W_PATRONYMIC) FNAME,
-//                                          TLD_NUMBER, PERSON_NUMBER PN, IKU_YEAR, IKU_MONTH,
-//                                          GENDER, ID, BIRTHDAY, WEIGHT, GROWTH,
-//                                          PASSPORT_SERIAL, PASSPORT_NUMBER, PASSPORT_WHO, PASSPORT_DATE,
-//                                          PANSION_NUMBER, MEDICAL_NUMBER,
-//                                          HOME_PHONE, HOME_ADDRESS, MOBILE_PHONE
-//                                          FROM TABLE_WORKERS
-//                                          WHERE ID = " + id_rec
-
-
                 }
             }
         }
@@ -663,88 +594,6 @@ Page {
                     }
 
 
-
-//                    Column {
-//                        spacing: 10
-//                        Row {
-//                            spacing: 20
-//                            CheckBox {
-//                                text: "Выдающий"
-//                                height: 25
-//                                font.pixelSize: 14
-//                                checkable: false
-//                                hoverEnabled: false
-//                            }
-//                            CheckBox {
-//                                text: "Руководитель"
-//                                height: 25
-//                                font.pixelSize: 14
-//                                checkable: false
-//                                hoverEnabled: false
-//                            }
-//                            CheckBox {
-//                                text: "Производитель"
-//                                height: 25
-//                                font.pixelSize: 14
-//                                checkable: false
-//                                hoverEnabled: false
-//                            }
-//                            CheckBox {
-//                                text: "Открывающий"
-//                                height: 25
-//                                font.pixelSize: 14
-//                                checkable: false
-//                                //checkState: Qt.Checked
-//                                hoverEnabled: false
-//                            }
-//                            CheckBox {
-//                                text: "Закрывающий"
-//                                height: 25
-//                                font.pixelSize: 14
-//                                checkable: false
-//                                //checkState: Qt.Checked
-//                                hoverEnabled: false
-//                            }
-//                        }
-//                        Label {
-//                            text: "Уровень полномочий по дозе на выдачу дознаряда: 0.0 мЗв"
-//                            verticalAlignment: Text.AlignVCenter
-//                            height: 25
-//                            font.pixelSize: 14
-//                            color: "Black"
-//                            leftPadding: 10
-//                        }
-
-//                        Row {
-//                            spacing: 20
-//                            Column {
-//                                CheckBox {
-//                                    text: "Доступ c ППД"
-//                                    height: 25
-//                                    font.pixelSize: 14
-//                                    checkable: false
-//                                    hoverEnabled: false
-//                                }
-//                                CheckBox {
-//                                    text: "Аварийная доза"
-//                                    height: 25
-//                                    font.pixelSize: 14
-//                                    checkable: false
-//                                    hoverEnabled: false
-//                                }
-//                                CheckBox {
-//                                    text: "Запрет работы с ИИИ"
-//                                    height: 25
-//                                    font.pixelSize: 14
-//                                    checkable: false
-//                                    hoverEnabled: false
-//                                }
-//                            }
-//                        }
-//                    }
-
-
-
                 }
 
 
@@ -949,7 +798,7 @@ Page {
 
                             Rectangle {
                                 height: wtab2_passport.heightAll
-                                width:  550
+                                width:  480
                                 //border.color: "LightGray"
                                 Column {
                                     spacing: 5
@@ -965,7 +814,7 @@ Page {
 
                                     Rectangle {
                                         height: 1
-                                        width: 550
+                                        width: 480
                                         color: "LightGray"
                                     }
                                     Row {
@@ -1325,9 +1174,81 @@ Page {
     }
 
 
+}
+
+
+/// Список всех сотрудников
+Rectangle {
+    id: allPersons
+    anchors.top: parent.top
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    anchors.margins: 15
+    width: 180
+
+    color: "#EEEEEE"
+    border.color: "LightGray"
+
+
+    Rectangle {
+        id: header_allPersons
+        anchors.top: parent.topr
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 40
+        border.color: "LightGray"
+    }
+    Item {
+        id: body_allPersons
+        anchors.top: header_allPersons.bottom
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        ListView {
+            id: list_Persons
+            anchors.fill: parent
+            anchors.margins: 5
+            highlightFollowsCurrentItem: true
+            model: ListModel {
+                ListElement {
+                    name: "Name A"
+                    number: "1113264"
+                }
+                ListElement {
+                    name: "Name B"
+                    number: "4564564"
+                }
+                ListElement {
+                    name: "Name C"
+                    number: "4654564"
+                }
+            }
+            ScrollBar.vertical: ScrollBar {
+                policy: "AlwaysOn"
+            }
+
+            clip: true
+            delegate:
+                Item {
+                width: 180; height: 40
+                Column {
+                    Text {
+                        text: name
+                    }
+                    Text {
+                        text: number
+                    }
+                }
+
+            }
+        }
+
+    }
 
 
 
+}
 
 
 }

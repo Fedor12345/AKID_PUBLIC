@@ -272,13 +272,15 @@ void ManagerConnectDB::connectionDB_BEGIN(QString connectionName)
 {    
     if(connectionName == CONNECTION_NAME_0) {
         waitDB->fl_connectionStates[0] = true;
-        qDebug() << " @ Manager: (BEGIN connect)  waitDB->fl_connectionStates[0] = " << waitDB->fl_connectionStates[0];
+        qDebug() << " @ Manager: (BEGIN connect to" << connectionName << ")  waitDB->fl_connectionStates[0] = " << waitDB->fl_connectionStates[0];
     }
     if(connectionName == CONNECTION_NAME_1) {
         waitDB->fl_connectionStates[1] = true;
-        qDebug() << " @ Manager: (BEGIN connect)  waitDB->fl_connectionStates[1] = " << waitDB->fl_connectionStates[1];
+        qDebug() << " @ Manager: (BEGIN connect to" << connectionName << ")  waitDB->fl_connectionStates[1] = " << waitDB->fl_connectionStates[1];
     }
-
+    QString message = "Попытка подключения к " + connectionName;
+    qDebug() << " @ Manager: " << message;
+    emit signalSendGUI_status(message, nullptr, NULL);
 }
 
 /// Вызывается сигналом из waitDB, когда время ожидания всех подключений завершилось

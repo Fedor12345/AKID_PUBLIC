@@ -47,6 +47,9 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("report", report);
 
 
+    /// внесены изменения для проверки ветки
+    /// внесены еще изменения для проверки ветки
+
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;
