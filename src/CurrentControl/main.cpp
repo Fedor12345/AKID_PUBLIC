@@ -42,6 +42,18 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("workersModel", managerDB->createModel("","model_PERSON"));
 
+//    engine.rootContext()->setContextProperty("adm_status_Model", managerDB->createModel("","adm_status"));
+//    engine.rootContext()->setContextProperty("adm_organisation_org_Model", managerDB->createModel("","adm_organisation_org"));
+//    engine.rootContext()->setContextProperty("adm_status_Model", managerDB->createModel("","adm_status"));
+//    engine.rootContext()->setContextProperty("adm_status_Model", managerDB->createModel("","adm_status"));
+//    engine.rootContext()->setContextProperty("adm_status_Model", managerDB->createModel("","adm_status"));
+
+
+//(" SELECT STATUS_CODE, STATUS FROM ADM_STATUS ", "adm_status")
+//(" SELECT ORGANIZATION_ FROM ADM_ORGANIZATION ", "adm_organisation_org")
+//(" SELECT ID_ORGANIZATION, DEPARTMENT FROM ADM_ORGANIZATION WHERE ID = 1 ", "adm_organisation_dep")
+//(" SELECT ID_DEPARTMENT_NPP,DEPARTMENT_NPP FROM ADM_DEPARTMENT_NPP ", "adm_department_nnp")
+
 
     CreateReport_test *report = new CreateReport_test();
     engine.rootContext()->setContextProperty("report", report);

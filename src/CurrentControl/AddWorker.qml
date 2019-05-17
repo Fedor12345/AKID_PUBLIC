@@ -77,6 +77,17 @@ Item {
                     //ошибка выполнения запроса
                 }
             }
+
+            //проверка есть ли в БД запись с таким же табельным номером
+            if(owner_name == "isPersonalNumber") {
+                if(var_res>0) { nw_personalNumber.color = "Red"      }
+                else          { nw_personalNumber.color    = "Green" }
+            }
+            //проверка есть ли в БД запись с таким же ТЛД
+            if(owner_name == "isIDTLD") {
+                if(var_res>0) { nw_tld.color = "Red"   }
+                else          { nw_tld.color = "Green" }
+            }
         }
     }
 
@@ -415,26 +426,49 @@ Item {
                                     Column {
                                         Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                         Text {
+                                            id: label_personalNumber
                                             text: "Табельный №"
                                             font.pixelSize: 14
+                                            color: {
+                                                if(nw_personalNumber.length === 0) {
+                                                    return "Red"
+                                                }
+                                                else { return nw_personalNumber.color}
+                                            }
                                         }
                                         TextField {
                                             id: nw_personalNumber
                                             font.pixelSize: 16
                                             width: 100
                                             horizontalAlignment: Text.AlignHCenter
-                                            selectByMouse: true
+                                            selectByMouse: true                                            
                                             onTextEdited: {
-                                                if (text.length === 1) text = text.toUpperCase()
+                                               if (text.length > 0) { timer_personalNumber.restart() }
+                                               // if (text.length === 1) text = text.toUpperCase()
                                             }
+                                        }
+                                        Timer {
+                                            id: timer_personalNumber
+                                            interval: 500
+                                            repeat: false
+                                             onTriggered: {
+                                                 if (nw_personalNumber.text.length > 0)
+                                                 { Query1.setQueryAndName(" Select PERSON_NUMBER FROM EXT_PERSON WHERE PERSON_NUMBER = " + nw_personalNumber.text, "isPersonalNumber"); }
+
+                                             }
                                         }
                                     }
 
                                     Column {
                                         Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                         Text {
+                                            id: label_tld
                                             text: "№ ТЛД"
                                             font.pixelSize: 14
+                                            color: {
+                                                if(nw_tld.length === 0) { return "Red" }
+                                                else { return nw_tld.color}
+                                            }
                                         }
                                         TextField {
                                             id: nw_tld
@@ -443,8 +477,19 @@ Item {
                                             horizontalAlignment: Text.AlignHCenter
                                             selectByMouse: true
                                             onTextEdited: {
-                                                if (text.length === 1) text = text.toUpperCase()
+                                                if (text.length > 0) { timer_tld.restart() }
+                                                //if (text.length === 1) text = text.toUpperCase()
                                             }
+                                        }
+                                        Timer {
+                                            id: timer_tld
+                                            interval: 500
+                                            repeat: false
+                                             onTriggered: {
+                                                 if (nw_tld.text.length > 0)
+                                                 { Query1.setQueryAndName(" Select ID_TLD FROM EXT_PERSON WHERE ID_TLD = " + nw_tld.text, "isIDTLD"); }
+
+                                             }
                                         }
                                     }
 
@@ -520,6 +565,8 @@ Item {
                                                     //console.log(" >>>>> currentText = ", nw_organisation.currentText, " ", currentIndex)
                                                     if(nw_staffType.currentIndex==1)
                                                         modeles.model_adm_organisation_dep.setQueryDB(" SELECT ID, DEPARTMENT FROM ADM_ORGANIZATION WHERE ORGANIZATION_ = '" + currentText + "'");
+                                                        //modeles.model_adm_organisation_dep.query(" SELECT ID, DEPARTMENT FROM ADM_ORGANIZATION WHERE ORGANIZATION_ = '" + currentText + "'");
+
                                                 }
                                             }
                                             Button {

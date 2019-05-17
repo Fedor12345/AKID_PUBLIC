@@ -115,10 +115,11 @@ Page {
     /// индикаторы сосотояний подключения
     Rectangle {
         anchors.bottom: rect_status_.top
-
-        anchors.right: parent.right
         anchors.margins: 10
-        width: 1100
+        anchors.right: parent.right
+        anchors.rightMargin: 15
+
+        width: 1120
         height: 1
         color: "LightGray"
 

@@ -38,6 +38,13 @@ void SQLquery::setQuery(const QString &query, const bool &isGroup)
     //queryExecute();
 }
 
+// в параметрах указывается SQL запрос и уникальное имя для идентификации этого запроса
+void SQLquery::setQueryAndName(const QString &query, const QString &owner_name)
+{
+    this->sender_name = owner_name;
+    this->setQuery(query);
+}
+
 /// очищает список вопросов
 void SQLquery::clearqueriesGroup(){
     this->queriesGroup.clear();
