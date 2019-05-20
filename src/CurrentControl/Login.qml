@@ -115,7 +115,7 @@ Item {
                 bottomPadding: 16
                 topPadding: 8
                 leftPadding: 8
-                text: "ARM_CONTROL" //"DOZ1" //C##CDBUSER1
+                text: "ARM_AKID_J" // "ARM_AKID_I" // "ARM_CONTROL" //"DOZ1" //C##CDBUSER1
                 placeholderText: qsTr("введите имя пользователя")
                 verticalAlignment: Text.AlignVCenter
                 clip: false

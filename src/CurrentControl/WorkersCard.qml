@@ -154,7 +154,7 @@ Item {
     id: main_2
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.rightMargin: 200
+    anchors.rightMargin: 260
     anchors.top: parent.top
     anchors.bottom: parent.bottom
 
@@ -1190,7 +1190,7 @@ Rectangle {
     anchors.right: parent.right
     anchors.bottom: parent.bottom
     anchors.margins: 15
-    width: 180
+    width: 240
 
     color: "#f7f7f7"
     border.color: "LightGray"
@@ -1246,31 +1246,57 @@ Rectangle {
             clip: true
             delegate:
                 ItemDelegate {
-                width: 150; height: 60
-                Column {
+                width: 210; height: 60
+                Row {
+                    spacing: 5
+                    Rectangle {
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        width: 15
+                        color: "transparent"
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.right: parent.right
+                            //anchors.rightMargin: 5
+                            text: index
+                            font.pixelSize: 15
+                            color: "#999999"
+                        }
+                    }
+
+                    Rectangle {
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        width: 1
+                        color: "Lightgray"
+                    }
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
                     anchors.leftMargin: 5
-                    Text {
-                        text: W_NAME + " " + W_SURNAME + " " + W_PATRONYMIC
-                        font.pixelSize: 14
-                        color: {
-                         if (list_Persons.currentIndex == index) { "#FF5722" }
-                         else { "#4c4c4c" }
+                    Column {
+                        Text {
+                            text: W_NAME + " " + W_SURNAME + " " + W_PATRONYMIC
+                            font.pixelSize: 14
+                            color: {
+                             if (list_Persons.currentIndex == index) { "#FF5722" }
+                             else { "#4c4c4c" }
+                            }
+                            //font.bold: true
                         }
-                        //font.bold: true
+                        Text {
+                            text: "Таб. № " + PERSON_NUMBER
+                            font.pixelSize: 10
+                            color: "#777777"
+                        }
+                        Text {
+                            text: "ТЛД № " + ID_TLD
+                            font.pixelSize: 10
+                            color: "#777777"
+                        }
                     }
-                    Text {
-                        text: "Таб. № " + PERSON_NUMBER
-                        font.pixelSize: 10
-                        color: "#777777"
-                    }
-                    Text {
-                        text: "ТЛД № " + ID_TLD
-                        font.pixelSize: 10
-                        color: "#777777"
-                    }
+
                 }
+
                 onClicked: {
                     console.log("Click: " + " " + index)
                     if (list_Persons.currentIndex !== index) {
