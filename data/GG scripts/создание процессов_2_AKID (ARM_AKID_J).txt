@@ -1,0 +1,84 @@
+
+
+user:  ARM_AKID_J_2
+table: *
+
+
+	(!)
+	> DBLOGIN USERID GGADMIN@ORCLPDB PASSWORD alpha1		
+	> ADD TRANDATA ARM_AKID_J_2.*
+	
+	
+	(!)
+	> DBLOGIN USERID C##GGADMIN@ORCL PASSWORD alpha1
+	
+------| EXT_J2: |---------------------------------------
+	> edit params EXT_J2	
+    ----------------------------------------------------
+	EXTRACT EXT_J2 
+	--PURGEOLDEXTRACTS
+	USERID C##GGADMIN@ORCL PASSWORD alpha1 
+	LOGALLSUPCOLS  
+	UPDATERECORDFORMAT COMPACT 
+
+	--TRANLOGOPTIONS EXCLUDEUSER USER_REPLICATION_2
+	TRANLOGOPTIONS EXCLUDETAG 2
+
+	EXTTRAIL .\dirdat\trailFilesJ\a2
+	SOURCECATALOG ORCLPDB 
+	TABLE ARM_AKID_J_2.*;
+    ----------------------------------------------------
+
+	> ADD EXTRACT EXT_J2, INTEGRATED TRANLOG, BEGIN NOW
+	> ADD EXTTRAIL .\dirdat\trailFilesJ\a2, EXTRACT EXT_J2, MEGABYTES 100
+ 
+	> REGISTER EXTRACT EXT_J2 DATABASE CONTAINER (ORCLPDB)
+ 
+ 
+ ------| DP_J2: |---------------------------------------
+	> edit params DP_J2	
+	----------------------------------------------------
+	EXTRACT DP_J2
+	--PURGEOLDEXTRACTS
+	USERID C##GGADMIN@ORCL PASSWORD alpha1
+	RMTHOST 192.168.1.5, MGRPORT 7809
+	RMTTRAIL .\dirdat\trailFilesJ\b2
+	PASSTHRU 
+	SOURCECATALOG ORCLPDB
+	TABLE ARM_AKID_J_2.*;
+	----------------------------------------------------
+		
+	> ADD EXTRACT DP_J2, EXTTRAILSOURCE .\dirdat\trailFilesJ\a2 BEGIN NOW
+	> ADD RMTTRAIL .\dirdat\trailFilesJ\b2 EXTRACT DP_J2
+
+
+
+ 
+	(!)
+	> DBLOGIN USERID GGADMIN@ORCLPDB PASSWORD alpha1
+	
+ ------| R_J1: |----------------------------------------
+	> edit params R_J1
+	----------------------------------------------------
+	REPLICAT R_J1
+	--DBOPTIONS INTEGRATEDPARAMS(parallelism 1)
+	--USERIDALIAS srcdb2 DOMAIN admin2
+	--USERID C##GGADMIN@ORCLPDB2, password alpha1
+	USERID GGADMIN@ORCLPDB, password alpha1
+	--DISCARDFILE .\dirdsc\replcat1.dsc, PURGE
+	--ASSUMETARGETDEFS
+	--SOURCEDEFS .\dirdef\R_M1.def 
+	--MAP ORCLPDB.USER1.TABLE2, TARGET ORCLPDB2.USER2.TABLE2;
+	--MAP ORCLPDB.user_test1.User_, TARGET ORCLPDB2.AKID_2.User_;
+	REPERROR (0001, DISCARD)
+	--REPERROR (-26787, DISCARD)
+	HANDLECOLLISIONS
+	MAP ORCLPDB.ARM_AKID_J.*, TARGET ORCLPDB.ARM_AKID_J_2.*;
+	----------------------------------------------------
+	
+	> ADD REPLICAT R_J1 INTEGRATED EXTTRAIL .\dirdat\trailFilesJ\b1
+	
+	> REGISTER REPLICAT R_J1 DATABASE
+	
+	
+	
