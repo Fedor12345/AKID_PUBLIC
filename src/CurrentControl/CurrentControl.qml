@@ -114,34 +114,91 @@ Page {
 
     /// индикаторы сосотояний подключения
     Rectangle {
-        anchors.bottom: rect_status_.top
-
-        anchors.right: parent.right
+        anchors.bottom: rect_mainStatusPanel.top
         anchors.margins: 10
-        width: 1100
+        anchors.right: parent.right
+        anchors.rightMargin: 15
+
+        width: 1120
         height: 1
         color: "LightGray"
 
     }
-    Rectangle {
-        id: rect_status_
-        border.color: "LightGray"
+    Popup {
+        id: popup_wait_2
+        modal: true
+        closePolicy: Popup.NoAutoClose
+        parent: Overlay.overlay
+        x: Math.round((parent.width - width) / 2)
+        y: Math.round((parent.height - height) / 2)
+
+        width: 250
+        height: 150
+
+
+        Rectangle {
+            anchors.fill: parent
+            Column {
+                anchors.centerIn: parent
+                spacing: 10
+                Text {
+                    id: popup_txt
+                    font.pixelSize: 15
+                    color: "#17a81a"
+                    //text: qsTr("text")
+                }
+                Button {
+                    id: cansel_popup_button
+                    text: "Закрыть"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    contentItem: Text {
+                        text: cansel_popup_button.text
+                        font: cansel_popup_button.font
+                        opacity: enabled ? 1.0 : 0.3
+                        color: cansel_popup_button.down ? "#17a81a" : "#21be2b"
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideRight
+                    }
+                    background: Rectangle {
+                        implicitWidth: 100
+                        implicitHeight: 40
+                        opacity: enabled ? 1 : 0.3
+                        border.color: cansel_popup_button.down ? "#17a81a" : "#21be2b"
+                        border.width: 1
+                        radius: 2
+                    }
+                    onClicked: {
+                        popup_wait_2.close();
+                    }
+                }
+            }
+        }
+
+
+    }
+    Item {
+        id: rect_mainStatusPanel
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-        width: 170
+        width: 580
         height: 40
         anchors.margins: 15
+        //border.color: "LightGray"
 
         Connections {
                 target: managerDB
+                property int iBegin: 0
 
                 onSignalSendGUI_status: {
+                    console.log(" ******************** ",message, " status = ",status)
                     //txt_statusConnection.text = message;
                     if(message=="begin"){
-                        txt_statusConnection.append("<p style='color:#9cc17f'>" + message + "</p>") //txt_statusConnection.text = message;
+                        txt_statusConnection.append("<p style='color:#9cc17f'>" + message + ": " + iBegin + "</p>") //txt_statusConnection.text = message;
                         indicatorConnect_0.lightOff();
                         indicatorConnect_1.lightOff();
                         //indicatorConnect_local.lightOff();
+                        iBegin++;
                     }
                     else
                     {
@@ -164,7 +221,7 @@ Page {
                         }
 
                     }
-                    else {
+                    else if(!status) {
                         //indicatorConnect_local.lightOff();
                         if(currentConnectionName=="machine 0") {
                             indicatorConnect_0.lightFalse();
@@ -175,19 +232,106 @@ Page {
                     }
 
 
+                    if(currentConnectionName) {
+                        popup_wait_2.close()
+                    }
 
                 }
 
          }
 
-
-        Rectangle {
-            id: rect_statusConnection
-            property bool isButton_clear: false
-            anchors.right: parent.left
-            anchors.rightMargin: 10
+        //пенель с кнопками смены коннекта
+        Item {
+            id: rect_changeConnect
+            anchors.left: parent.left
             anchors.bottom: parent.bottom
-            //anchors.top: parent.top
+            anchors.top: parent.top
+            width: 81
+            //property int currentMachine: 0
+
+            Rectangle {
+                id: machine0
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                anchors.top: parent.top
+                width: 40
+                border.color: "LightGray"
+                Text {
+                    anchors.centerIn: parent
+                    text: qsTr("0")
+                    font.pixelSize: 15
+                    color: "#494848"
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        //rect_changeConnect.currentMachine = 0
+                        indicatorConnect_0.lightOff();
+                        indicatorConnect_1.lightOff();
+                        popup_txt.text = qsTr("Подлючение к machine 0");
+                        txt_statusConnection.append("<p style='color:#9cc17f'> Переключение БД </p>")
+                        popup_wait_2.open();
+
+                        managerDB.connectionDB(0);
+                    }
+                    onEntered: {
+                        parent.color = "#dbdbdb" // "LightGray"
+                    }
+                    onExited:  {
+                        parent.color = "Transparent"
+                    }
+                }
+            }
+            Rectangle {
+                id: machine1
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.top: parent.top
+                width: 40
+                border.color: "LightGray"
+                Text {
+                    anchors.centerIn: parent
+                    text: qsTr("1")
+                    font.pixelSize: 15
+                    color: "#494848"
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        //rect_changeConnect.currentMachine = 1
+                        indicatorConnect_0.lightOff();
+                        indicatorConnect_1.lightOff();
+                        popup_txt.text = qsTr("Подлючение к machine 1");
+                        popup_wait_2.open();
+                        txt_statusConnection.append("<p style='color:#9cc17f'> Переключение БД </p>")
+                        managerDB.connectionDB(1);
+                    }
+                    onEntered: {
+                        parent.color = "#dbdbdb" //"LightGray"
+                    }
+                    onExited:  {
+                        parent.color = "Transparent"
+                    }
+                }
+            }
+
+//            Row {
+//                anchors.centerIn: parent
+//                //Tumbler { model: 5 }
+//                //Switch {}
+//                //RadioButton {}
+//            }
+        }
+
+        //разоврачивающаяся информационная панель
+        Rectangle {
+            id: rect_statusConnection_info
+            property bool isButton_clear: false
+            anchors.left: rect_changeConnect.right
+            anchors.leftMargin: 10
+            anchors.bottom: parent.bottom
             width: 300
             height: 40
             border.color: "LightGray"
@@ -202,9 +346,9 @@ Page {
                     id: txt_statusConnection
                     font.pointSize: 10
                     textFormat: Text.RichText /// для использования html форматирования текста
-                    //anchors.fill: parent
                     wrapMode: TextArea.Wrap
                     color: Material.color(Material.Grey)
+                    font.family: "Calibri"
                 }
 
                 ScrollBar.vertical: ScrollBar { }
@@ -213,15 +357,15 @@ Page {
                 anchors.fill:parent
                 hoverEnabled: true
 
-                //onClicked: {rect_statusConnection.height = 400}
+                //onClicked: {rect_statusConnection_info.height = 400}
                 onEntered: {
-                    rect_statusConnection.height = 400
+                    rect_statusConnection_info.height = 400
                     flickable_txt_STATUSCONNECT.anchors.margins = 20
                     txt_statusConnection.font.pointSize = 9
                     txt_button_clear.opacity = 0.2
                 }
                 onExited:  {
-                    rect_statusConnection.height = 40
+                    rect_statusConnection_info.height = 40
                     flickable_txt_STATUSCONNECT.anchors.margins = 0
                     txt_statusConnection.font.pointSize = 10
                     txt_button_clear.opacity = 0.0
@@ -232,16 +376,16 @@ Page {
                     {
                         button_clear.border.color = "LightGray"
                         txt_button_clear.opacity = 0.6
-                        rect_statusConnection.isButton_clear = true
+                        rect_statusConnection_info.isButton_clear = true
                     }
                     else {
                         button_clear.border.color = "transparent"
                         txt_button_clear.opacity = 0.2
-                        rect_statusConnection.isButton_clear = false
+                        rect_statusConnection_info.isButton_clear = false
                     }
                 }
                 onClicked: {
-                    if(rect_statusConnection.isButton_clear) {txt_statusConnection.clear()}
+                    if(rect_statusConnection_info.isButton_clear) {txt_statusConnection.clear()}
                 }
 
             }
@@ -263,50 +407,60 @@ Page {
         }
 
 
+        // индикторы
+        Rectangle {
+            id: rect_statusConnection_indicator
+            border.color: "LightGray"
+            anchors.bottom: parent.bottom
+            anchors.left: rect_statusConnection_info.right
+            anchors.leftMargin: 10
+            width: 170
+            height: 40
 
 
-        Item {
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            TextEdit {
-                id: txt_nameConnection
+            Item {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
-                anchors.leftMargin: 10
-
-
-
-                font.pixelSize: 12
-                text: "-"
-                color: Material.color(Material.Grey)
-                selectByMouse: true
-                //selectionColor: Material.color(Material.Red)
-            }
-
-            Rectangle {
-                anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
-                anchors.rightMargin: 10
 
-                border.color: "LightGray"
-                radius: 5
-                width: 70
-                height: 25
-                Row {
-                    anchors.centerIn: parent
-                    spacing: 10
-                    LightIndicator { id: indicatorConnect_0;  height: 15; width: 15 }
-                    LightIndicator { id: indicatorConnect_1;  height: 15; width: 15 }
-//                    Rectangle      { height: 15; width: 1; color: "LightGray" }
-//                    LightIndicator { id: indicatorConnect_local;  height: 15; width: 15; style: false }
+                TextEdit {
+                    id: txt_nameConnection
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
 
+
+
+                    font.pixelSize: 12
+                    text: "-"
+                    color: Material.color(Material.Grey)
+                    selectByMouse: true
+                    //selectionColor: Material.color(Material.Red)
                 }
+
+                Rectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                    anchors.rightMargin: 10
+
+                    border.color: "LightGray"
+                    radius: 5
+                    width: 70
+                    height: 25
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: 10
+                        LightIndicator { id: indicatorConnect_0;  height: 15; width: 15 }
+                        LightIndicator { id: indicatorConnect_1;  height: 15; width: 15 }
+                        //                    Rectangle      { height: 15; width: 1; color: "LightGray" }
+                        //                    LightIndicator { id: indicatorConnect_local;  height: 15; width: 15; style: false }
+
+                    }
+                }
+
             }
 
         }
-
     }
 
 

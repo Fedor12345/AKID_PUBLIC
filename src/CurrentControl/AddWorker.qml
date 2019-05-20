@@ -4,8 +4,12 @@ import QtQuick.Layouts 1.12
 
 Item {
     //id: item3
+    id: main_AddWorker
     height: 800//550
     width:  900//690
+
+    //property bool isOk: true
+
 
     signal create_confirm(var data_record)
     signal create_cancel()
@@ -47,10 +51,11 @@ Item {
 
     Item {
         id: modeles
-        property var model_adm_status:           managerDB.createModel(" SELECT STATUS_CODE, STATUS FROM ADM_STATUS ", "adm_status")
-        property var model_adm_organisation_org: managerDB.createModel(" SELECT ORGANIZATION_ FROM ADM_ORGANIZATION ", "adm_organisation_org")
-        property var model_adm_organisation_dep: managerDB.createModel(" SELECT ID_ORGANIZATION, DEPARTMENT FROM ADM_ORGANIZATION WHERE ID = 1 ", "adm_organisation_dep")
-        property var model_adm_department_nnp:   managerDB.createModel(" SELECT ID_DEPARTMENT_NPP,DEPARTMENT_NPP FROM ADM_DEPARTMENT_NPP ", "adm_department_nnp")
+        property var model_adm_status:           managerDB.createModel(" SELECT STATUS_CODE, STATUS  FROM ADM_STATUS ",                    "adm_status")
+        property var model_adm_organisation_org: managerDB.createModel(" SELECT ORGANIZATION_        FROM ADM_ORGANIZATION ",              "adm_organisation_org")
+        property var model_adm_organisation_dep: managerDB.createModel(" SELECT ID, DEPARTMENT       FROM ADM_ORGANIZATION WHERE ID = 1 ", "adm_organisation_dep")
+        property var model_adm_department_nnp:   managerDB.createModel(" SELECT ID, DEPARTMENT_NPP   FROM ADM_DEPARTMENT_NPP ",            "adm_department_nnp")
+        property var model_adm_assignment:       managerDB.createModel(" SELECT ID, ASSIGNEMENT      FROM ADM_ASSIGNEMENT ",               "adm_department_nnp")
     }
 
     Connections {
@@ -76,6 +81,17 @@ Item {
                 } else {
                     //ошибка выполнения запроса
                 }
+            }
+
+            //проверка есть ли в БД запись с таким же табельным номером
+            if(owner_name == "isPersonalNumber") {
+                if ( var_res > 0 ) { nw_personalNumber.color = "#ff0000" } // краный
+                else               { nw_personalNumber.color = "#008000" } // зеленный
+            }
+            //проверка есть ли в БД запись с таким же ТЛД
+            if(owner_name == "isIDTLD") {
+                if ( var_res > 0 ) { nw_tld.color = "#ff0000" }
+                else               { nw_tld.color = "#008000" }
             }
         }
     }
@@ -415,36 +431,72 @@ Item {
                                     Column {
                                         Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                         Text {
+                                            id: label_personalNumber
                                             text: "Табельный №"
                                             font.pixelSize: 14
+                                            color: {
+                                                if(nw_personalNumber.length === 0) { return "#ff0000" } //красный
+                                                else { return nw_personalNumber.color}
+                                            }
                                         }
                                         TextField {
                                             id: nw_personalNumber
-                                            font.pixelSize: 16
+                                            property bool isOk: (color == "#008000") ? true : false
                                             width: 100
+                                            font.pixelSize: 16
                                             horizontalAlignment: Text.AlignHCenter
                                             selectByMouse: true
                                             onTextEdited: {
-                                                if (text.length === 1) text = text.toUpperCase()
+                                               if (text.length > 0) { timer_personalNumber.restart() }
+                                               else { color = "#ff0000" }
+                                               // if (text.length === 1) text = text.toUpperCase()
                                             }
+                                        }
+                                        Timer {
+                                            id: timer_personalNumber
+                                            interval: 500
+                                            repeat: false
+                                            onTriggered: {
+                                                 if (nw_personalNumber.text.length > 0)
+                                                 { Query1.setQueryAndName(" Select PERSON_NUMBER FROM EXT_PERSON WHERE PERSON_NUMBER = " + nw_personalNumber.text, "isPersonalNumber"); }
+
+                                             }
                                         }
                                     }
 
                                     Column {
                                         Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                         Text {
+                                            id: label_tld
                                             text: "№ ТЛД"
                                             font.pixelSize: 14
+                                            color: {
+                                                if(nw_tld.length === 0) { return "#ff0000"  } //красный
+                                                else { return nw_tld.color}
+                                            }
                                         }
                                         TextField {
                                             id: nw_tld
-                                            font.pixelSize: 16
+                                            property bool isOk: (color == "#008000") ? true : false
                                             width: 100
+                                            font.pixelSize: 16
                                             horizontalAlignment: Text.AlignHCenter
                                             selectByMouse: true
                                             onTextEdited: {
-                                                if (text.length === 1) text = text.toUpperCase()
+                                                if (text.length > 0) { timer_tld.restart();}
+                                                else { color = "#ff0000" }
+                                                //if (text.length === 1) text = text.toUpperCase()
                                             }
+                                        }
+                                        Timer {
+                                            id: timer_tld
+                                            interval: 500
+                                            repeat: false
+                                            onTriggered: {
+                                                 if (nw_tld.text.length > 0)
+                                                 { Query1.setQueryAndName(" Select ID_TLD FROM EXT_PERSON WHERE ID_TLD = " + nw_tld.text, "isIDTLD"); }
+
+                                             }
                                         }
                                     }
 
@@ -520,6 +572,8 @@ Item {
                                                     //console.log(" >>>>> currentText = ", nw_organisation.currentText, " ", currentIndex)
                                                     if(nw_staffType.currentIndex==1)
                                                         modeles.model_adm_organisation_dep.setQueryDB(" SELECT ID, DEPARTMENT FROM ADM_ORGANIZATION WHERE ORGANIZATION_ = '" + currentText + "'");
+                                                        //modeles.model_adm_organisation_dep.query(" SELECT ID, DEPARTMENT FROM ADM_ORGANIZATION WHERE ORGANIZATION_ = '" + currentText + "'");
+
                                                 }
                                             }
                                             Button {
@@ -589,7 +643,7 @@ Item {
                                             spacing: 5                                            
                                             ComboBox {
                                                 id: nw_department_npp
-                                                width: 170
+                                                width: 180
                                                 flat: false
                                                 font.pixelSize: 16
                                                 visible: (nw_staffType.currentIndex==0) ? true : false
@@ -599,7 +653,7 @@ Item {
 
                                             ComboBox {
                                                 id: nw_department
-                                                width: 170
+                                                width: 180
                                                 flat: false
                                                 font.pixelSize: 16
                                                 visible: (nw_staffType.currentIndex==0) ? false : true
@@ -663,9 +717,9 @@ Item {
                                                 width: 200
                                                 flat: false
                                                 font.pixelSize: 16
-                                                //property var model_:
 
-                                                model: ["Test1", "Test2", "Test3"]
+                                                model: modeles.model_adm_assignment
+                                                textRole: "ASSIGNEMENT"
                                             }
                                         }
 
@@ -1241,6 +1295,20 @@ Item {
             //anchors.margins: 10
             anchors.bottomMargin: 10
             anchors.rightMargin: 20
+
+            enabled:
+            {
+                var isOk
+
+                if (nw_personalNumber.isOk) { isOk = true                }
+                else                        { isOk = false; return isOk; }
+
+                if (nw_tld.isOk) { isOk = true                }
+                else             { isOk = false; return isOk; }
+
+                return isOk;
+            }
+
             text: "Сохранить"
             font.pixelSize: 14
             anchors.bottom: parent.bottom
@@ -1316,7 +1384,7 @@ Item {
             text: "Отмена"
             font.pixelSize: 14
             anchors.bottom: parent.bottom
-            anchors.left: parent.left
+            anchors.left: parent.left            
 
             onClicked: {
                 create_cancel()

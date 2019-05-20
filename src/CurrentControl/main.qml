@@ -31,7 +31,7 @@ ApplicationWindow {
         background:
             Rectangle {
             anchors.fill: parent
-            color: "Transparent"//"White" Material.color(Material.Grey, Material.Shade200)
+            color: "Transparent" //"White" Material.color(Material.Grey, Material.Shade200)
         }
         MyBusyIndicator {
             biwidth:  40

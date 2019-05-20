@@ -38,6 +38,9 @@ void Database::connectionDB(const QString &userName, const QString &password) //
     qDebug() << "\n -> Database: connectionDB: ("<<this->databaseName << ") |  thread =" << QThread::currentThreadId() << "\n";
 
     this->userName = userName;
+    if(this->connectionName == "machine 1") {
+        this->userName = userName + "_2";
+    }
     this->password = password;
     db.setUserName(this->userName);
     db.setPassword(this->password);

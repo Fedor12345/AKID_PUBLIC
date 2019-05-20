@@ -45,6 +45,7 @@ signals:
 public slots:
     void setQuery(const QString &query);
     void setQuery(const QString &query, const bool &isGroup);
+    void setQueryAndName(const QString &query, const QString& owner_name);
     void clearqueriesGroup();
 
     void checkNameConnection(QString); //, bool

@@ -80,7 +80,7 @@ void WaitDB_thread::waitConnetionDB()
             /// запуск ожидания
             qDebug() << " ->-> WaitDB: run wait timer for the first connection ";
             //waitTimer(100, 50); /// 40циклов * 50мс = 2с ожидания
-            timer->start(2000);
+            timer->start(5000);
             this->loop.exec();
             qDebug() << " ->-> WaitDB: exit timer for the first connection ";
         }
@@ -127,7 +127,7 @@ void WaitDB_thread::waitConnectionCurrentDB(int currentConnection)
             /// запуск ожидания
             qDebug() << "! -> run wait timer <- !";
             //waitTimer(100, 50); /// 100циклов * 50мс = 5с ожидания
-            timer->start(2000);
+            timer->start(5000);
             this->loop.exec();
             qDebug() << "! -> exit timer <- !";
 
