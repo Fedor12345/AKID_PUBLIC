@@ -1,0 +1,32 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>Login.qml</file>
+        <file>StartPage.qml</file>
+        <file>Doznaryad.qml</file>
+        <file>MyTableView.qml</file>
+        <file>MyTextData.qml</file>
+        <file>icons/account-plus-outline.svg</file>
+        <file>icons/magnify.svg</file>
+        <file>icons/plus.svg</file>
+        <file>icons/account.svg</file>
+        <file>icons/materialdesignicons-webfont.ttf</file>
+        <file>New_doznaryad.qml</file>
+        <file>MyCalendar.qml</file>
+        <file>icons/calendar.svg</file>
+        <file>MyFindField.qml</file>
+        <file>icons/menu-left.svg</file>
+        <file>icons/menu-right.svg</file>
+        <file>icons/close.svg</file>
+        <file>icons/eraser.svg</file>
+        <file>icons/eraser-variant.svg</file>
+        <file>Add_task.qml</file>
+        <file>icons/minus.svg</file>
+        <file>Add_worker.qml</file>
+        <file>icons/check.svg</file>
+        <file>icons/settings.svg</file>
+        <file>MyBusyIndicator.qml</file>
+        <file>MsgBox.qml</file>
+    </qresource>
+</RCC>
