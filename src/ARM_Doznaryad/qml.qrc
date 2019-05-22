@@ -28,5 +28,6 @@
         <file>icons/settings.svg</file>
         <file>MyBusyIndicator.qml</file>
         <file>MsgBox.qml</file>
+        <file>LightIndicator.qml</file>
     </qresource>
 </RCC>

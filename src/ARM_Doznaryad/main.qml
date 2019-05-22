@@ -6,7 +6,7 @@ ApplicationWindow {
     id: window
     visible: true
     width: 1200
-    height: 800
+    height: 900
     title: qsTr(".: АРМ Электронный дознаряд")
 
     Connections {

@@ -11,7 +11,7 @@ Page {
     visible: true
 
         width: 1200
-        height: 800
+        height: 900
     property int space_margin: 15
 
 
@@ -177,6 +177,7 @@ Page {
                 id: copyButton
                 text: "Копия"
                 //font.pointSize: 12
+                enabled: false
                 onClicked: {
 
                 }
@@ -184,6 +185,7 @@ Page {
             ToolButton {
                 id: delButton
                 text: "Удалить"
+                enabled: false
                 //font.pointSize: 12
             }
 
@@ -191,33 +193,41 @@ Page {
             }
             ToolButton {
                 text: "Выборки"
+                enabled: false
             }
             ToolButton {
                 text: "Справочники"
+                enabled: false
             }
             ToolButton {
                 text: "ТЛД"
+                enabled: false
             }
             ToolSeparator {
             }
             ToolButton {
                 text: "Обновить"
+                onClicked: {
+                    dozModel.updateModel()
+                }
             }
             ToolButton {
                 text: "Печать"
+                enabled: false
             }
             ToolSeparator {
             }
 
             ToolButton {
                 text: "Очередь"
+                enabled: false
             }
         }
     }
 
     Connections{
         target: dozModel
-        onQueryStrChanged: {
+        onSignalUpdateDone: {
             //console.log("- - - - - dozModel row count: "+dozModel.rowCount())
             if (current_doz_ID === -1)  {
                 if (dozModel.rowCount() > 0) {
@@ -296,7 +306,7 @@ Page {
                 current_doz_ID = dozModel.get(listview.currentIndex)["ID"]
 
                 if (justquery.updateRecord("Doznarayd","TABLE_DOZNARYAD", data_record)) {
-                    dozModel.update_data()
+                    dozModel.updateModel() //.update_data()
 
                     mymsgbox_popup.iamready("Запись успешно обновлена")
                     //select_doznaryad(data_record["ID"])
@@ -347,8 +357,73 @@ Page {
 
             onEdit_confirm: {
                 add_task_popup.close()
-            }
+                mymsgbox_popup.pleasewait()
 
+                var tmap = {}, i = 0, j=0, res;
+
+                console.log("Insert records count: "+data_record.rowCount())
+
+                for (i=0; i < data_record.rowCount(); i++) {
+                    console.log("edit ID task: "+data_record.get(i)["ID"])
+                    tmap["ID_TASK"] = data_record.get(i)["ID"]
+                    justquery2.deleteRecord("addtask_edit", "TABLE_TASKS_ROOMS_CON", tmap)
+                }
+                tmap = {}
+
+                tmap["ID_DOZNARYAD"] = dozModel.get(listview.currentIndex)["ID"]
+                justquery2.deleteRecord("addtask_edit", "TABLE_TASKS", tmap)
+                tmap = {}
+
+                for(i=0; i < data_record.rowCount(); i++) {
+                    tmap["ID_DOZNARYAD"] = dozModel.get(listview.currentIndex)["ID"]
+
+                    tmap["ID_BLOK"] = data_record.get(i)["ID_BLOK"]
+                    tmap["ID_EQUIPMENT"] = data_record.get(i)["ID_EQUIPMENT"]
+                    tmap["ID_UNIT"] = data_record.get(i)["ID_UNIT"]
+                    tmap["ID_TYPE_OF_WORK"] = data_record.get(i)["ID_TYPE_OF_WORK"]
+                    tmap["ID_JOB_TITLE"] = data_record.get(i)["ID_JOB_TITLE"]
+                    tmap["DOSE_VALUE"] = data_record.get(i)["DOSE_VALUE"]
+                    tmap["MEASURE"] = data_record.get(i)["MEASURE"]
+                    tmap["PEOPLE_CNT"] = data_record.get(i)["PEOPLE_CNT"]
+                    tmap["CURRENT_DAY"] = data_record.get(i)["CURRENT_DAY"]
+                    tmap["CHB_RAD_STATE"] = data_record.get(i)["CHB_RAD_STATE"]
+                    tmap["GAMMA_VALUE"] = data_record.get(i)["GAMMA_VALUE"]
+                    tmap["BETA_VALUE"] = data_record.get(i)["BETA_VALUE"]
+                    tmap["NEUTRON_VALUE"] = data_record.get(i)["NEUTRON_VALUE"]
+                    tmap["ALFA_VALUE"] = data_record.get(i)["ALFA_VALUE"]
+
+                    //сохраняем в БД, в res2 получаем ID добавленной записи
+                    if ( !justquery2.insertRecordIntoTable("addtask_edit", "TABLE_TASKS", tmap) ) {
+                        //database.rollback()
+                        return -1;
+                    }
+                    res = justquery2.getMaxID("addtask_edit", "TABLE_TASKS", "ID_DOZNARYAD", tmap["ID_DOZNARYAD"])
+                    if (res === -1) {
+                        //database.rollback()
+                        return -1;
+                    }
+                    tmap = {}
+
+                    console.log("insert new record into TABLE_TASKS, record ID: " + res)
+
+                    if (typeof data_record.get(i)["ROOMS"] !== undefined) {
+                        for(j = 0; j < data_record.get(i)["ROOMS"].count; j++) {
+                            tmap["ID_TASK"] = res
+                            tmap["ID_ROOM"] = data_record.get(i)["ROOMS"].get(j)["ID"]
+
+                            if ( !justquery2.insertRecordIntoTable("Doznaryad", "TABLE_TASKS_ROOMS_CON", tmap) ) {
+                                //database.rollback()
+                                return -1;
+                            }
+                        }
+                        tmap = {}
+                    }
+
+                }
+
+                dozModel.updateModel()
+                mymsgbox_popup.iamready("Запись успешно обновлена")
+            }
         }
     }
 
@@ -379,7 +454,7 @@ Page {
                 if (res !== -1) {
                     current_doz_ID = res
                     //console.log("! Запись добавлена !")
-                    dozModel.update_data()
+                    dozModel.updateModel() //.update_data()
                     mymsgbox_popup.iamready("Запись успешно добавлена")
                 } else {
                     //console.log("! ОШИБКА записи в основную БД !")
@@ -438,7 +513,7 @@ Page {
                 }
                 tmap = {}
 
-                dozModel.update_data()
+                dozModel.updateModel() //.update_data()
 
                 mymsgbox_popup.iamready("Запись успешно обновлена")
             }
@@ -879,7 +954,7 @@ Page {
 //                    }
                     Connections {
                         target: task_listview.model
-                        onQueryStrChanged: {
+                        onSignalUpdateDone: {
                             task_listview.update_fields(0)
                         }
                     }
@@ -1609,6 +1684,9 @@ Page {
         anchors.left: frame1.right
         //anchors.top: frame8.bottom
         anchors.bottom: parent.bottom
+/// Anton
+        anchors.bottomMargin: 85
+        /// Anton
         height: 30
         padding: 1
         topPadding: 1
@@ -1646,4 +1724,363 @@ Page {
         }
 
     }
+ /// Anton
+
+    Rectangle {
+        anchors.bottom: rect_mainStatusPanel.top
+        anchors.margins: 10
+        anchors.right: parent.right
+        anchors.rightMargin: 15
+
+        width: 930
+        height: 1
+        color: "LightGray"
+
+    }
+    /// индикаторы сосотояний подключения
+    Popup {
+        id: popup_wait_2
+        modal: true
+        closePolicy: Popup.NoAutoClose
+        parent: Overlay.overlay
+        x: Math.round((parent.width - width) / 2)
+        y: Math.round((parent.height - height) / 2)
+
+        width: 250
+        height: 150
+
+
+        Rectangle {
+            anchors.fill: parent
+            Column {
+                anchors.centerIn: parent
+                spacing: 10
+                Text {
+                    id: popup_txt
+                    font.pixelSize: 15
+                    color: "#17a81a"
+                    //text: qsTr("text")
+                }
+                Button {
+                    id: cansel_popup_button
+                    text: "Закрыть"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    contentItem: Text {
+                        text: cansel_popup_button.text
+                        font: cansel_popup_button.font
+                        opacity: enabled ? 1.0 : 0.3
+                        color: cansel_popup_button.down ? "#17a81a" : "#21be2b"
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideRight
+                    }
+                    background: Rectangle {
+                        implicitWidth: 100
+                        implicitHeight: 40
+                        opacity: enabled ? 1 : 0.3
+                        border.color: cansel_popup_button.down ? "#17a81a" : "#21be2b"
+                        border.width: 1
+                        radius: 2
+                    }
+                    onClicked: {
+                        popup_wait_2.close();
+                    }
+                }
+            }
+        }
+
+
+    }
+    Item {
+        id: rect_mainStatusPanel
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        width: 580
+        height: 40
+        anchors.margins: 15
+        //border.color: "LightGray"
+
+        Connections {
+                target: managerDB
+                property int iBegin: 0
+
+                onSignalSendGUI_status: {
+                    console.log(" ******************** ",message, " status = ",status)
+                    //txt_statusConnection.text = message;
+                    if(message=="begin"){
+                        txt_statusConnection.append("<p style='color:#9cc17f'>" + message + ": " + iBegin + "</p>") //txt_statusConnection.text = message;
+                        indicatorConnect_0.lightOff();
+                        indicatorConnect_1.lightOff();
+                        //indicatorConnect_local.lightOff();
+                        iBegin++;
+                    }
+                    else
+                    {
+                        txt_statusConnection.append(message);
+                    }
+
+                    if(status) {
+                        txt_nameConnection.text = currentConnectionName;
+                        //indicatorConnect_local.lightOff();
+
+                        if(currentConnectionName=="machine 0") {
+                            indicatorConnect_0.lightTrue();
+                        }
+                        if(currentConnectionName=="machine 1") {
+                            indicatorConnect_1.lightTrue();
+                        }
+                        if(currentConnectionName=="0") {
+                            //indicatorConnect_local.lightTrue();
+                            txt_nameConnection.text = "local machine"
+                        }
+
+                    }
+                    else if(!status) {
+                        //indicatorConnect_local.lightOff();
+                        if(currentConnectionName=="machine 0") {
+                            indicatorConnect_0.lightFalse();
+                        }
+                        if(currentConnectionName=="machine 1") {
+                            indicatorConnect_1.lightFalse();
+                        }
+                    }
+
+
+                    if(currentConnectionName) {
+                        popup_wait_2.close()
+                    }
+
+                }
+
+         }
+
+        //пенель с кнопками смены коннекта
+        Item {
+            id: rect_changeConnect
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            anchors.top: parent.top
+            width: 81
+            //property int currentMachine: 0
+
+//            Rectangle {
+//                id: machine0
+//                anchors.left: parent.left
+//                anchors.bottom: parent.bottom
+//                anchors.top: parent.top
+//                width: 40
+//                border.color: "LightGray"
+//                Text {
+//                    anchors.centerIn: parent
+//                    text: qsTr("0")
+//                    font.pixelSize: 15
+//                    color: "#494848"
+//                }
+//                MouseArea {
+//                    anchors.fill: parent
+//                    hoverEnabled: true
+//                    onClicked: {
+//                        //rect_changeConnect.currentMachine = 0
+//                        indicatorConnect_0.lightOff();
+//                        indicatorConnect_1.lightOff();
+//                        popup_txt.text = qsTr("Подлючение к machine 0");
+//                        txt_statusConnection.append("<p style='color:#9cc17f'> Переключение БД </p>")
+//                        popup_wait_2.open();
+
+//                        managerDB.connectionDB(0);
+//                    }
+//                    onEntered: {
+//                        parent.color = "#dbdbdb" // "LightGray"
+//                    }
+//                    onExited:  {
+//                        parent.color = "Transparent"
+//                    }
+//                }
+//            }
+
+//            Rectangle {
+//                id: machine1
+//                anchors.right: parent.right
+//                anchors.bottom: parent.bottom
+//                anchors.top: parent.top
+//                width: 40
+//                border.color: "LightGray"
+//                Text {
+//                    anchors.centerIn: parent
+//                    text: qsTr("1")
+//                    font.pixelSize: 15
+//                    color: "#494848"
+//                }
+//                MouseArea {
+//                    anchors.fill: parent
+//                    hoverEnabled: true
+//                    onClicked: {
+//                        //rect_changeConnect.currentMachine = 1
+//                        indicatorConnect_0.lightOff();
+//                        indicatorConnect_1.lightOff();
+//                        popup_txt.text = qsTr("Подлючение к machine 1");
+//                        popup_wait_2.open();
+//                        txt_statusConnection.append("<p style='color:#9cc17f'> Переключение БД </p>")
+//                        managerDB.connectionDB(1);
+//                    }
+//                    onEntered: {
+//                        parent.color = "#dbdbdb" //"LightGray"
+//                    }
+//                    onExited:  {
+//                        parent.color = "Transparent"
+//                    }
+//                }
+//            }
+
+//            Row {
+//                anchors.centerIn: parent
+//                //Tumbler { model: 5 }
+//                //Switch {}
+//                //RadioButton {}
+//            }
+        }
+
+        //разоврачивающаяся информационная панель
+        Rectangle {
+            id: rect_statusConnection_info
+            property bool isButton_clear: false
+            anchors.left: rect_changeConnect.right
+            anchors.leftMargin: 10
+            anchors.bottom: parent.bottom
+            width: 300
+            height: 40
+            border.color: "LightGray"
+
+            Flickable {
+                id: flickable_txt_STATUSCONNECT
+                anchors.fill: parent
+                //anchors.margins: 2
+                anchors.leftMargin: 20
+
+                TextArea.flickable: TextArea {
+                    id: txt_statusConnection
+                    font.pointSize: 10
+                    textFormat: Text.RichText /// для использования html форматирования текста
+                    wrapMode: TextArea.Wrap
+                    color: Material.color(Material.Grey)
+                    font.family: "Calibri"
+                }
+
+                ScrollBar.vertical: ScrollBar { }
+            }
+            MouseArea {
+                anchors.fill:parent
+                hoverEnabled: true
+
+                //onClicked: {rect_statusConnection_info.height = 400}
+                onEntered: {
+                    rect_statusConnection_info.height = 400
+                    flickable_txt_STATUSCONNECT.anchors.margins = 20
+                    txt_statusConnection.font.pointSize = 9
+                    txt_button_clear.opacity = 0.2
+                }
+                onExited:  {
+                    rect_statusConnection_info.height = 40
+                    flickable_txt_STATUSCONNECT.anchors.margins = 0
+                    txt_statusConnection.font.pointSize = 10
+                    txt_button_clear.opacity = 0.0
+                }
+                onPositionChanged: {
+                    if(    mouseX >= button_clear.x && mouseX <= (button_clear.x+button_clear.width)
+                        && mouseY >= button_clear.y && mouseY <= (button_clear.y+button_clear.height) )
+                    {
+                        button_clear.border.color = "LightGray"
+                        txt_button_clear.opacity = 0.6
+                        rect_statusConnection_info.isButton_clear = true
+                    }
+                    else {
+                        button_clear.border.color = "transparent"
+                        txt_button_clear.opacity = 0.2
+                        rect_statusConnection_info.isButton_clear = false
+                    }
+                }
+                onClicked: {
+                    if(rect_statusConnection_info.isButton_clear) {txt_statusConnection.clear()}
+                }
+
+            }
+            Rectangle {
+                id: button_clear
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.margins: 14
+                width: 50
+                height: 20
+                Text {
+                    id: txt_button_clear
+                    anchors.centerIn: parent
+                    text: qsTr("Clear")
+                    opacity: 0.0
+                }
+
+            }
+        }
+
+
+        // индикторы
+        Rectangle {
+            id: rect_statusConnection_indicator
+            border.color: "LightGray"
+            anchors.bottom: parent.bottom
+            anchors.left: rect_statusConnection_info.right
+            anchors.leftMargin: 10
+            width: 170
+            height: 40
+
+
+            Item {
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.right: parent.right
+
+                TextEdit {
+                    id: txt_nameConnection
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+
+
+
+                    font.pixelSize: 12
+                    text: "-"
+                    color: Material.color(Material.Grey)
+                    selectByMouse: true
+                    //selectionColor: Material.color(Material.Red)
+                }
+
+                Rectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                    anchors.rightMargin: 10
+
+                    border.color: "LightGray"
+                    radius: 5
+                    width: 70
+                    height: 25
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: 10
+                        LightIndicator { id: indicatorConnect_0;  height: 15; width: 15 }
+                        LightIndicator { id: indicatorConnect_1;  height: 15; width: 15 }
+                        //                    Rectangle      { height: 15; width: 1; color: "LightGray" }
+                        //                    LightIndicator { id: indicatorConnect_local;  height: 15; width: 15; style: false }
+
+                    }
+                }
+
+            }
+
+        }
+    }
+
+
+
+
+
+    /// Anton
 }

@@ -1,4 +1,4 @@
-#include "../Libs/database.h"
+#include <database.h>   //"../Libs/database.h"
 
 
 Database::Database(QString connectionName, QString hostName, QString databaseName, QObject *parent) : QObject(parent) //
@@ -38,14 +38,21 @@ void Database::connectionDB(const QString &userName, const QString &password) //
     qDebug() << "\n -> Database: connectionDB: ("<<this->databaseName << ") |  thread =" << QThread::currentThreadId() << "\n";
 
     this->userName = userName;
-    if(this->connectionName == "machine 1") {
-        this->userName = userName + "_2";
-    }
     this->password = password;
     db.setUserName(this->userName);
+    if(this->connectionName == "machine 1") {
+            this->userName = userName + "_2";
+        }
     db.setPassword(this->password);
+
     ///////////////////////////////////////////////////////////////////////////
     //db.setDatabaseName("DRIVER={SQL Server};SERVER=HOME-PC;DATABASE=ARM;");
+    ///////////////////////////////////////////////////////////////////////////
+    //db.setHostName("localhost");
+    //db.setPort(1521);
+    //db.setDatabaseName("akid");
+    //db.setUserName(this->userName);
+    //db.setPassword(this->password);
     ///////////////////////////////////////////////////////////////////////////
 
     qDebug() << " -> Database:  connectionName = " << this->connectionName;

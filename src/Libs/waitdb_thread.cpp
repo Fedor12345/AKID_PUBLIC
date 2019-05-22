@@ -1,7 +1,6 @@
-#include "../Libs/waitdb_thread.h"
+#include <waitdb_thread.h>      //"../Libs/waitdb_thread.h"
 
-WaitDB_thread::WaitDB_thread(int numberOfDB)
-{
+WaitDB_thread::WaitDB_thread(int numberOfDB) {
     qDebug() << "WaitDB:            start";
     this->nDB = numberOfDB;
     this->fl_connectionStates = new bool[this->nDB];
@@ -11,25 +10,26 @@ WaitDB_thread::WaitDB_thread(int numberOfDB)
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &WaitDB_thread::slotTimerAlarm);
     timer->setSingleShot(true);
-    //timer->start(5000);
+
 }
 
-WaitDB_thread::~WaitDB_thread()
-{
+WaitDB_thread::~WaitDB_thread() {
 
 }
 
 
 void WaitDB_thread::slotTimerAlarm() {
     qDebug() << "\nTIMER ALARM\n";
-    this->loop.exit();
-    timer->stop();
+	if (loop.isRunning())
+        loop.exit(0);
+
 }
 
 void WaitDB_thread::stopWaitTimer() {
     qDebug() << "\nTIMER STOP fl_connect ="<< this->fl_connect<<"\n";
     timer->stop();
-    this->loop.exit();
+    if (loop.isRunning())
+        loop.exit(0);
 }
 
 
@@ -80,8 +80,11 @@ void WaitDB_thread::waitConnetionDB()
             /// запуск ожидания
             qDebug() << " ->-> WaitDB: run wait timer for the first connection ";
             //waitTimer(100, 50); /// 40циклов * 50мс = 2с ожидания
-            timer->start(5000);
-            this->loop.exec();
+            if (!timer->isActive())
+                timer->start(2000);  // 2 сек ожидания
+
+            if (!loop.isRunning())
+                loop.exec();
             qDebug() << " ->-> WaitDB: exit timer for the first connection ";
         }
     }
@@ -112,30 +115,29 @@ void WaitDB_thread::waitConnectionCurrentDB(int currentConnection)
             if(this->fl_connect) { //если произошло подключение, то остановить цикл
                 qDebug() << "\n_ПОПЫТКА ПОДКЛЮЧЕНИЯ " << i << " отменяется(!)| fl_connect = " << fl_connect;
                 break;
-            }
-
-
-            qDebug() << "\n_ПОПЫТКА ПОДКЛЮЧЕНИЯ " << i << "| fl_connect = " << fl_connect;
-
-            if(!this->fl_connect) {
-                qDebug()<<"_(wait)signalConnectionNextDB(" << checkConn << ") -> manager";
-
+            } else {
+				qDebug() << "\n_ПОПЫТКА ПОДКЛЮЧЕНИЯ " << i << "| fl_connect = " << fl_connect;
+				
+				qDebug()<<"_(wait)signalConnectionNextDB(" << checkConn << ") -> manager";
+				
+				/// запуск ожидания
+				qDebug() << "! -> run wait timer <- !";
+				//waitTimer(100, 50); /// 100циклов * 50мс = 5с ожидания
+				if (!timer->isActive()) {
+                    qDebug() << "start waitConection timer";
+                    timer->start(5000); // 5 сек ожидания
+                }
+				
                 emit signalBlockingGUI(); /// послать сигнал GUI о блокировке элементов
                 emit signalConnectionNextDB(checkConn);
-            }
-
-            /// запуск ожидания
-            qDebug() << "! -> run wait timer <- !";
-            //waitTimer(100, 50); /// 100циклов * 50мс = 5с ожидания
-            timer->start(5000);
-            this->loop.exec();
-            qDebug() << "! -> exit timer <- !";
-
+				
+				if (!loop.isRunning()) {
+                    qDebug() << "run lop.exec()";
+                    loop.exec();
+                }
+				qDebug() << "! -> exit timer <- !";
+			}
        }
-
-//        i++;
-//        if(checkConn == this->nDB-1) { checkConn=0; }
-//                                else { checkConn++; }\
 
         i++;
         if(checkConn == 1) {

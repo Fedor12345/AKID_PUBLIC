@@ -36,7 +36,7 @@ Item {
 
     Connections {
         target: popup_listview.model
-        onQueryStrChanged: {
+        onSignalUpdateDone: {
             if (element.flg_f) {
                 if (popup_listview.count > 0) {
                     if (!find_popup.opened) {

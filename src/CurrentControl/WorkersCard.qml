@@ -15,12 +15,6 @@ Page {
         text:"workerCard_&"
     }
 
-    Item {
-        id: modeles
-        property var model_ext_person_list: managerDB.createModel(" SELECT ID_PERSON, W_NAME, W_SURNAME, W_PATRONYMIC, PERSON_NUMBER, ID_TLD FROM EXT_PERSON ", "ext_person")
-    }
-
-
     Connections {
         target: workersModel
         onSignalUpdateDone: {
@@ -154,7 +148,7 @@ Item {
     id: main_2
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.rightMargin: 260
+    anchors.rightMargin: 200
     anchors.top: parent.top
     anchors.bottom: parent.bottom
 
@@ -1190,9 +1184,9 @@ Rectangle {
     anchors.right: parent.right
     anchors.bottom: parent.bottom
     anchors.margins: 15
-    width: 240
+    width: 180
 
-    color: "#f7f7f7"
+    color: "#EEEEEE"
     border.color: "LightGray"
 
 
@@ -1203,11 +1197,6 @@ Rectangle {
         anchors.right: parent.right
         height: 40
         border.color: "LightGray"
-        Text {
-            anchors.centerIn: parent
-            text: qsTr("Список сотрудников")
-            font.pixelSize: 12
-        }
     }
     Item {
         id: body_allPersons
@@ -1220,137 +1209,39 @@ Rectangle {
             id: list_Persons
             anchors.fill: parent
             anchors.margins: 5
-            property var id_currentPerson
-
             highlightFollowsCurrentItem: true
-            model: modeles.model_ext_person_list
-//                ListModel {
-//                ListElement {
-//                    name: "Name A"
-//                    number: "1113264"
-//                }
-//                ListElement {
-//                    name: "Name B"
-//                    number: "4564564"
-//                }
-//                ListElement {
-//                    name: "Name C"
-//                    number: "4654564"
-//                }
-//            }
-
+            model: ListModel {
+                ListElement {
+                    name: "Name A"
+                    number: "1113264"
+                }
+                ListElement {
+                    name: "Name B"
+                    number: "4564564"
+                }
+                ListElement {
+                    name: "Name C"
+                    number: "4654564"
+                }
+            }
             ScrollBar.vertical: ScrollBar {
                 policy: "AlwaysOn"
             }
 
             clip: true
             delegate:
-                ItemDelegate {
-                width: 210; height: 60
-                Row {
-                    spacing: 5
-                    Rectangle {
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        width: 15
-                        color: "transparent"
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.right: parent.right
-                            //anchors.rightMargin: 5
-                            text: index
-                            font.pixelSize: 15
-                            color: "#999999"
-                        }
+                Item {
+                width: 180; height: 40
+                Column {
+                    Text {
+                        text: name
                     }
-
-                    Rectangle {
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        width: 1
-                        color: "Lightgray"
+                    Text {
+                        text: number
                     }
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.left: parent.left
-                    anchors.leftMargin: 5
-                    Column {
-                        Text {
-                            text: W_NAME + " " + W_SURNAME + " " + W_PATRONYMIC
-                            font.pixelSize: 14
-                            color: {
-                             if (list_Persons.currentIndex == index) { "#FF5722" }
-                             else { "#4c4c4c" }
-                            }
-                            //font.bold: true
-                        }
-                        Text {
-                            text: "Таб. № " + PERSON_NUMBER
-                            font.pixelSize: 10
-                            color: "#777777"
-                        }
-                        Text {
-                            text: "ТЛД № " + ID_TLD
-                            font.pixelSize: 10
-                            color: "#777777"
-                        }
-                    }
-
                 }
 
-                onClicked: {
-                    console.log("Click: " + " " + index)
-                    if (list_Persons.currentIndex !== index) {
-                        list_Persons.currentIndex = index
-                    }
-                    list_Persons.id_currentPerson = modeles.model_ext_person_list.getId(index)
-
-                    timer_persons.restart()
-                }
             }
-
-            highlight: Rectangle {
-                color: "transparent" // "#FF5722" //"#c9c9c9" // "#B0BEC5" //Material.color(Material.Grey, Material.Shade700)
-                border.color: "#FF5722"
-//                Image {
-//                    id: idrop
-//                    width: 24
-//                    height: 24
-//                    source: "icons/arrow-down-drop.svg"
-//                    sourceSize.height: 24
-//                    sourceSize.width: 24
-//                    fillMode: Image.Stretch
-//                    rotation: 90
-//                    anchors.right: parent.right
-//                    anchors.verticalCenter: parent.verticalCenter
-
-//                }
-            }
-            highlightMoveDuration: 400
-        }
-
-        Timer {
-            id: timer_persons
-            interval: 410
-            repeat: false
-             onTriggered: {
-                     workersModel.query = " SELECT W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
-                                            SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
-                                            WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
-                                            ID_TLD, STAFF_TYPE,
-
-                                            PASSPORT_NUMBER,  PASSPORT_GIVE,
-                                            PASSPORT_DATE, POLICY_NUMBER, SNILS,
-                                            HOME_ADDRESS, HOME_TEL,
-                                            WORK_TEL,MOBILE_TEL, WORK_ADDRESS, E_MAIL,
-
-                                            adm_status.STATUS
-
-                                            FROM ext_person
-                                            LEFT JOIN adm_status ON ext_person.STATUS_CODE = adm_status.STATUS_CODE
-                                            WHERE ext_person.ID_PERSON = " + list_Persons.id_currentPerson;
-
-
-             }
         }
 
     }

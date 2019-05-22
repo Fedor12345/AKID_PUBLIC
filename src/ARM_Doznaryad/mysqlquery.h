@@ -8,7 +8,7 @@
 #include <QDebug>
 
 #include <QSharedPointer>
-//#include <QEventLoop>
+#include <QEventLoop>
 
 class SQLquery : public QObject {
     Q_OBJECT
@@ -30,24 +30,23 @@ public:
     Q_INVOKABLE bool rollback();
     Q_INVOKABLE bool commit();
 
-    #define AutoDisconnect(l) QSharedPointer <QMetaObject::Connection> l = QSharedPointer <QMetaObject::Connection> (\
-        new QMetaObject::Connection(), [](QMetaObject::Connection *conn){QObject::disconnect(*conn);}); *l
-
-//use AutoDisconnect(conn1) = connect(....)
+//    #define AutoDisconnect(l) QSharedPointer <QMetaObject::Connection> l = QSharedPointer <QMetaObject::Connection> (\
+//        new QMetaObject::Connection(), [](QMetaObject::Connection *conn){QObject::disconnect(*conn);}); *l
+////use AutoDisconnect(conn1) = connect(....)
 
 private:
     QString querySQL;
     QString connectionName;
-    bool fl_setQuery; /// станавливается в true, если запрос был послан от интерфейса,
+    bool fl_setQuery; /// устанавливается в true, если запрос был послан от интерфейса,
                       /// что бы блокировать обработку сигнала от менеджера при каждом новом подключении к бд
 
     QString sender_name = "";               //имя отправителя запроса
     bool result_state = false;              //TRUE - запрос прошел без ошибок
     QMap<QString, QVariant> result_data;    //набор данных
-
     QString nameModel = "";
-
     QVariantList z_data;
+
+    QEventLoop evloop;
 private:
     void queryExecute();
     void setQuery(const QString& query);
@@ -59,7 +58,7 @@ signals:
     //res - true без ошибок
     //var_res - результат запроса, если есть
     void signalSendResult(const QString& owner_name, const bool& res, const QMap<QString, QVariant>& var_res);
-    void signalGetReady();
+    //void signalGetReady();
 
 public slots:
     void checkNameConnection(QString);

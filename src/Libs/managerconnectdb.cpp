@@ -1,8 +1,8 @@
-#include "managerconnectdb.h"
+#include <managerconnectdb.h>
 
-#include <QTimer> //удалить в финальной версии
+//#include <QTimer> //удалить в финальной версии
 
-#include "../Libs/sqlquerymodel.h"
+#include <sqlquerymodel.h>  //"../Libs/sqlquerymodel.h"
 
 ManagerConnectDB::ManagerConnectDB()
 {
@@ -15,7 +15,6 @@ ManagerConnectDB::ManagerConnectDB()
     this->password       = new QString[NUMBER_OF_DB];
     this->connectionName = new QString[NUMBER_OF_DB];
 
-
     this->databaseName[0] = DATABASE_NAME_0; //"ORCLPDB_net(1.5)"; //"ORCLPDB";
     this->databaseName[1] = DATABASE_NAME_1; //"ORCLPDB_net(1.197)"; //"ORCLPDB_net";
 
@@ -27,8 +26,6 @@ ManagerConnectDB::ManagerConnectDB()
 
     this->connectionName[0] = CONNECTION_NAME_0;
     this->connectionName[1] = CONNECTION_NAME_1;
-
-
 
     db0 = new Database(CONNECTION_NAME_0,HOST_NAME_0,DATABASE_NAME_0); /// в параметрах задается имя соединения
     db1 = new Database(CONNECTION_NAME_1,HOST_NAME_1,DATABASE_NAME_1);

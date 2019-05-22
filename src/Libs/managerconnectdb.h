@@ -4,8 +4,8 @@
 #include <QObject>
 #include <QThread>
 
-#include <../Libs/waitdb_thread.h>
-#include <../Libs/database.h>
+#include <waitdb_thread.h>      // <../Libs/waitdb_thread.h>
+#include <database.h>           // <../Libs/database.h>
 //#include <object_thread.h>
 //#include <modeldb_thread.h>
 
@@ -112,9 +112,9 @@ public slots:
 //    void setQueryDB();
 //    void setQueryModelDb();
 
-    /// обновление от Двитрия
+    /// обновление от Дмитрия
     void setLoginPwd(const QString&, const QString&);   //Установить Login/Password
-    QObject* createModel(const QString &str_query, const QString &nameModel);
+    QObject* createModel(const QString &str_query, const QString &nameModel = "");
 
 
 //    //модели

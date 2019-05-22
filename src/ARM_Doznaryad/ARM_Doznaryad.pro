@@ -1,4 +1,4 @@
-QT += qml quick widgets sql
+QT += qml quick sql
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
@@ -12,13 +12,29 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+##
+DESTDIR =      $${PWD}/../bin_Doznaryad
+
+OBJECTS_DIR =  $${DESTDIR}/obj
+MOC_DIR =      $${DESTDIR}/moc
+UI_DIR =       $${DESTDIR}/ui
+RCC_DIR =      $${DESTDIR}/rcc
+
+TARGET = ARM_Doznaryad
+TEMPLATE = app
+CODECFORTR = UTF-8
+
+INCLUDEPATH += ../Libs/
+##
+
 SOURCES += \
         main.cpp \
-    managerconnectdb.cpp \
-    sqlquery.cpp \
-    waitdb_thread.cpp \
-    database.cpp \
-    sqlquerymodel.cpp
+        mysqlquery.cpp \
+        ../Libs/sqlquerymodel.cpp \
+        ../Libs/database.cpp \
+        ../Libs/managerconnectdb.cpp \
+        ../Libs/waitdb_thread.cpp
+
 
 RESOURCES += qml.qrc
 
@@ -34,11 +50,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    managerconnectdb.h \
-    sqlquery.h \
-    sqlquerymodel.h \
-    waitdb_thread.h \
-    database.h
+        mysqlquery.h \
+        ../Libs/sqlquerymodel.h \
+        ../Libs/waitdb_thread.h \
+        ../Libs/managerconnectdb.h \
+        ../Libs/database.h
 
-DISTFILES += \
-    MyBusyIndicator.qml
+DISTFILES +=

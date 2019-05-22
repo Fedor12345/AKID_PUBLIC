@@ -1,12 +1,12 @@
-#include "sqlquery.h"
 #include <QVariant>
 #include <QMap>
 #include <QList>
 #include <QDate>
 
 #include <QSqlRecord>
-#include <QEventLoop>
+//#include <QEventLoop>
 
+#include "mysqlquery.h"
 
 SQLquery::SQLquery(QString nameModel, QObject *parent) : QObject(parent) {
     this->fl_setQuery = false;
@@ -40,8 +40,9 @@ void SQLquery::checkNameConnection(QString connectionName) {
 //            qDebug () << "4. " << this->connectionName;
             result_state = false;
 
-            emit signalGetReady();
-        }
+            //emit signalGetReady();
+            if (evloop.isRunning())
+                evloop.exit();        }
 
         this->fl_setQuery = false;
     }
@@ -113,7 +114,9 @@ void SQLquery::queryExecute() {
     result_state = res_bool;
     //emit signalSendResult(sender_name , res_bool, map);
     emit signalSendResult(sender_name , res_bool, result_data);
-    emit signalGetReady();
+    //emit signalGetReady();
+    if (evloop.isRunning())
+        evloop.exit();
 }
 
 //------------------------------------------------------------------------------------
@@ -121,12 +124,12 @@ void SQLquery::queryExecute() {
 bool SQLquery::insertRecordIntoTable(const QString& owner_name, const QString &tname, const QMap<QString, QVariant> &map, const bool& flg_async) {
     qDebug() << "\n - RUN insertRecordIntoTable\n";
 
-    QEventLoop loop1(this);
-    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop1]() {
-        qDebug() << "insertRecordIntoTable LOOP: get signalGetReady()";
-        if (loop1.isRunning())
-            loop1.exit();
-    });
+//    QEventLoop loop1(this);
+//    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop1]() {
+//        qDebug() << "insertRecordIntoTable LOOP: get signalGetReady()";
+//        if (loop1.isRunning())
+//            loop1.exit();
+//    });
 
     sender_name = owner_name;
 
@@ -156,8 +159,11 @@ bool SQLquery::insertRecordIntoTable(const QString& owner_name, const QString &t
 
     setQuery(tstr1);
 
-    if (!flg_async)
-        loop1.exec();    // ждем пока выполнится запрос (signalGetReady)
+    if (!flg_async) {
+        //loop1.exec();    // ждем пока выполнится запрос (signalGetReady)
+        if (!evloop.isRunning())
+            evloop.exec();
+    }
 
     qDebug() << "\n - EXIT insertRecordIntoTable\n";
     return this->result_state;
@@ -171,8 +177,8 @@ int SQLquery::getMaxID(const QString& owner_name, const QString &tname, const QS
 
     qDebug() << "\n - RUN getMaxID\n";
 
-    QEventLoop loop;
-    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {loop.exit();});
+//    QEventLoop loop;
+//    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {loop.exit();});
 
     sender_name = owner_name;
 
@@ -190,8 +196,11 @@ int SQLquery::getMaxID(const QString& owner_name, const QString &tname, const QS
 
     setQuery(tstr1);
 
-    if (!flg_async)
-        loop.exec();
+    if (!flg_async) {
+        //loop.exec();
+        if (!evloop.isRunning())
+            evloop.exec();
+    }
 
     qDebug() << "\n - EXIT getMaxID\n";
 
@@ -205,11 +214,10 @@ int SQLquery::getMaxID(const QString& owner_name, const QString &tname, const QS
 //-------------------------------------------------------------------------------------------
 QMap<QString, QVariant> SQLquery::find_record(const QString& owner_name,const QString &sql_query,
                                               const bool& flg_async) {
-
     qDebug() << " - find_record";
 
-    QEventLoop loop;
-    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {loop.exit();});
+//    QEventLoop loop;
+//    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {loop.exit();});
 
     sender_name = owner_name;
 
@@ -218,8 +226,11 @@ QMap<QString, QVariant> SQLquery::find_record(const QString& owner_name,const QS
 
     if (sql_query.length() > 0) {
         setQuery(sql_query);
-        if (!flg_async)
-            loop.exec();
+        if (!flg_async) {
+            //loop.exec();
+            if (!evloop.isRunning())
+                evloop.exec();
+        }
     }
 
     return result_data;
@@ -229,12 +240,14 @@ QMap<QString, QVariant> SQLquery::find_record(const QString& owner_name,const QS
 QVariantList SQLquery::find_records(const QString &sql_query) {
     qDebug() << " - find_records";
 
-    QEventLoop loop;
-    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {loop.exit();});
+//    QEventLoop loop;
+//    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {loop.exit();});
 
     if (sql_query.length() > 0) {
         setQuery(sql_query);
-        loop.exec();
+        //loop.exec();
+        if (!evloop.isRunning())
+            evloop.exec();
     }
 
     return z_data;
@@ -248,12 +261,12 @@ bool SQLquery::updateRecord(const QString& owner_name, const QString &tname, con
     qDebug() << " - update_record";
 
     QString tstr1, tstr2;
-    QEventLoop loop;
-    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {
-        qDebug() << "updateRecord LOOP: get signalGetReady()";
-        if (loop.isRunning())
-            loop.exit(0);
-    });
+//    QEventLoop loop;
+//    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {
+//        qDebug() << "updateRecord LOOP: get signalGetReady()";
+//        if (loop.isRunning())
+//            loop.exit(0);
+//    });
 
     sender_name = owner_name;
 
@@ -276,8 +289,11 @@ bool SQLquery::updateRecord(const QString& owner_name, const QString &tname, con
     if (tstr1.length() > 0) {
         setQuery(tstr1);
 
-        if (!flg_async)
-            loop.exec();
+        if (!flg_async) {
+            //loop.exec();
+            if (!evloop.isRunning())
+                evloop.exec();
+        }
 
         return result_state;
     } else {
@@ -288,10 +304,10 @@ bool SQLquery::updateRecord(const QString& owner_name, const QString &tname, con
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 bool SQLquery::deleteRecord(const QString& owner_name, const QString &tname, const QMap<QString, QVariant> &map, const bool& flg_async) {
     QString tstr1, tstr2;
-    QEventLoop loop;
-    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {
-        qDebug() << "deleterecord LOOP: get signalGetReady()";
-        loop.exit();});
+//    QEventLoop loop;
+//    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {
+//        qDebug() << "deleterecord LOOP: get signalGetReady()";
+//        loop.exit();});
 
     sender_name = owner_name;
 
@@ -302,8 +318,11 @@ bool SQLquery::deleteRecord(const QString& owner_name, const QString &tname, con
     if (tstr1.length() > 0) {
         setQuery(tstr1);
 
-        if (!flg_async)
-            loop.exec();
+        if (!flg_async) {
+            //loop.exec();
+            if (!evloop.isRunning())
+                evloop.exec();
+        }
 
         return result_state;
     } else {
@@ -313,40 +332,44 @@ bool SQLquery::deleteRecord(const QString& owner_name, const QString &tname, con
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 bool SQLquery::setpoint() {
-    QEventLoop loop;
-    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {loop.exit();});
+//    QEventLoop loop;
+//    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {loop.exit();});
     qDebug() << "\n ~ SET SAVEPOINT A ~\n";
 
     setQuery("SAVEPOINT A");
-    loop.exec();
+    //loop.exec();
+    if (!evloop.isRunning())
+        evloop.exec();
 
     qDebug() << "\n ~ DONE ~\n";
     return result_state;
 }
 
 bool SQLquery::rollback() {
-    QEventLoop loop;
-    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {loop.exit();});
+//    QEventLoop loop;
+//    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {loop.exit();});
 
     setQuery("ROLLBACK TO SAVEPOINT A");
 
-    loop.exec();
+    //loop.exec();
+    if (!evloop.isRunning())
+        evloop.exec();
 
     qDebug() << "rollback transaction";
     return result_state;
 }
 
 bool SQLquery::commit() {
-    QEventLoop loop;
-    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {loop.exit();});
+//    QEventLoop loop;
+//    AutoDisconnect(conn) = connect(this, &SQLquery::signalGetReady, [&loop]() {loop.exit();});
 
     qDebug() << "\n ~ COMMIT TRANSACTION ~\n";
 
     setQuery("COMMIT");
-    loop.exec();
+    //loop.exec();
+    if (!evloop.isRunning())
+        evloop.exec();
 
     qDebug() << "\n ~ DONE ~\n";
     return result_state;

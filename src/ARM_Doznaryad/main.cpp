@@ -2,9 +2,9 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-#include "sqlquery.h"
-#include "sqlquerymodel.h"
-#include "managerconnectdb.h"
+#include "mysqlquery.h"
+#include <sqlquerymodel.h>
+#include <managerconnectdb.h>
 
 int main(int argc, char *argv[]) {
 

@@ -3,8 +3,9 @@ CODECFORTR = UTF-8
 
 CONFIG += ordered
 
-SUBDIRS += \
-    CurrentControl
-#    Libs
+SUBDIRS += \ 
+        #CurrentControl \
+        ARM_Doznaryad
+
 
 TRANSLATIONS += translate_ru.ts
