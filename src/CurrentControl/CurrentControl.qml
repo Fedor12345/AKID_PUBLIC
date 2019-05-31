@@ -273,7 +273,8 @@ Page {
                         txt_statusConnection.append("<p style='color:#9cc17f'> Переключение БД </p>")
                         popup_wait_2.open();
 
-                        managerDB.connectionDB(0);
+                        //managerDB.connectionDB(0);
+                        managerDB.checkConnectionDB(0)
                     }
                     onEntered: {
                         parent.color = "#dbdbdb" // "LightGray"
@@ -306,7 +307,8 @@ Page {
                         popup_txt.text = qsTr("Подлючение к machine 1");
                         popup_wait_2.open();
                         txt_statusConnection.append("<p style='color:#9cc17f'> Переключение БД </p>")
-                        managerDB.connectionDB(1);
+                        //managerDB.connectionDB(1);
+                        managerDB.checkConnectionDB(1)
                     }
                     onEntered: {
                         parent.color = "#dbdbdb" //"LightGray"

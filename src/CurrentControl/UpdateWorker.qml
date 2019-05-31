@@ -1,6 +1,9 @@
+import QtQuick 2.0
+
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.12
+import QtQuick.Controls.Material 2.3
 
 Item {
     //id: item3
@@ -8,11 +11,75 @@ Item {
     height: 800//550
     width:  900//690
 
-    //property bool isOk: true
+
+    property var workerModel
+    property var id_person
+
+    signal update_confirm(var data_record, var id_person)
+    signal update_cancel()
 
 
-    signal create_confirm(var data_record)
-    signal create_cancel()
+    Item {
+        id: modeles
+        property var model_adm_status:           managerDB.createModel(" SELECT STATUS_CODE, STATUS  FROM ADM_STATUS ",                    "adm_status_update")
+        property var model_adm_organisation_org: managerDB.createModel(" SELECT ID, ORGANIZATION_    FROM ADM_ORGANIZATION ",              "adm_organisation_org_update")
+        property var model_adm_organisation_dep: managerDB.createModel(" SELECT ID, DEPARTMENT       FROM ADM_ORGANIZATION WHERE ID = 1 ", "adm_organisation_dep_update")
+        property var model_adm_department_nnp:   managerDB.createModel(" SELECT ID, DEPARTMENT_NPP   FROM ADM_DEPARTMENT_NPP ",            "adm_department_nnp_update")
+        property var model_adm_assignment:       managerDB.createModel(" SELECT ID, ASSIGNEMENT      FROM ADM_ASSIGNEMENT ",               "adm_department_nnp_update")
+    }
+
+
+
+    function setDatePerson() {
+        var value = workerModel.get(0)["STATUS"]
+        modeles.model_adm_status.getIndexRow("STATUS", value);
+
+        //Проверка, есть ли данные в моделе (выбран ли сотрудник в списке)
+        if( workerModel.headerData(0, Qt.Horizontal, 0) === "ID_PERSON" ) { // == undefined
+            main_AddWorker.id_person = workerModel.get(0)["ID_PERSON"]
+            console.log(" -------------> ", main_AddWorker.id_person)
+            nw_FIO.text = workerModel.get(0)["W_NAME"] + " " +  workerModel.get(0)["W_SURNAME"] + " " + workerModel.get(0)["W_PATRONYMIC"];
+//            nw_name.text = workerModel.get(0)["W_NAME"]
+//            nw_surname.text = workerModel.get(0)["W_SURNAME"]
+//            nw_patronymic.text = workerModel.get(0)["W_PATRONYMIC"]
+
+
+
+            //nw_birthday.ready = true
+//            var str = workersModel.get(0)["BIRTH_DATE"]
+//            nw_birthday.date_val = str.getDate() + "." + (str.getMonth()+1) + "." + str.getFullYear()
+
+
+            //nw_gender.text = (workerModel.get(0)["SEX"] == 0) ? "Мужчина" : "Женщина"
+            nw_gender.currentIndex = (workerModel.get(0)["SEX"] == 0) ? 0 : 1
+
+
+            nw_weight.text = workerModel.get(0)["WEIGHT"]
+            nw_height.text = workerModel.get(0)["HEIGHT"]
+
+            nw_personalNumber.text = workerModel.get(0)["PERSON_NUMBER"]
+            nw_tld.text            = workerModel.get(0)["ID_TLD"]
+
+            txt_status.text     = workersModel.get(0)["STATUS"]
+
+            //        nw_iku_year.text = "0,0"
+            //        nw_iku_month.text = "0,0"
+
+            nw_pass_number.text   = workerModel.get(0)["PASSPORT_NUMBER"]
+            //nw_pass_date.ready = false
+            nw_passportGive.text  = workerModel.get(0)["PASSPORT_GIVE"]
+            nw_SNILS.text         = workerModel.get(0)["SNILS"]
+
+            nw_homeTel.text     = workerModel.get(0)["HOME_TEL"]
+            nw_mobileTel.text   = workerModel.get(0)["MOBILE_TEL"]
+            nw_homeAdress.text  = workerModel.get(0)["HOME_ADDRESS"]
+            nw_eMail.text       = workerModel.get(0)["E_MAIL"]
+            nw_workTel.text     = workerModel.get(0)["WORK_TEL"]
+            //nw_workTel_2.text   = workerModel.get(0)["SNILS"]
+            nw_workAdress.text  = workerModel.get(0)["WORK_ADDRESS"]
+            //nw_eMailWork.text   = workerModel.get(0)["SNILS"]
+        }
+    }
 
     function clearfields() {
         nw_name.text = ""
@@ -23,7 +90,7 @@ Item {
         nw_gender.currentIndex = 0
 
         nw_weight.text = "0"
-        nw_hieght.text = "0"
+        nw_height.text = "0"
 
         nw_personalNumber.text = ""
         nw_tld.text = ""
@@ -49,14 +116,7 @@ Item {
     }
 
 
-    Item {
-        id: modeles
-        property var model_adm_status:           managerDB.createModel(" SELECT STATUS_CODE, STATUS  FROM ADM_STATUS ",                    "adm_status")
-        property var model_adm_organisation_org: managerDB.createModel(" SELECT ORGANIZATION_        FROM ADM_ORGANIZATION ",              "adm_organisation_org")
-        property var model_adm_organisation_dep: managerDB.createModel(" SELECT ID, DEPARTMENT       FROM ADM_ORGANIZATION WHERE ID = 1 ", "adm_organisation_dep")
-        property var model_adm_department_nnp:   managerDB.createModel(" SELECT ID, DEPARTMENT_NPP   FROM ADM_DEPARTMENT_NPP ",            "adm_department_nnp")
-        property var model_adm_assignment:       managerDB.createModel(" SELECT ID, ASSIGNEMENT      FROM ADM_ASSIGNEMENT ",               "adm_department_nnp")
-    }
+
 
     Connections {
         id: wc_query
@@ -66,7 +126,7 @@ Item {
 
         //(const QString& owner_name, const bool& res)
         onSignalSendResult: {
-            if (owner_name === "AddWorker") {
+            if (owner_name === "UpdateWorker") {
                 if (res === true) {
                     if (wc_query.num_step === 0) {
                         if(var_res > 0) {
@@ -103,7 +163,7 @@ Item {
         height: 40
         Label {
             id: header_caption
-            text: "Добавление нового сотрудника"
+            text: "Обновление данных сотрудника"
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
 
@@ -245,57 +305,26 @@ Item {
                                         Layout.leftMargin: 0//10
                                         Layout.topMargin: 10
                                         spacing: 25
-                                        Column {
-                                            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                                            Text {
-                                                text: "Фамилия"
-                                                font.pixelSize: 14
-                                            }
-                                            TextField {
-                                                id: nw_surname
-                                                font.pixelSize: 16
-                                                width: 150
-                                                horizontalAlignment: Text.AlignHCenter
-                                                selectByMouse: true
-                                                onTextEdited: {
-                                                    if (text.length === 1) text = text.toUpperCase()
-                                                }
-                                            }
+                                        TextEdit {
+                                            id: nw_FIO
+                                            font.pixelSize: 16
+                                            width: 150
+                                            horizontalAlignment: Text.AlignHCenter
+                                            selectByMouse: true
+                                            color: Material.color(Material.DeepOrange)
                                         }
-                                        Column {
-                                            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                                            Text {
-                                                text: "Имя"
-                                                font.pixelSize: 14
-                                            }
-                                            TextField {
-                                                id: nw_name
-                                                font.pixelSize: 16
-                                                width: 150
-                                                horizontalAlignment: Text.AlignHCenter
-                                                selectByMouse: true
-                                                onTextEdited: {
-                                                    if (text.length === 1) text = text.toUpperCase()
-                                                }
-                                            }
-                                        }
-                                        Column {
-                                            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                                            Text {
-                                                text: "Отчество"
-                                                font.pixelSize: 14
-                                            }
-                                            TextField {
-                                                id: nw_patronymic
-                                                font.pixelSize: 16
-                                                width: 150
-                                                horizontalAlignment: Text.AlignHCenter
-                                                selectByMouse: true
-                                                onTextEdited: {
-                                                    if (text.length === 1) text = text.toUpperCase()
-                                                }
-                                            }
-                                        }
+//                                        TextField {
+//                                            id: nw_surname,nw_name,nw_patronymic
+//                                            font.pixelSize: 16
+//                                            width: 150
+//                                            horizontalAlignment: Text.AlignHCenter
+//                                            selectByMouse: true
+//                                            color: Material.color(Material.DeepOrange)
+//                                            onTextEdited: {
+//                                                if (text.length === 1) text = text.toUpperCase()
+//                                            }
+//                                            enabled: false
+//                                        }
 
                                     }
 
@@ -312,7 +341,6 @@ Item {
                                                 text: "Дата рождения"
                                                 font.pixelSize: 14
                                             }
-
                                             MyCalendar {
                                                 id: nw_birthday
                                                 date_val: new Date()
@@ -325,7 +353,10 @@ Item {
                                                 text: "Пол"
                                                 font.pixelSize: 14
                                             }
-
+//                                            TextEdit {
+//                                                id: nw_gender
+//                                                font.pixelSize: 16
+//                                            }
                                             ComboBox {
                                                 id: nw_gender
                                                 width: 135
@@ -381,7 +412,7 @@ Item {
                                                 anchors.horizontalCenter: parent.horizontalCenter
                                                 spacing: 10
                                                 TextField {
-                                                    id: nw_hieght
+                                                    id: nw_height
                                                     width: 60
                                                     //height: 48
                                                     horizontalAlignment: Text.AlignHCenter
@@ -434,10 +465,10 @@ Item {
                                             id: label_personalNumber
                                             text: "Табельный №"
                                             font.pixelSize: 14
-                                            color: {
-                                                if(nw_personalNumber.length === 0) { return "#ff0000" } //красный
-                                                else { return nw_personalNumber.color}
-                                            }
+//                                            color: {
+//                                                if(nw_personalNumber.length === 0) { return "#ff0000" } //красный
+//                                                else { return nw_personalNumber.color}
+//                                            }
                                         }
                                         TextField {
                                             id: nw_personalNumber
@@ -446,21 +477,7 @@ Item {
                                             font.pixelSize: 16
                                             horizontalAlignment: Text.AlignHCenter
                                             selectByMouse: true
-                                            onTextEdited: {
-                                               if (text.length > 0) { timer_personalNumber.restart() }
-                                               else { color = "#ff0000" }
-                                               // if (text.length === 1) text = text.toUpperCase()
-                                            }
-                                        }
-                                        Timer {
-                                            id: timer_personalNumber
-                                            interval: 500
-                                            repeat: false
-                                            onTriggered: {
-                                                 if (nw_personalNumber.text.length > 0)
-                                                 { Query1.setQueryAndName(" Select PERSON_NUMBER FROM EXT_PERSON WHERE PERSON_NUMBER = " + nw_personalNumber.text, "isPersonalNumber"); }
-
-                                             }
+                                            //enabled: false
                                         }
                                     }
 
@@ -470,10 +487,10 @@ Item {
                                             id: label_tld
                                             text: "№ ТЛД"
                                             font.pixelSize: 14
-                                            color: {
-                                                if(nw_tld.length === 0) { return "#ff0000"  } //красный
-                                                else { return nw_tld.color}
-                                            }
+//                                            color: {
+//                                                if(nw_tld.length === 0) { return "#ff0000"  } //красный
+//                                                else { return nw_tld.color}
+//                                            }
                                         }
                                         TextField {
                                             id: nw_tld
@@ -482,21 +499,12 @@ Item {
                                             font.pixelSize: 16
                                             horizontalAlignment: Text.AlignHCenter
                                             selectByMouse: true
-                                            onTextEdited: {
-                                                if (text.length > 0) { timer_tld.restart();}
-                                                else { color = "#ff0000" }
-                                                //if (text.length === 1) text = text.toUpperCase()
-                                            }
-                                        }
-                                        Timer {
-                                            id: timer_tld
-                                            interval: 500
-                                            repeat: false
-                                            onTriggered: {
-                                                 if (nw_tld.text.length > 0)
-                                                 { Query1.setQueryAndName(" Select ID_TLD FROM EXT_PERSON WHERE ID_TLD = " + nw_tld.text, "isIDTLD"); }
-
-                                             }
+                                            //enabled: false
+//                                            onTextEdited: {
+//                                                if (text.length > 0) { timer_tld.restart();}
+//                                                else { color = "#ff0000" }
+//                                                //if (text.length === 1) text = text.toUpperCase()
+//                                            }
                                         }
                                     }
 
@@ -640,7 +648,7 @@ Item {
                                             font.pixelSize: 14
                                         }
                                         Row {
-                                            spacing: 5                                            
+                                            spacing: 5
                                             ComboBox {
                                                 id: nw_department_npp
                                                 width: 180
@@ -1098,7 +1106,7 @@ Item {
                                             MyCalendar {
                                                 id: nw_date_on
                                                 date_val: new Date()
-                                                enabled: false //true
+                                                enabled: false // true
                                                 width: 200
                                             }
 //                                            TextField {
@@ -1296,18 +1304,18 @@ Item {
             anchors.bottomMargin: 10
             anchors.rightMargin: 20
 
-            enabled:
-            {
-                var isOk
+//            enabled:
+//            {
+//                var isOk
 
-                if (nw_personalNumber.isOk) { isOk = true                }
-                else                        { isOk = false; return isOk; }
+//                if (nw_personalNumber.isOk) { isOk = true                }
+//                else                        { isOk = false; return isOk; }
 
-                if (nw_tld.isOk) { isOk = true                }
-                else             { isOk = false; return isOk; }
+//                if (nw_tld.isOk) { isOk = true                }
+//                else             { isOk = false; return isOk; }
 
-                return isOk;
-            }
+//                return isOk;
+//            }
 
             text: "Сохранить"
             font.pixelSize: 14
@@ -1317,29 +1325,28 @@ Item {
 
             onClicked: {
                 var data_arr = {}
-                data_arr["W_NAME"]       = nw_name.text
-                data_arr["W_SURNAME"]    = nw_surname.text
-                data_arr["W_PATRONYMIC"] = nw_patronymic.text
+//                data_arr["W_NAME"]       = nw_name.text
+//                data_arr["W_SURNAME"]    = nw_surname.text
+//                data_arr["W_PATRONYMIC"] = nw_patronymic.text
 
 
                 //if (nw_birthday.ready) data_arr["BIRTH_DATE"] = nw_birthday.date_val
 
-                data_arr["SEX"] = nw_gender.currentIndex // (nw_gender.currentIndex==0) ? "M" : "F"
+                //data_arr["SEX"] = nw_gender.currentIndex // (nw_gender.currentIndex==0) ? "M" : "F"
                 data_arr["WEIGHT"] = parseInt(nw_weight.text, 10)
-                data_arr["HEIGHT"] = parseInt(nw_hieght.text, 10)
+                data_arr["HEIGHT"] = parseInt(nw_height.text, 10)
 
 
-                if (nw_personalNumber.length > 0) data_arr["PERSON_NUMBER"] = parseInt(nw_personalNumber.text,10)
-                if (nw_tld.text.length > 0)       data_arr["ID_TLD"]        = parseInt(nw_tld.text,10)
+                if (nw_personalNumber.length > 0) data_arr["PERSON_NUMBER"] = parseInt( nw_personalNumber.text, 10 )
+                if (nw_tld.text.length > 0)       data_arr["ID_TLD"]        = parseInt( nw_tld.text, 10 )
 
-                data_arr["STATUS_CODE"] = parseInt(modeles.model_adm_status.getId(nw_statusCode.currentIndex), 10) //nw_statusCode.currentIndex + 1
-                data_arr["STAFF_TYPE"]  = nw_staffType.currentText //modeles.model_adm_department_nnp.getId(nw_staffType.currentText)
+                data_arr["STATUS_CODE"] = parseInt( modeles.model_adm_status.getId(nw_statusCode.currentIndex), 10 ) //nw_statusCode.currentIndex + 1                data_arr["STAFF_TYPE"]  = nw_staffType.currentText //modeles.model_adm_department_nnp.getId(nw_staffType.currentText)
 
                 if(nw_staffType.currentIndex==0) {
-                    data_arr["ID_DEPARTMENT_NPP"] = parseInt(modeles.model_adm_department_nnp.getId(nw_department_npp.currentIndex),10)
+                    data_arr["ID_DEPARTMENT_NPP"] = parseInt( modeles.model_adm_department_nnp.getId(nw_department_npp.currentIndex), 10 )
                 }
                 else if(nw_staffType.currentIndex==1) {
-                    data_arr["ID_ORGANIZATION"] = parseInt( modeles.model_adm_organisation_dep.getId(nw_department.currentIndex),10 )
+                    data_arr["ID_ORGANIZATION"] = parseInt( modeles.model_adm_organisation_dep.getId(nw_department.currentIndex), 10 )
                 }
 
                 data_arr["ID_ASSIGNEMENT"] = parseInt( modeles.model_adm_assignment.getId(nw_assignment.currentIndex), 10 )  //nw_assignment.currentText
@@ -1350,11 +1357,9 @@ Item {
 ////                    data_arr["IKU_MONTH"] = (nw_iku_month.text.length > 0) ? parseFloat(nw_iku_month.text.replace(",",".")) : 0.0
 ////                }
 
-
                 if (nw_pass_number.text.length > 0)  data_arr["PASSPORT_NUMBER"]  = nw_pass_number.text
                 if (nw_passportGive.text.length > 0) data_arr["PASSPORT_GIVE"]    = nw_passportGive.text
 
-                ///ДАТА РАСКОМЕНТИРОВАТЬ if (nw_pass_date.ready) data_arr["PASSPORT_DATE"] = nw_pass_date.date_val
                 //data_arr["PASSPORT_DATE"] = nw_pass_date.date_val
 
                 if (nw_SNILS.text.length > 0)   data_arr["SNILS"] = nw_SNILS.text
@@ -1374,9 +1379,9 @@ Item {
 
                 //console.log(">", nw_organisation.currentText)
                 //console.log(data_arr["STATUS_CODE"]);
-                //console.log(">",nw_staffType.currentText);
-                create_confirm(data_arr)
-                clearfields()
+                console.log(" !>>> ",main_AddWorker.id_person);
+                update_confirm(data_arr, main_AddWorker.id_person)
+                //clearfields()
             }
         }
 
@@ -1388,11 +1393,11 @@ Item {
             text: "Отмена"
             font.pixelSize: 14
             anchors.bottom: parent.bottom
-            anchors.left: parent.left            
+            anchors.left: parent.left
 
             onClicked: {
-                create_cancel()
-                clearfields()
+                update_cancel()
+                //clearfields()
             }
         }
 
@@ -1408,4 +1413,5 @@ Item {
 
 
 }
+
 

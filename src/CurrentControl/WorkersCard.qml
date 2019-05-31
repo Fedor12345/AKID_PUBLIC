@@ -10,6 +10,27 @@ Page {
     id: main_
     property int space_margin: 15
 
+    Component.onCompleted: {
+        workersModel.query = " SELECT ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
+                               SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
+                               WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
+                               ID_TLD, STAFF_TYPE,
+
+                               PASSPORT_NUMBER,  PASSPORT_GIVE,
+                               PASSPORT_DATE, POLICY_NUMBER, SNILS,
+                               HOME_ADDRESS, HOME_TEL,
+                               WORK_TEL,MOBILE_TEL, WORK_ADDRESS, E_MAIL,
+
+                               adm_status.STATUS
+
+                               FROM ext_person
+                               LEFT JOIN adm_status ON ext_person.STATUS_CODE = adm_status.STATUS_CODE
+                               WHERE ext_person.ID_PERSON = " + 1;
+
+    }
+
+
+
     Label {
         anchors.centerIn: parent
         text:"workerCard_&"
@@ -17,7 +38,7 @@ Page {
 
     Item {
         id: modeles
-        property var model_ext_person_list: managerDB.createModel(" SELECT ID_PERSON, W_NAME, W_SURNAME, W_PATRONYMIC, PERSON_NUMBER, ID_TLD FROM EXT_PERSON ", "ext_person")
+        property var model_ext_person_list: managerDB.createModel(" SELECT ID_PERSON, W_NAME, W_SURNAME, W_PATRONYMIC, PERSON_NUMBER, ID_TLD FROM EXT_PERSON ORDER BY W_SURNAME", "ext_person" )
     }
 
 
@@ -52,14 +73,14 @@ Page {
 //                     };
 //                     str.toLocaleString("ru", options)
                    ///ДАТА РАСКОМЕНТИРОВАТЬ  txt_date_on.text  = str.getDate() + "." + (str.getMonth()+1)  + "." + str.getFullYear()   //String(workersModel.get(0)["DATE_ON"]).substring(0,20)
-                     str = workersModel.get(0)["DATE_OFF"]
+                    str = workersModel.get(0)["DATE_OFF"]
                   ///ДАТА РАСКОМЕНТИРОВАТЬ   txt_date_off.text = str.getDate() + "." + (str.getMonth()+1)  + "." + str.getFullYear()
                     //txt_date_off.text = String(workersModel.get(0)["DATE_OFF"])
 
                     //3
-                    txt_gender.text   = workersModel.get(0)["SEX"]
-                     str = workersModel.get(0)["BIRTH_DATE"]
-                   ///ДАТА РАСКОМЕНТИРОВАТЬ txt_birthday.text = str.getDate() + "." + (str.getMonth()+1) + "." + str.getFullYear()
+                    txt_gender.text   = (workersModel.get(0)["SEX"] == 0) ? "М" : "Ж"
+                    str = workersModel.get(0)["BIRTH_DATE"]
+                    txt_birthday.text = str.getDate() + "." + (str.getMonth()+1) + "." + str.getFullYear()
                     txt_weight.text   = workersModel.get(0)["WEIGHT"]
                     txt_height.text   = workersModel.get(0)["HEIGHT"]
 
@@ -94,6 +115,13 @@ Page {
     function createNewPerson(map_data) {
         console.log("createNewPerson: ");
         Query1.insertRecordIntoTable("WorkersCard" ,"EXT_PERSON", map_data) //wc_query.map_data
+
+    }
+
+    // обновление данных сотрудника в бд
+    function updateOldPerson(map_data,id_person) {
+        console.log("updateOldPerson: ",id_person);
+        Query1.updateRecordIntoTable("WorkersCard" ,"EXT_PERSON", map_data, "ID_PERSON", id_person) //wc_query.map_data
 
     }
 
@@ -142,6 +170,36 @@ Page {
                 popup_AddWorker.close()
                 //loaderAddWorker.sourceComponent = undefined;
                 createNewPerson(data_record)
+            }
+        }
+
+
+    }
+
+
+
+    Popup {
+        id: popup_UpdateWorker
+        width: updateWorker.width + padding*2
+        height: updateWorker.height + padding*2
+
+        modal: true
+        focus: true
+        closePolicy: Popup.NoAutoClose
+        parent: Overlay.overlay
+        x: Math.round((parent.width - width) / 2)
+        y: Math.round((parent.height - height) / 2)
+        padding: 0
+
+        UpdateWorker {
+            id: updateWorker
+            workerModel: workersModel
+            onUpdate_cancel: {
+                popup_UpdateWorker.close();
+            }
+            onUpdate_confirm: {
+                popup_UpdateWorker.close()
+                updateOldPerson(data_record, id_person)
             }
         }
 
@@ -201,6 +259,8 @@ Item {
                 font.pixelSize: 14
                 flat: true
                 onClicked: {
+                    popup_UpdateWorker.open()
+                    updateWorker.setDatePerson();
                     //popup_wait.open()
                 }
             }
@@ -209,6 +269,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 font.pixelSize: 14
                 flat: true
+                enabled: false
             }
             ToolSeparator {}
             ToolButton {
@@ -216,6 +277,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 font.pixelSize: 14
                 flat: true
+                enabled: false
             }
             ToolSeparator {}
         }
@@ -239,7 +301,7 @@ Item {
                 if (id_rec !== -1) {
                     //popup_wait.open()
                     console.log("-!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!->");
-                    workersModel.query = " SELECT W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
+                    workersModel.query = " SELECT ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
                                            SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
                                            WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
                                            ID_TLD, STAFF_TYPE,
@@ -541,6 +603,7 @@ Item {
             TabButton {
                 text: "Общая информация"
                 width: implicitWidth
+                enabled: false
             }
             TabButton {
                 text: "Персональная информация"
@@ -549,10 +612,12 @@ Item {
             TabButton {
                 text: "Информация по дозам"
                 width: implicitWidth
+                enabled: false
             }
             TabButton {
                 text: "Зоны контроля"
                 width: implicitWidth
+                enabled: false
             }
         }
 
@@ -1221,6 +1286,7 @@ Rectangle {
             anchors.fill: parent
             anchors.margins: 5
             property var id_currentPerson
+            currentIndex: 0
 
             highlightFollowsCurrentItem: true
             model: modeles.model_ext_person_list
@@ -1298,7 +1364,7 @@ Rectangle {
                 }
 
                 onClicked: {
-                    console.log("Click: " + " " + index)
+                    //console.log("Click: " + " " + index)
                     if (list_Persons.currentIndex !== index) {
                         list_Persons.currentIndex = index
                     }
@@ -1333,7 +1399,7 @@ Rectangle {
             interval: 410
             repeat: false
              onTriggered: {
-                     workersModel.query = " SELECT W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
+                     workersModel.query = " SELECT ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
                                             SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
                                             WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
                                             ID_TLD, STAFF_TYPE,

@@ -25,6 +25,7 @@ public:
 
 private:
     void startScript(QString path);
+    void killProcess(QString task);
 
 signals:
     void sendToQml(QString str);
