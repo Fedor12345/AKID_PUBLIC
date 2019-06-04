@@ -7,13 +7,20 @@ import QtQuick.Controls.Material 2.3
 
 Item {
     //id: item3
-    id: main_AddWorker
+    id: main_UpdateWorker
     height: 800//550
     width:  900//690
 
-
-    property var workerModel
     property var id_person
+    property var model_worker
+
+    property var model_adm_status
+    property var model_adm_organisation
+    property var model_adm_department_outer
+    property var model_adm_department_inner
+    property var model_adm_assignment
+
+
 
     signal update_confirm(var data_record, var id_person)
     signal update_cancel()
@@ -21,27 +28,33 @@ Item {
 
     Item {
         id: modeles
-        property var model_adm_status:           managerDB.createModel(" SELECT STATUS_CODE, STATUS  FROM ADM_STATUS ",                    "adm_status_update")
-        property var model_adm_organisation_org: managerDB.createModel(" SELECT ID, ORGANIZATION_    FROM ADM_ORGANIZATION ",              "adm_organisation_org_update")
-        property var model_adm_organisation_dep: managerDB.createModel(" SELECT ID, DEPARTMENT       FROM ADM_ORGANIZATION WHERE ID = 1 ", "adm_organisation_dep_update")
-        property var model_adm_department_nnp:   managerDB.createModel(" SELECT ID, DEPARTMENT_NPP   FROM ADM_DEPARTMENT_NPP ",            "adm_department_nnp_update")
-        property var model_adm_assignment:       managerDB.createModel(" SELECT ID, ASSIGNEMENT      FROM ADM_ASSIGNEMENT ",               "adm_department_nnp_update")
+//        property var model_adm_status:           managerDB.createModel(" SELECT STATUS_CODE, STATUS  FROM ADM_STATUS ",                    "adm_status_update")
+//        property var model_adm_assignment:       managerDB.createModel(" SELECT ID, ASSIGNEMENT      FROM ADM_ASSIGNEMENT ",               "adm_department_nnp_update")
+//        property var model_adm_organisation:     managerDB.createModel(" SELECT ID, ORGANIZATION_    FROM ADM_ORGANIZATION ",                 "adm_organisation")
+//        property var model_adm_department_outer: managerDB.createModel(" SELECT ID, DEPARTMENT_OUTER FROM ADM_DEPARTMENT_OUTER WHERE ID = 0", "adm_department_outer")
+//        property var model_adm_department_inner: managerDB.createModel(" SELECT ID, DEPARTMENT_INNER FROM ADM_DEPARTMENT_INNER ",             "adm_department_inner")
+
+
+//        property var model_adm_organisation_org: managerDB.createModel(" SELECT ID, ORGANIZATION_    FROM ADM_ORGANIZATION ",              "adm_organisation_org_update")
+//        property var model_adm_organisation_dep: managerDB.createModel(" SELECT ID, DEPARTMENT       FROM ADM_ORGANIZATION WHERE ID = 1 ", "adm_organisation_dep_update")
+//        property var model_adm_department_nnp:   managerDB.createModel(" SELECT ID, DEPARTMENT_NPP   FROM ADM_DEPARTMENT_NPP ",            "adm_department_nnp_update")
+
     }
 
 
 
     function setDatePerson() {
-        var value = workerModel.get(0)["STATUS"]
-        modeles.model_adm_status.getIndexRow("STATUS", value);
+        var value = model_worker.get(0)["STATUS"]
+        main_UpdateWorker.model_adm_status.getIndexRow("STATUS", value);
 
         //Проверка, есть ли данные в моделе (выбран ли сотрудник в списке)
-        if( workerModel.headerData(0, Qt.Horizontal, 0) === "ID_PERSON" ) { // == undefined
-            main_AddWorker.id_person = workerModel.get(0)["ID_PERSON"]
-            console.log(" -------------> ", main_AddWorker.id_person)
-            nw_FIO.text = workerModel.get(0)["W_NAME"] + " " +  workerModel.get(0)["W_SURNAME"] + " " + workerModel.get(0)["W_PATRONYMIC"];
-//            nw_name.text = workerModel.get(0)["W_NAME"]
-//            nw_surname.text = workerModel.get(0)["W_SURNAME"]
-//            nw_patronymic.text = workerModel.get(0)["W_PATRONYMIC"]
+        if( model_worker.headerData(0, Qt.Horizontal, 0) === "ID_PERSON" ) { // == undefined
+            main_UpdateWorker.id_person = model_worker.get(0)["ID_PERSON"]
+            console.log(" -------------> ", main_UpdateWorker.id_person)
+            nw_FIO.text = model_worker.get(0)["W_NAME"] + " " +  model_worker.get(0)["W_SURNAME"] + " " + model_worker.get(0)["W_PATRONYMIC"];
+//            nw_name.text = model_worker.get(0)["W_NAME"]
+//            nw_surname.text = model_worker.get(0)["W_SURNAME"]
+//            nw_patronymic.text = model_worker.get(0)["W_PATRONYMIC"]
 
 
 
@@ -50,34 +63,34 @@ Item {
 //            nw_birthday.date_val = str.getDate() + "." + (str.getMonth()+1) + "." + str.getFullYear()
 
 
-            //nw_gender.text = (workerModel.get(0)["SEX"] == 0) ? "Мужчина" : "Женщина"
-            nw_gender.currentIndex = (workerModel.get(0)["SEX"] == 0) ? 0 : 1
+            //nw_gender.text = (model_worker.get(0)["SEX"] == 0) ? "Мужчина" : "Женщина"
+            nw_gender.currentIndex = (model_worker.get(0)["SEX"] == 0) ? 0 : 1
 
 
-            nw_weight.text = workerModel.get(0)["WEIGHT"]
-            nw_height.text = workerModel.get(0)["HEIGHT"]
+            nw_weight.text = model_worker.get(0)["WEIGHT"]
+            nw_height.text = model_worker.get(0)["HEIGHT"]
 
-            nw_personalNumber.text = workerModel.get(0)["PERSON_NUMBER"]
-            nw_tld.text            = workerModel.get(0)["ID_TLD"]
+            nw_personalNumber.text = model_worker.get(0)["PERSON_NUMBER"]
+            nw_tld.text            = model_worker.get(0)["ID_TLD"]
 
             txt_status.text     = workersModel.get(0)["STATUS"]
 
             //        nw_iku_year.text = "0,0"
             //        nw_iku_month.text = "0,0"
 
-            nw_pass_number.text   = workerModel.get(0)["PASSPORT_NUMBER"]
+            nw_pass_number.text   = model_worker.get(0)["PASSPORT_NUMBER"]
             //nw_pass_date.ready = false
-            nw_passportGive.text  = workerModel.get(0)["PASSPORT_GIVE"]
-            nw_SNILS.text         = workerModel.get(0)["SNILS"]
+            nw_passportGive.text  = model_worker.get(0)["PASSPORT_GIVE"]
+            nw_SNILS.text         = model_worker.get(0)["SNILS"]
 
-            nw_homeTel.text     = workerModel.get(0)["HOME_TEL"]
-            nw_mobileTel.text   = workerModel.get(0)["MOBILE_TEL"]
-            nw_homeAdress.text  = workerModel.get(0)["HOME_ADDRESS"]
-            nw_eMail.text       = workerModel.get(0)["E_MAIL"]
-            nw_workTel.text     = workerModel.get(0)["WORK_TEL"]
-            //nw_workTel_2.text   = workerModel.get(0)["SNILS"]
-            nw_workAdress.text  = workerModel.get(0)["WORK_ADDRESS"]
-            //nw_eMailWork.text   = workerModel.get(0)["SNILS"]
+            nw_homeTel.text     = model_worker.get(0)["HOME_TEL"]
+            nw_mobileTel.text   = model_worker.get(0)["MOBILE_TEL"]
+            nw_homeAdress.text  = model_worker.get(0)["HOME_ADDRESS"]
+            nw_eMail.text       = model_worker.get(0)["E_MAIL"]
+            nw_workTel.text     = model_worker.get(0)["WORK_TEL"]
+            //nw_workTel_2.text   = model_worker.get(0)["SNILS"]
+            nw_workAdress.text  = model_worker.get(0)["WORK_ADDRESS"]
+            //nw_eMailWork.text   = model_worker.get(0)["SNILS"]
         }
     }
 
@@ -523,7 +536,7 @@ Item {
                                             //property var model_:
                                             property var id_status: 1 //"STATUS_CODE"
 
-                                            model: modeles.model_adm_status
+                                            model: main_UpdateWorker.model_adm_status
                                                 //managerDB.createModel(" SELECT STATUS FROM ADM_STATUS ", "adm_status")
 //                                                  ["Работал весь учетный год",
 //                                                "Прикомандирован в отчетном году",
@@ -573,15 +586,18 @@ Item {
                                                 width: 170
                                                 flat: false
                                                 font.pixelSize: 16
-                                                model: (nw_staffType.currentIndex==0) ? ["АЭС"] : modeles.model_adm_organisation_org
-                                                textRole: (nw_staffType.currentIndex==0) ? "" : "ORGANIZATION_"
+                                                model: main_UpdateWorker.model_adm_organisation
+                                                    //(nw_staffType.currentIndex==0) ? ["АЭС"] : main_UpdateWorker.model_adm_organisation_org
+                                                textRole: "ORGANIZATION_" //(nw_staffType.currentIndex==0) ? "" : "ORGANIZATION_"
                                                 //меняется содержание списка "Подразделения" в зависмисоти от выбранного названия оргнанизации
                                                 onCurrentTextChanged: {
                                                     //console.log(" >>>>> currentText = ", nw_organisation.currentText, " ", currentIndex)
                                                     if(nw_staffType.currentIndex==1)
-                                                        modeles.model_adm_organisation_dep.setQueryDB(" SELECT ID, DEPARTMENT FROM ADM_ORGANIZATION WHERE ORGANIZATION_ = '" + currentText + "'");
-                                                        //modeles.model_adm_organisation_dep.query(" SELECT ID, DEPARTMENT FROM ADM_ORGANIZATION WHERE ORGANIZATION_ = '" + currentText + "'");
-
+                                                        var id_org = main_UpdateWorker.model_adm_organisation.getId(currentIndex)
+                                                        main_UpdateWorker.model_adm_department_outer.setQueryDB(" SELECT ID, DEPARTMENT_OUTER FROM ADM_DEPARTMENT_OUTER WHERE ID_ORGANIZATION = '" + id_org + "'");
+                                                        nw_department_outer.currentIndex = -1
+                                                        //main_UpdateWorker.model_adm_organisation_dep.setQueryDB(" SELECT ID, DEPARTMENT FROM ADM_ORGANIZATION WHERE ORGANIZATION_ = '" + currentText + "'");
+                                                        //main_UpdateWorker.model_adm_organisation_dep.query(" SELECT ID, DEPARTMENT FROM ADM_ORGANIZATION WHERE ORGANIZATION_ = '" + currentText + "'");
                                                 }
                                             }
                                             Button {
@@ -625,11 +641,11 @@ Item {
                                                             //font.bold: true
                                                             font.pixelSize: 40
                                                             onClicked: { // SELECT ORGANIZATION_ FROM ADM_ORGANIZATION
-                                                                var query = " INSERT INTO ADM_ORGANIZATION VALUES ("
-                                                                               + "'" + txt_addOrganization.text + "', "
-                                                                               + "'" + txt_addDepartment.text   + "') ";
-                                                                Query1.setQuery(query);
-                                                                popup_addOrganisation.close();
+//                                                                var query = " INSERT INTO ADM_ORGANIZATION VALUES ("
+//                                                                               + "'" + txt_addOrganization.text + "', "
+//                                                                               + "'" + txt_addDepartment.text   + "') ";
+//                                                                Query1.setQuery(query);
+//                                                                popup_addOrganisation.close();
                                                             }
                                                         }
                                                     }
@@ -650,23 +666,23 @@ Item {
                                         Row {
                                             spacing: 5
                                             ComboBox {
-                                                id: nw_department_npp
+                                                id: nw_department_inner
                                                 width: 180
                                                 flat: false
                                                 font.pixelSize: 16
                                                 visible: (nw_staffType.currentIndex==0) ? true : false
-                                                model: modeles.model_adm_department_nnp  //.setQueryDB(" SELECT STATUS_CODE, ADM_STATUS FROM ADM_STATUS ")
-                                                textRole: "DEPARTMENT_NPP"
+                                                model: main_UpdateWorker.model_adm_department_inner  //.setQueryDB(" SELECT STATUS_CODE, ADM_STATUS FROM ADM_STATUS ")
+                                                textRole: "DEPARTMENT_INNER"
                                             }
 
                                             ComboBox {
-                                                id: nw_department
+                                                id: nw_department_outer
                                                 width: 180
                                                 flat: false
                                                 font.pixelSize: 16
                                                 visible: (nw_staffType.currentIndex==0) ? false : true
-                                                model: modeles.model_adm_organisation_dep
-                                                textRole: "DEPARTMENT"
+                                                model: main_UpdateWorker.model_adm_department_outer
+                                                textRole: "DEPARTMENT_OUTER"
                                             }
 //                                            Button {
 //                                                id: nw_addDepartment
@@ -726,7 +742,7 @@ Item {
                                                 flat: false
                                                 font.pixelSize: 16
 
-                                                model: modeles.model_adm_assignment
+                                                model: main_UpdateWorker.model_adm_assignment
                                                 textRole: "ASSIGNEMENT"
                                             }
                                         }
@@ -1340,16 +1356,16 @@ Item {
                 if (nw_personalNumber.length > 0) data_arr["PERSON_NUMBER"] = parseInt( nw_personalNumber.text, 10 )
                 if (nw_tld.text.length > 0)       data_arr["ID_TLD"]        = parseInt( nw_tld.text, 10 )
 
-                data_arr["STATUS_CODE"] = parseInt( modeles.model_adm_status.getId(nw_statusCode.currentIndex), 10 ) //nw_statusCode.currentIndex + 1                data_arr["STAFF_TYPE"]  = nw_staffType.currentText //modeles.model_adm_department_nnp.getId(nw_staffType.currentText)
+                data_arr["STATUS_CODE"] = parseInt( main_UpdateWorker.model_adm_status.getId(nw_statusCode.currentIndex), 10 ) //nw_statusCode.currentIndex + 1                data_arr["STAFF_TYPE"]  = nw_staffType.currentText //main_UpdateWorker.model_adm_department_nnp.getId(nw_staffType.currentText)
 
                 if(nw_staffType.currentIndex==0) {
-                    data_arr["ID_DEPARTMENT_NPP"] = parseInt( modeles.model_adm_department_nnp.getId(nw_department_npp.currentIndex), 10 )
+                    data_arr["ID_DEPARTMENT_NPP"] = parseInt( main_UpdateWorker.model_adm_department_nnp.getId(nw_department_npp.currentIndex), 10 )
                 }
                 else if(nw_staffType.currentIndex==1) {
-                    data_arr["ID_ORGANIZATION"] = parseInt( modeles.model_adm_organisation_dep.getId(nw_department.currentIndex), 10 )
+                    data_arr["ID_ORGANIZATION"] = parseInt( main_UpdateWorker.model_adm_organisation_dep.getId(nw_department.currentIndex), 10 )
                 }
 
-                data_arr["ID_ASSIGNEMENT"] = parseInt( modeles.model_adm_assignment.getId(nw_assignment.currentIndex), 10 )  //nw_assignment.currentText
+                data_arr["ID_ASSIGNEMENT"] = parseInt( main_UpdateWorker.model_adm_assignment.getId(nw_assignment.currentIndex), 10 )  //nw_assignment.currentText
 
 
 ////                data_arr["IKU_YEAR"] = (nw_iku_year.text.length > 0) ? parseFloat(nw_iku_year.text.replace(",",".")) : 0.0
@@ -1379,8 +1395,8 @@ Item {
 
                 //console.log(">", nw_organisation.currentText)
                 //console.log(data_arr["STATUS_CODE"]);
-                console.log(" !>>> ",main_AddWorker.id_person);
-                update_confirm(data_arr, main_AddWorker.id_person)
+                //console.log(" !>>> ",main_UpdateWorker.id_person);
+                update_confirm(data_arr, main_UpdateWorker.id_person)
                 //clearfields()
             }
         }

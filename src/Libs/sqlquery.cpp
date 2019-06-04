@@ -183,7 +183,7 @@ void SQLquery::getMaxID(const QString& owner_name, const QString &tname, const Q
         tstr1 = "SELECT max(id_person) max_id FROM " + tname;
     }
 
-    qDebug() << " + query: " << tstr1;
+    qDebug() << " -> SQLquery: getMaxID(): query: " << tstr1;
     setQuery(tstr1);
 }
 
@@ -216,19 +216,46 @@ bool SQLquery::insertRecordIntoTable(const QString& owner_name, const QString &t
 
 
         if (map.value(key).type() == QVariant::DateTime) {
-            tstr2 = tstr2 +"TO_DATE('"+ map.value(key).toDate().toString(Qt::ISODate) + "', 'YYYY-MM-DD'),";
+            tstr2 = tstr2 + "TO_DATE('"+ map.value(key).toDate().toString(Qt::ISODate) + "', 'YYYY-MM-DD'),";
             //TO_DATE('2019-03-01 06:40:00', 'YYYY-MM-DD HH24:MI:SS')
         } else {
-            tstr2 = tstr2 +"'"+  map.value(key).toString() + "',";
+            tstr2 = tstr2 + "'" +  map.value(key).toString() + "',";
         }
     }
     tstr1.remove (tstr1.length()-1, 1);
     tstr2.remove (tstr2.length()-1, 1);
     tstr1 = tstr1+") "+tstr2+")";
 
-    qDebug() << " + query: " << tstr1;
+    qDebug() << " -> SQLquery: insertRecordIntoTable(): query: " << tstr1;
 
     setQuery(tstr1);
+
+    return true;
+}
+
+bool SQLquery::updateRecordIntoTable(const QString &owner_name, const QString &tname, const QMap<QString, QVariant> &map, const QString &idWhere, const int &id)
+{
+   // return NULL;
+    sender_name = owner_name;
+
+    QString tstr = " UPDATE " + tname + " SET ";
+
+
+    foreach (QString key, map.keys()) {
+        tstr = tstr + key + " = ";
+        if (map.value(key).type() == QVariant::DateTime) {
+            tstr = tstr + " TO_DATE('"+ map.value(key).toDate().toString(Qt::ISODate) + "', 'YYYY-MM-DD'), ";
+            //TO_DATE('2019-03-01 06:40:00', 'YYYY-MM-DD HH24:MI:SS')
+        } else {
+            tstr = tstr + " '" +  map.value(key).toString() + "',";
+        }
+    }
+    tstr = tstr.remove(tstr.length()-1,1);
+    tstr = tstr + " WHERE " + idWhere + " = " + QString::number(id);
+
+    qDebug() << " -> SQLquery: updateRecordIntoTable(): query: " << tstr;
+
+    setQuery(tstr);
 
     return true;
 }

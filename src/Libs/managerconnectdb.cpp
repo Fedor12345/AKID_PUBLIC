@@ -138,6 +138,28 @@ ManagerConnectDB::~ManagerConnectDB()
 
 }
 
+void ManagerConnectDB::checkConnectionDB(int iConnection)
+{
+    emit signalSendGUI_status("begin",nullptr,NULL);
+
+    qDebug()<<" @ Manager: checkConnectionDB() | thread = " << QThread::currentThreadId();
+
+    if (alreadyTrytoconnect == false) {
+        alreadyTrytoconnect = true;
+
+        if(!waitDB->fl_waitConnection) {
+            waitDB->fl_connect = false;
+        }
+
+        emit signalWaitConnectionCurrentDB(iConnection);
+
+    } else {
+        qDebug()<<" @ Manager: - ALREADY CHECK CONNECTION";
+    }
+
+
+}
+
 void ManagerConnectDB::checkAllConnectionDB()
 {
     qDebug()<<" @ Manager: startConnectionDB() | thread = " << QThread::currentThreadId();

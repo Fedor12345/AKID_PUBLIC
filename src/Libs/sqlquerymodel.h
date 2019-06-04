@@ -69,6 +69,7 @@ public slots:
     void updateModel();
     void updateModel(QString);
     int getId(int row);
+    int getIndexRow(const QString &columnName, const QString &value);
     QString getFirstColumn(int row);
     QVariantMap get(int row);
 

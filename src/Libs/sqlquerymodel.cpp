@@ -4,9 +4,7 @@
 #include <QMutex>
 
 
-SQLQueryModel::SQLQueryModel(QString nameModel, QObject *parent) :
-    QSqlQueryModel(parent)
-{
+SQLQueryModel::SQLQueryModel(QString nameModel, QObject *parent) : QSqlQueryModel(parent) {
     this->nameModel = nameModel;
     this->fl_setQuery = false;
 }
@@ -104,7 +102,7 @@ void SQLQueryModel:: updateModel(QString query) {
 // получить данные в первом столбце из запроса (в интежере)
 int SQLQueryModel::getId(int row) {
     int id_=0;
-    id_ = this->data(this->index(row, 0), this->i_ID).toInt();
+    id_ = this->data( this->index(row, 0), this->i_ID ).toInt(); /// this->i_ID = Qt::UserRole + 1
     //qDebug() << " -> SQLmodel(" << this->nameModel << "):" << "id_ = " << id_;
     return id_;
 }
@@ -112,10 +110,41 @@ int SQLQueryModel::getId(int row) {
 // получить данные в первом столбце из запроса
 QString SQLQueryModel::getFirstColumn(int row) {
     QString str="";
-    str = this->data(this->index(row, 0), this->i_ID).toString();
+    str = this->data( this->index(row, 0), this->i_ID ).toString();  /// this->i_ID = Qt::UserRole + 1
     //qDebug() << " -> SQLmodel(" << this->nameModel << "):" << "id_ = " << id_;
     return str;
 }
+
+int SQLQueryModel::getIndexRow(const QString &columnName, const QString &value)
+{
+    /////////////////////////////////
+    return NULL;
+    /////////////////////////////////
+
+
+    qDebug() << " --> SQLmodel: getIndexRow(): columnName = " << columnName <<  " value = " << value;
+    qDebug() << " --> SQLmodel: getIndexRow(): roleNames().value(0)= "  << this->roleNames().values(); //this->roleNames().values().value(0);
+
+    int iColumn = 0;
+    for (int i=0; i<record().count(); i++) {
+        if( this->roleNames().values().value(i) == columnName ) {
+            qDebug() << " --> SQLmodel: getIndexRow(): roleNames().value(0) = "  << this->roleNames().values().value(i); //this->roleNames().values().value(0);
+            iColumn = i;
+        }
+    }
+    int indexRow = 0;
+    while(this->data(this->index(indexRow, iColumn), this->i_ID).toInt())
+    {
+        indexRow++;
+    }
+//    indexRow = this->data(this->index(i, iColumn), this->i_ID).toInt();  /// this->i_ID = Qt::UserRole + 1
+    qDebug() << " --> SQLmodel: getIndexRow(): indexRow = "  << indexRow;
+
+
+    return NULL;
+}
+
+
 
 
 QVariantMap SQLQueryModel::get(int row)
@@ -180,17 +209,15 @@ QString SQLQueryModel::queryStr() const
 
 void SQLQueryModel::queryExecute()
 {
-    //qDebug() << "1____model: " << this->nameModel;
-
     QSqlDatabase db = QSqlDatabase::database(this->connectionName, false);
-    QSqlQuery querySQL(db);
-
     qDebug() << " -> SQLmodel(" << this->nameModel << "): queryExecute(): querySQL = " << this->querySQL;
     this->setQuery(this->querySQL,db);
 
-    if(querySQL.lastError().isValid()) { qDebug() << " -> SQLmodel(" << this->nameModel << "): setQuery_ERROR: " << querySQL.lastError().text(); }
+    //QSqlQuery querySQL(db);
+    //if(querySQL.lastError().isValid()) { qDebug() << " -> SQLmodel(" << this->nameModel << "): setQuery_ERROR: " << querySQL.lastError().text(); }
     qDebug() << " -> SQLmodel(" << this->nameModel << "): roleNames : "<<this->roleNames();
     //qDebug() << " -> SQLmodel: roleNames : " << this->roleNames().values().value(0);
+
     emit signalUpdateDone(this->nameModel);
 }
 

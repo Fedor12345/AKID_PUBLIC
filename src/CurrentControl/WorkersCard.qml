@@ -10,21 +10,40 @@ Page {
     id: main_
     property int space_margin: 15
 
+    property var model_adm_status:           stackview_mainwindow.model_adm_status
+    property var model_adm_assignment:       stackview_mainwindow.model_adm_assignment
+    property var model_adm_organisation:     stackview_mainwindow.model_adm_organisation
+    property var model_adm_department_outer: stackview_mainwindow.model_adm_department_outer
+    property var model_adm_department_inner: stackview_mainwindow.model_adm_department_inner
+
+
+
     Component.onCompleted: {
-        workersModel.query = " SELECT ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
+        workersModel.query = " SELECT
+                               ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
                                SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
                                WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
                                ID_TLD, STAFF_TYPE,
 
-                               PASSPORT_NUMBER,  PASSPORT_GIVE,
+                               PASSPORT_NUMBER, PASSPORT_GIVE,
                                PASSPORT_DATE, POLICY_NUMBER, SNILS,
                                HOME_ADDRESS, HOME_TEL,
                                WORK_TEL,MOBILE_TEL, WORK_ADDRESS, E_MAIL,
 
-                               adm_status.STATUS
+                               adm_status.STATUS,
+
+                               ADM_ORGANIZATION.ORGANIZATION_,
+                               ADM_DEPARTMENT_INNER.DEPARTMENT_INNER,
+                               ADM_DEPARTMENT_OUTER.DEPARTMENT_OUTER,
+                               ADM_ASSIGNEMENT.ASSIGNEMENT
 
                                FROM ext_person
-                               LEFT JOIN adm_status ON ext_person.STATUS_CODE = adm_status.STATUS_CODE
+                               LEFT JOIN adm_status           ON ext_person.STATUS_CODE         = adm_status.STATUS_CODE
+                               LEFT JOIN ADM_ORGANIZATION     ON ext_person.ID_ORGANIZATION     = ADM_ORGANIZATION.ID
+                               LEFT JOIN ADM_DEPARTMENT_INNER ON ext_person.ID_DEPARTMENT_INNER = ADM_DEPARTMENT_INNER.ID
+                               LEFT JOIN ADM_DEPARTMENT_OUTER ON ext_person.ID_DEPARTMENT_OUTER = ADM_DEPARTMENT_OUTER.ID
+                               LEFT JOIN ADM_ASSIGNEMENT      ON ext_person.ID_ASSIGNEMENT      = ADM_ASSIGNEMENT.ID
+
                                WHERE ext_person.ID_PERSON = " + 1;
 
     }
@@ -48,8 +67,14 @@ Page {
             if(nameModel=="model_PERSON")
             {
                 if (workersModel.rowCount() > 0) {
-                    // общая информация
+                    // информация о работе
                     //doznarad_position.text = workersModel.get(0)["doznarad_position"]
+                    txt_organization.text = workersModel.get(0)["ORGANIZATION_"]
+                    if( workersModel.get(0)["STAFF_TYPE"]==="Командировачный" )
+                    { txt_department.text   = workersModel.get(0)["DEPARTMENT_OUTER"] }
+                    else if ( workersModel.get(0)["STAFF_TYPE"]==="Персонал АЭС" )
+                    { txt_department.text   = workersModel.get(0)["DEPARTMENT_INNER"] }
+                    txt_assignement.text  = workersModel.get(0)["ASSIGNEMENT"]
 
 
                     var str = "";
@@ -64,18 +89,39 @@ Page {
                     txt_iku_month.text = workersModel.get(0)["IKU_MONTH"]
                     txt_iku_year.text  = workersModel.get(0)["IKU_YEAR"]
 
+                    txt_dose_before_npp.text = workersModel.get(0)["DOSE_BEFORE_NPP"]
+                    txt_dose_chnpp.text      = workersModel.get(0)["DOSE_CHNPP"]
 
-                     str = workersModel.get(0)["DATE_ON"]
+                    str = workersModel.get(0)["DATE_ON"]
 //                     var options = {
 //                       year: 'numeric',
 //                       month: 'long',
 //                       day: 'numeric'
 //                     };
 //                     str.toLocaleString("ru", options)
-                   ///ДАТА РАСКОМЕНТИРОВАТЬ  txt_date_on.text  = str.getDate() + "." + (str.getMonth()+1)  + "." + str.getFullYear()   //String(workersModel.get(0)["DATE_ON"]).substring(0,20)
+                    txt_date_on.text  = str.getDate() + "." + (str.getMonth()+1)  + "." + str.getFullYear()   //String(workersModel.get(0)["DATE_ON"]).substring(0,20)
                     str = workersModel.get(0)["DATE_OFF"]
-                  ///ДАТА РАСКОМЕНТИРОВАТЬ   txt_date_off.text = str.getDate() + "." + (str.getMonth()+1)  + "." + str.getFullYear()
-                    //txt_date_off.text = String(workersModel.get(0)["DATE_OFF"])
+                    txt_date_off.text = str.getDate() + "." + (str.getMonth()+1)  + "." + str.getFullYear()
+
+
+                    if( workersModel.get(0)["EMERGENCY_DOSE"] === "1" ) {
+                        txt_emergency_dose.is = true;
+                    }
+                    else if( workersModel.get(0)["EMERGENCY_DOSE"] === "0" )
+                    {
+                        txt_emergency_dose.is = false;
+                    }
+
+                    if(workersModel.get(0)["DISABLE_RADIATION"] === "1") {
+                        nw_disable_radiation.is = true;
+                    }
+                    else if( workersModel.get(0)["DISABLE_RADIATION"] === "0" )
+                    {
+                        nw_disable_radiation.is = false;
+                    }
+
+
+
 
                     //3
                     txt_gender.text   = (workersModel.get(0)["SEX"] == 0) ? "М" : "Ж"
@@ -90,8 +136,8 @@ Page {
                      str = workersModel.get(0)["PASSPORT_DATE"]
                     ///ДАТА РАСКОМЕНТИРОВАТЬ txt_pass_dateget.text = str.getDate() + "." +(str.getMonth()+1)  + "." + str.getFullYear()
 
-                    txt_medical_number.text = workersModel.get(0)["POLICY_NUMBER"]
-                    txt_medical_series.text = workersModel.get(0)["SNILS"]
+//                    txt_medical_number.text = workersModel.get(0)["POLICY_NUMBER"]
+//                    txt_medical_series.text = workersModel.get(0)["SNILS"]
 
                     txt_snils.text = workersModel.get(0)["SNILS"]
 
@@ -102,6 +148,7 @@ Page {
                     txt_work_phone.text = workersModel.get(0)["WORK_TEL"]
                     txt_work_address.text = workersModel.get(0)["WORK_ADDRESS"]
                     txt_work_email.text = workersModel.get(0)["E_MAIL"]
+
                 }
 
             }
@@ -162,6 +209,12 @@ Page {
 
         AddWorker {
             id: addworker
+            model_adm_status:           main_.model_adm_status
+            model_adm_organisation:     main_.model_adm_organisation
+            model_adm_department_outer: main_.model_adm_department_outer
+            model_adm_department_inner: main_.model_adm_department_inner
+            model_adm_assignment:       main_.model_adm_assignment
+
             onCreate_cancel: {
                 popup_AddWorker.close();
                 //loaderAddWorker.sourceComponent = undefined;
@@ -193,7 +246,12 @@ Page {
 
         UpdateWorker {
             id: updateWorker
-            workerModel: workersModel
+            model_worker: workersModel
+            model_adm_status:           main_.model_adm_status
+            model_adm_organisation:     main_.model_adm_organisation
+            model_adm_department_outer: main_.model_adm_department_outer
+            model_adm_department_inner: main_.model_adm_department_inner
+            model_adm_assignment:       main_.model_adm_assignment
             onUpdate_cancel: {
                 popup_UpdateWorker.close();
             }
@@ -301,20 +359,31 @@ Item {
                 if (id_rec !== -1) {
                     //popup_wait.open()
                     console.log("-!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!->");
-                    workersModel.query = " SELECT ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
+                    workersModel.query = " SELECT
+                                           ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
                                            SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
                                            WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
                                            ID_TLD, STAFF_TYPE,
 
-                                           PASSPORT_NUMBER,  PASSPORT_GIVE,
+                                           PASSPORT_NUMBER, PASSPORT_GIVE,
                                            PASSPORT_DATE, POLICY_NUMBER, SNILS,
                                            HOME_ADDRESS, HOME_TEL,
                                            WORK_TEL,MOBILE_TEL, WORK_ADDRESS, E_MAIL,
 
-                                           adm_status.STATUS
+                                           adm_status.STATUS,
+
+                                           ADM_ORGANIZATION.ORGANIZATION_,
+                                           ADM_DEPARTMENT_INNER.DEPARTMENT_INNER,
+                                           ADM_DEPARTMENT_OUTER.DEPARTMENT_OUTER,
+                                           ADM_ASSIGNEMENT.ASSIGNEMENT
 
                                            FROM ext_person
-                                           LEFT JOIN adm_status ON ext_person.STATUS_CODE = adm_status.STATUS_CODE
+                                           LEFT JOIN adm_status           ON ext_person.STATUS_CODE         = adm_status.STATUS_CODE
+                                           LEFT JOIN ADM_ORGANIZATION     ON ext_person.ID_ORGANIZATION     = ADM_ORGANIZATION.ID
+                                           LEFT JOIN ADM_DEPARTMENT_INNER ON ext_person.ID_DEPARTMENT_INNER = ADM_DEPARTMENT_INNER.ID
+                                           LEFT JOIN ADM_DEPARTMENT_OUTER ON ext_person.ID_DEPARTMENT_OUTER = ADM_DEPARTMENT_OUTER.ID
+                                           LEFT JOIN ADM_ASSIGNEMENT      ON ext_person.ID_ASSIGNEMENT      = ADM_ASSIGNEMENT.ID
+
                                            WHERE ext_person.ID_PERSON = " + id_rec;
                 }
             }
@@ -335,123 +404,248 @@ Item {
         topPadding: 1
         bottomPadding: 1
 
-        height: implicitContentHeight//190
+        height: 150 //implicitContentHeight
         //width: 670
 
 
         background: Rectangle {
             anchors.fill: parent
-            color: "White"
-            border.color: "LightGray"
+            color: "#eaeaea" //"#d6d6d6"//"White"
+            border.color: "#9E9E9E" //"LightGray"
             //radius: 7
         }
 
-        Column {
+        Item {
             anchors.fill: parent
-            spacing: 0
 
-            Row {
-                //id: row1
-                //Layout.fillWidth: true
-                spacing: 20
-                padding: 10
+            Column {
+                anchors.fill: parent
+                spacing: 0
 
-                Rectangle {
-                    width: 115
-                    height: 130
+                Row {
+                    //id: row1
+                    //Layout.fillWidth: true
+                    //                anchors.left: parent.left
+                    //                anchors.right: parent.right
+                    spacing: 20
+                    padding: 10
 
-                    //                    border.color: "Silver"
-                    //                    color: Material.color(Material.BlueGrey, Material.Shade100)
-                    border.color: "LightGray"
-                    //color: "aliceblue"//"whitesmoke"
-                    Image {
-                        opacity: 0.2
-                        sourceSize.height: 100
-                        sourceSize.width: 100
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        source: "icons/face.svg"
+                    Rectangle {
+                        width: 115
+                        height: 130
 
+                        //                    border.color: "Silver"
+                        //                    color: Material.color(Material.BlueGrey, Material.Shade100)
+                        border.color: "LightGray"
+                        //color: "aliceblue"//"whitesmoke"
+                        Image {
+                            opacity: 0.2
+                            sourceSize.height: 100
+                            sourceSize.width: 100
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            source: "icons/face.svg"
+
+                        }
                     }
+
+                    Column {
+                        spacing: 10
+                        padding: 0
+                        topPadding: 0
+                        Text {
+                            id: txt_fio
+                            text: ".."
+                            font.family: "Tahoma"
+                            font.pixelSize: 28
+                            color: Material.color(Material.DeepOrange) //"midnightblue"//"#333333"//"steelblue"
+                        }
+                        Row {
+                            id: row1
+                            //leftPadding: 10
+                            Column {
+                                //width: 110
+                                spacing: 5
+                                rightPadding: 10
+                                Label {
+                                    text: "Табельный №"
+                                    //anchors.right: parent.right
+                                    font.pixelSize: 14
+                                    color: "black"
+                                }
+                                Label {
+                                    text: "№ ТЛД"
+                                    //anchors.right: parent.right
+                                    font.pixelSize: 14
+                                    color: "black"
+                                }
+                                Label {
+                                    text: "Тип персонала"
+                                    //anchors.right: parent.right
+                                    font.pixelSize: 14
+                                    color: "black"
+                                }
+                                Label {
+                                    text: "Статус"
+                                    //anchors.right: parent.right
+                                    font.pixelSize: 14
+                                    color: "black"
+                                }
+                            }
+                            Column {
+                                width: 220
+                                spacing: 5
+                                Text {
+                                    id: txt_pn
+                                    text: ".."
+                                    font.pixelSize: 14
+                                    color: "darkslategrey"
+                                }
+                                Text {
+                                    id: txt_tld
+                                    text: ".."
+                                    font.pixelSize: 14
+                                    color: "darkslategrey"
+                                }
+                                Text {
+                                    id: txt_staff_type
+                                    text: ".."//"Основной персонал АЭС"
+                                    font.pixelSize: 14
+                                    color: "darkslategrey"
+                                }
+                                Text {
+                                    id: txt_status
+                                    text: ".."//"Работал весь отчетный год"
+                                    font.pixelSize: 14
+                                    color: "darkslategrey"
+                                }
+                            }
+
+
+                        }
+                    }
+
                 }
+            }
 
-                Column {
-                    spacing: 10
-                    padding: 0
-                    topPadding: 0
-                    Text {
-                        id: txt_fio
-                        text: ".."
-                        font.family: "Tahoma"
-                        font.pixelSize: 28
-                        color: Material.color(Material.DeepOrange) //"midnightblue"//"#333333"//"steelblue"
-                    }
-                    Row {
-                        id: row1
-                        //leftPadding: 10
-                        Column {
-                            //width: 110
-                            spacing: 5
-                            rightPadding: 10
-                            Label {
-                                text: "Табельный №"
-                                //anchors.right: parent.right
+            Rectangle {
+                anchors.right: parent.right
+                anchors.rightMargin: 50
+                anchors.verticalCenter: parent.verticalCenter
+                width: 350
+                height: 70
+                border.color: "LightGray"
+
+                Item {
+                    anchors.fill: parent
+                    anchors.margins: 5
+
+                    Item {
+                        id: txt_emergency_dose
+                        property bool is: false
+
+                        anchors.left:   parent.left
+                        anchors.right:  parent.right
+                        anchors.top:    parent.top
+                        anchors.bottom: parent.verticalCenter
+
+
+                        Label {
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "Признак получения аварийной дозы"
+                            font.pixelSize: 14
+                        }
+                        Rectangle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.right: parent.right
+                            anchors.rightMargin: 51
+                            height: parent.height
+                            width: 50
+                            color: "Transparent"
+                            border.color: (txt_emergency_dose.is) ? "Transparent" : "LightGray"
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Нет")
                                 font.pixelSize: 14
-                                color: "black"
-                            }
-                            Label {
-                                text: "№ ТЛД"
-                                //anchors.right: parent.right
-                                font.pixelSize: 14
-                                color: "black"
-                            }
-                            Label {
-                                text: "Тип персонала"
-                                //anchors.right: parent.right
-                                font.pixelSize: 14
-                                color: "black"
-                            }
-                            Label {
-                                text: "Статус"
-                                //anchors.right: parent.right
-                                font.pixelSize: 14
-                                color: "black"
+                                opacity: (txt_emergency_dose.is) ? 0.3 : 1.0
+                                //font.bold: (txt_emergency_dose.is) ? false : true
                             }
                         }
-                        Column {
-                            width: 220
-                            spacing: 5
+                        Rectangle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.right: parent.right
+                            height: parent.height
+                            width: 50
+                            color: "Transparent"
+                            border.color: (txt_emergency_dose.is) ? "LightGray" : "Transparent"
                             Text {
-                                id: txt_pn
-                                text: ".."
+                                anchors.centerIn: parent
+                                text: qsTr("Да")
                                 font.pixelSize: 14
-                                color: "darkslategrey"
-                            }
-                            Text {
-                                id: txt_tld
-                                text: ".."
-                                font.pixelSize: 14
-                                color: "darkslategrey"
-                            }
-                            Text {
-                                id: txt_staff_type
-                                text: ".."//"Основной персонал АЭС"
-                                font.pixelSize: 14
-                                color: "darkslategrey"
-                            }
-                            Text {
-                                id: txt_status
-                                text: ".."//"Работал весь отчетный год"
-                                font.pixelSize: 14
-                                color: "darkslategrey"
+                                opacity: (txt_emergency_dose.is) ? 1.0 : 0.3
+                                //font.bold: (txt_emergency_dose.is) ? true : false
                             }
                         }
-
-
                     }
+
+                    Item {
+                        id: nw_disable_radiation
+                        property bool is: false
+
+                        anchors.left:   parent.left
+                        anchors.right:  parent.right
+                        anchors.top:    parent.verticalCenter
+                        anchors.bottom: parent.bottom
+
+                        Label {
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "Статус запрета с ИИИ"
+                            font.pixelSize: 14
+                        }
+                        Rectangle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.right: parent.right
+                            anchors.rightMargin: 51
+                            height: parent.height
+                            width: 50
+                            color: "Transparent"
+                            border.color: (nw_disable_radiation.is) ? "Transparent" : "LightGray"
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Нет")
+                                font.pixelSize: 14
+                                opacity: (nw_disable_radiation.is) ? 0.3 : 1.0
+                                //font.bold: (txt_emergency_dose.is) ? false : true
+                            }
+                        }
+                        Rectangle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.right: parent.right
+                            height: parent.height
+                            width: 50
+                            color: "Transparent"
+                            border.color: (nw_disable_radiation.is) ? "LightGray" : "Transparent"
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Да")
+                                font.pixelSize: 14
+                                opacity: (nw_disable_radiation.is) ? 1.0 : 0.3
+                                //font.bold: (txt_emergency_dose.is) ? true : false
+                            }
+                        }
+                    }
+
+
+
+
                 }
             }
         }
+
+
+
     }
 
 
@@ -477,7 +671,7 @@ Item {
 
         Row {
             Column {
-                //width: 110
+                width: 100
                 spacing: 5
                 rightPadding: 10
                 Label {
@@ -492,46 +686,113 @@ Item {
                     font.pixelSize: 14
                     color: "black"
                 }
-                Label {
-                    text: "Годовая доза"
-                    //anchors.right: parent.right
-                    font.pixelSize: 14
-                    color: "black"
-                }
 
             }
             Column {
                 width: 100
                 spacing: 5
-                Text {
-                    id: txt_iku_year
-                    text: ".."
-                    font.pixelSize: 14
-                    color: "darkslategrey"
-                }
-                Text {
-                    id: txt_iku_month
-                    text: ".."
-                    font.pixelSize: 14
-                    color: "darkslategrey"
-                }
                 Row {
-                    id: row2
-                    spacing: 10
-
-                    Text {
+                    spacing: 5
+                    TextEdit {
+                        id: txt_iku_year
+                        font.bold: true
+                        color: Material.color(Material.LightGreen)
+                        selectByMouse: true
+                        selectionColor: Material.color(Material.Red)
                         text: ".."
-                        font.pixelSize: 14
-                        color: "darkslategrey"//"indianred"
+                        font.pixelSize: 15
                     }
-
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("мЗв")
+                        font.pixelSize: 14
+                    }
                 }
 
+                Row {
+                    spacing: 5
+                    TextEdit {
+                        id: txt_iku_month
+                        font.bold: true
+                        color: Material.color(Material.LightGreen)
+                        selectByMouse: true
+                        selectionColor: Material.color(Material.Red)
+                        text: ".."
+                        font.pixelSize: 15
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("мЗв")
+                        font.pixelSize: 14
+                    }
+                }
             }
 
             Column {
                 //anchors.bottom: parent.bottom
-                //width: 230
+                width: 180
+                spacing: 5
+                rightPadding: 10
+                Label {
+                    text: "Доза до АЭС"
+                    font.pixelSize: 14
+                    color: "black"
+                }
+                Label {
+                    text: "Доза, полученная на ЧАЭС"
+                    font.pixelSize: 14
+                    color: "black"
+                }
+            }
+            Column {
+                //anchors.bottom: parent.bottom
+                width: 100
+                spacing: 5
+                rightPadding: 10
+
+                Row {
+                    spacing: 5
+                    TextEdit {
+                        id: txt_dose_before_npp
+                        font.bold: true
+                        color: Material.color(Material.LightGreen)
+                        selectByMouse: true
+                        selectionColor: Material.color(Material.Red)
+                        text: ".."
+                        font.pixelSize: 15
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("мЗв")
+                        font.pixelSize: 14
+                    }
+                }
+
+                Row {
+                    spacing: 5
+                    TextEdit {
+                        id: txt_dose_chnpp
+                        font.bold: true
+                        color: Material.color(Material.LightGreen)
+                        selectByMouse: true
+                        selectionColor: Material.color(Material.Red)
+                        text: ".."
+                        font.pixelSize: 15
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("мЗв")
+                        font.pixelSize: 14
+                    }
+                }
+
+
+            }
+
+
+            Column {
+                //anchors.bottom: parent.bottom
+                width: 170
                 spacing: 5
                 rightPadding: 10
                 Label {
@@ -552,20 +813,26 @@ Item {
                 //width: 230
                 spacing: 5
                 rightPadding: 10
-                Text {
-                    id:txt_date_on
+
+                TextEdit {
+                    id: txt_date_on
+                    font.bold: true
+                    color: Material.color(Material.LightGreen)
+                    selectByMouse: true
+                    selectionColor: Material.color(Material.Red)
                     text: ".."
-                    //anchors.right: parent.right
-                    font.pixelSize: 14
-                    color: "darkslategrey"
+                    font.pixelSize: 15
                 }
-                Text {
-                    id:txt_date_off
+                TextEdit {
+                    id: txt_date_off
+                    font.bold: true
+                    color: Material.color(Material.LightGreen)
+                    selectByMouse: true
+                    selectionColor: Material.color(Material.Red)
                     text: ".."
-                    //anchors.right: parent.right
-                    font.pixelSize: 14
-                    color: "darkslategrey"
+                    font.pixelSize: 15
                 }
+
             }
         }
 
@@ -601,9 +868,9 @@ Item {
             background: Rectangle { color: "#eeeeee" }
             property int tbwidth: 300
             TabButton {
-                text: "Общая информация"
+                text: "Информация о работе"
                 width: implicitWidth
-                enabled: false
+                //enabled: false
             }
             TabButton {
                 text: "Персональная информация"
@@ -612,7 +879,7 @@ Item {
             TabButton {
                 text: "Информация по дозам"
                 width: implicitWidth
-                enabled: false
+                //enabled: false
             }
             TabButton {
                 text: "Зоны контроля"
@@ -630,13 +897,13 @@ Item {
 
             Item {
                 id: wtab1
-
                 Pane {
                     id: wtab1_aboutwork
                     anchors.top: parent.top
+                    anchors.topMargin: 5
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    height: 170
+                    height: 60
                     padding: 5
                     //enabled: false
                     background: Rectangle {
@@ -645,23 +912,94 @@ Item {
                         border.color: "transparent"
                         //radius: 7
                     }
+//                    Row {
+//                        spacing: 5
+//                        Label {
+//                            text: "Дознаряд:"
+//                        }
+//                        Rectangle {
+//                            width: 150
+//                            height: 20
+//                            color: Material.color(Material.Lime)
+//                            Label {
+//                                id: doznarad_position
+//                                anchors.centerIn: parent
+//                                font.bold: true
+//                                color: Material.color(Material.Teal)
+//                            }
+
+//                        }
+//                    }
+
                     Row {
-                        spacing: 5
-                        Label {
-                            text: "Дознаряд:"
-                        }
-                        Rectangle {
-                            width: 150
-                            height: 20
-                            color: Material.color(Material.Lime)
+                        anchors.left: parent.left
+                        anchors.leftMargin: 10
+                        spacing: 20
+                        Column {
+                            spacing: 5
                             Label {
-                                id: doznarad_position
-                                anchors.centerIn: parent
+                                text: "Организация"
+                                font.pixelSize: 15
+                            }
+                            TextEdit {
+                                id: txt_organization
+                                font.pixelSize: 15
                                 font.bold: true
                                 color: Material.color(Material.Teal)
+                                selectByMouse: true
+                                selectionColor: Material.color(Material.Red)
+                                text: "-----"
                             }
-
                         }
+
+                        Rectangle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: 30
+                            width: 1
+                            color: "LightGray"
+                        }
+
+                        Column {
+                            spacing: 5
+                            Label {
+                                text: "Подразделение"
+                                font.pixelSize: 15
+                            }
+                            TextEdit {
+                                id: txt_department
+                                font.bold: true
+                                color: Material.color(Material.Teal)
+                                selectByMouse: true
+                                selectionColor: Material.color(Material.Red)
+                                text: "-----"
+                                font.pixelSize: 15
+                            }
+                        }
+
+                        Rectangle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: 30
+                            width: 1
+                            color: "LightGray"
+                        }
+
+                        Column {
+                            spacing: 5
+                            Label {
+                                text: "Должность"
+                                font.pixelSize: 15
+                            }
+                            TextEdit {
+                                id: txt_assignement
+                                font.bold: true
+                                color: Material.color(Material.Teal)
+                                selectByMouse: true
+                                selectionColor: Material.color(Material.Red)
+                                text: "-----"
+                                font.pixelSize: 15
+                            }
+                        }
+
                     }
 
 
@@ -965,59 +1303,59 @@ Item {
 
                         Row {
                             spacing: 20
-                            Rectangle {
-                                height: wtab2_passport.heightAll
-                                width:  400
-                                //border.color: "LightGray"
-                                Column {
-                                    spacing: 5
-                                    Label {
-                                        text: "Данные медицинского полиса"
-                                        verticalAlignment: Text.AlignVCenter
-                                        height: 25
-                                        font.pixelSize: wtab2_passport.sizeHeader
-                                        color: "Black"
-                                        leftPadding: 10
-                                    }
-                                    Rectangle {
-                                        height: 1
-                                        width: 400
-                                        color: "LightGray"
-                                    }
-                                    Row {
-                                        leftPadding: 10
-                                        spacing: 5
+//                            Rectangle {
+//                                height: wtab2_passport.heightAll
+//                                width:  400
+//                                //border.color: "LightGray"
+//                                Column {
+//                                    spacing: 5
+//                                    Label {
+//                                        text: "Данные медицинского полиса"
+//                                        verticalAlignment: Text.AlignVCenter
+//                                        height: 25
+//                                        font.pixelSize: wtab2_passport.sizeHeader
+//                                        color: "Black"
+//                                        leftPadding: 10
+//                                    }
+//                                    Rectangle {
+//                                        height: 1
+//                                        width: 400
+//                                        color: "LightGray"
+//                                    }
+//                                    Row {
+//                                        leftPadding: 10
+//                                        spacing: 5
 
-                                        Label {
-                                            text: "Номер:"
-                                            font.pixelSize: wtab2_passport.sizeTxt
-                                        }
-                                        TextEdit {
-                                            id: txt_medical_number
-                                            font.pixelSize: wtab2_passport.sizeTxt
-                                            font.bold: true
-                                            color: Material.color(Material.Teal)
-                                            selectByMouse: true
-                                            selectionColor: Material.color(Material.Red)
-                                        }
+//                                        Label {
+//                                            text: "Номер:"
+//                                            font.pixelSize: wtab2_passport.sizeTxt
+//                                        }
+//                                        TextEdit {
+//                                            id: txt_medical_number
+//                                            font.pixelSize: wtab2_passport.sizeTxt
+//                                            font.bold: true
+//                                            color: Material.color(Material.Teal)
+//                                            selectByMouse: true
+//                                            selectionColor: Material.color(Material.Red)
+//                                        }
 
-                                        Label {
-                                            leftPadding: 10
-                                            text: "Серия:(снилс)"
-                                            font.pixelSize: wtab2_passport.sizeTxt
-                                        }
-                                        TextEdit  {
-                                            id: txt_medical_series
-                                            font.pixelSize: wtab2_passport.sizeTxt
-                                            font.bold: true
-                                            color: Material.color(Material.Teal)
-                                            selectByMouse: true
-                                            selectionColor: Material.color(Material.Red)
-                                        }
+//                                        Label {
+//                                            leftPadding: 10
+//                                            text: "Серия:(снилс)"
+//                                            font.pixelSize: wtab2_passport.sizeTxt
+//                                        }
+//                                        TextEdit  {
+//                                            id: txt_medical_series
+//                                            font.pixelSize: wtab2_passport.sizeTxt
+//                                            font.bold: true
+//                                            color: Material.color(Material.Teal)
+//                                            selectByMouse: true
+//                                            selectionColor: Material.color(Material.Red)
+//                                        }
 
-                                    }
-                                }
-                            }
+//                                    }
+//                                }
+//                            }
 
                             Rectangle {
                                 height: wtab2_passport.heightAll
@@ -1227,14 +1565,198 @@ Item {
 
             Item {
                 id: wtab3
-                Label {
-                    text: "tab 3"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
+                Pane {
+                    id: wtab3_doze
+                    anchors.fill: parent
+                    padding: 5
+                    property int sizeHeader: 14
+                    property int sizeTxt: 14
+                    property int heightAll: 60
+                    property int widthAll: 400
+
+                    background: Rectangle {
+                        anchors.fill: parent
+                        color: "White"
+                        //border.color: "transparent"
+                        //radius: 7
+                    }
+//                   Column {
+//                       spacing: 20
+//                       Row {
+//                           spacing: 30
+//                           Column {
+//                               Text {
+//                                   text: "Дата постановки на учет"
+//                                   font.pixelSize: 14
+//                               }
+//                               TextEdit {
+//                                   id: nw_date_on
+//                                   font.bold: true
+//                                   color: Material.color(Material.Teal)
+//                                   selectByMouse: true
+//                                   selectionColor: Material.color(Material.Red)
+//                                   text: "---"
+//                                   font.pixelSize: 15
+//                                   //horizontalAlignment: Text.AlignHCenter
+////                                   onTextEdited: {
+////                                       if (text.length === 1) text = text.toUpperCase()
+////                                   }
+//                               }
+//                           }
+//                           Column {
+//                               Text {
+//                                   text: "Дата снятия с учета"
+//                                   font.pixelSize: 14
+//                               }
+//                               TextEdit {
+//                                   id: nw_date_off
+//                                   font.bold: true
+//                                   color: Material.color(Material.Teal)
+//                                   selectByMouse: true
+//                                   selectionColor: Material.color(Material.Red)
+//                                   text: "---"
+//                                   font.pixelSize: 15
+//                                   //horizontalAlignment: Text.AlignHCenter
+////                                   onTextEdited: {
+////                                       if (text.length === 1) text = text.toUpperCase()
+////                                   }
+//                               }
+//                           }
+//                       }
+
+//                       Rectangle {
+//                           height: 1
+//                           width: 400
+//                           color: "LightGray"
+//                       }
+
+//                       Column {
+//                           spacing: 20
+//                           Row {
+//                               spacing: 10
+//                               Item {
+//                                   height: parent.height
+//                                   width: 180
+//                                   Text {
+//                                       text: "Доза до АЭС"
+//                                       font.pixelSize: 14
+//                                   }
+//                               }
+
+//                               TextEdit {
+//                                   id: nw_dose_before_npp
+//                                   font.bold: true
+//                                   color: Material.color(Material.Teal)
+//                                   selectByMouse: true
+//                                   selectionColor: Material.color(Material.Red)
+//                                   text: "---"
+//                                   font.pixelSize: 16
+//                                   //horizontalAlignment: Text.AlignHCenter
+////                                   onTextEdited: {
+////                                       if (text.length === 1) text = text.toUpperCase()
+////                                   }
+//                               }
+//                               Text {
+//                                   text: qsTr("мЗв")
+//                                   font.pixelSize: 14
+//                               }
+//                           }
+//                           Row {
+//                               spacing: 10
+//                               Item {
+//                                   height: parent.height
+//                                   width: 180
+//                                   Text {
+//                                       text: "Доза, полученная на ЧАЭС"
+//                                       font.pixelSize: 14
+//                                   }
+//                               }
+//                               TextEdit {
+//                                   id: nw_dose_chnpp
+//                                   font.bold: true
+//                                   color: Material.color(Material.Teal)
+//                                   selectByMouse: true
+//                                   selectionColor: Material.color(Material.Red)
+//                                   text: "---"
+//                                   font.pixelSize: 16
+//                                   //horizontalAlignment: Text.AlignHCenter
+////                                   onTextEdited: {
+////                                       if (text.length === 1) text = text.toUpperCase()
+////                                   }
+//                               }
+//                               Text {
+//                                   text: qsTr("мЗв")
+//                                   font.pixelSize: 14
+//                               }
+//                           }
+//                       }
+
+//                       Rectangle {
+//                           height: 1
+//                           width: 400
+//                           color: "LightGray"
+//                       }
+
+//                       Row {
+//                           spacing: 30
+//                           Column {
+//                               Text {
+//                                   text: "Годовой ИКУ, мЗв"
+//                                   font.pixelSize: 14
+//                               }
+//                               TextEdit {
+//                                   id: nw_iku_year
+//                                   font.bold: true
+//                                   color: Material.color(Material.Teal)
+//                                   selectByMouse: true
+//                                   selectionColor: Material.color(Material.Red)
+//                                   text: "---"
+//                                   font.pixelSize: 15
+//                                   //horizontalAlignment: Text.AlignHCenter
+////                                   onTextEdited: {
+////                                       if (text.length === 1) text = text.toUpperCase()
+////                                   }
+//                               }
+//                           }
+//                           Column {
+//                               Text {
+//                                   text: "Месячный ИКУ, мЗв"
+//                                   font.pixelSize: 14
+//                               }
+//                               TextEdit {
+//                                   id: nw_iku_month
+//                                   font.bold: true
+//                                   color: Material.color(Material.Teal)
+//                                   selectByMouse: true
+//                                   selectionColor: Material.color(Material.Red)
+//                                   text: "---"
+//                                   font.pixelSize: 15
+//                                   //horizontalAlignment: Text.AlignHCenter
+////                                   onTextEdited: {
+////                                       if (text.length === 1) text = text.toUpperCase()
+////                                   }
+//                               }
+//                           }
+//                       }
+
+//                       Rectangle {
+//                           height: 1
+//                           width: 400
+//                           color: "LightGray"
+//                       }
+
+
+
+
+//                   }
+
+
                 }
+
             }
+
             Item {
-                id: wtab41
+                id: wtab4
                 Label {
                     text: "tab 4"
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -1398,22 +1920,33 @@ Rectangle {
             id: timer_persons
             interval: 410
             repeat: false
-             onTriggered: {
-                     workersModel.query = " SELECT ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
-                                            SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
-                                            WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
-                                            ID_TLD, STAFF_TYPE,
+            onTriggered: {
+                workersModel.query = " SELECT
+                                       ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
+                                       SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
+                                       WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
+                                       ID_TLD, STAFF_TYPE,
 
-                                            PASSPORT_NUMBER,  PASSPORT_GIVE,
-                                            PASSPORT_DATE, POLICY_NUMBER, SNILS,
-                                            HOME_ADDRESS, HOME_TEL,
-                                            WORK_TEL,MOBILE_TEL, WORK_ADDRESS, E_MAIL,
+                                       PASSPORT_NUMBER, PASSPORT_GIVE,
+                                       PASSPORT_DATE, POLICY_NUMBER, SNILS,
+                                       HOME_ADDRESS, HOME_TEL,
+                                       WORK_TEL,MOBILE_TEL, WORK_ADDRESS, E_MAIL,
 
-                                            adm_status.STATUS
+                                       adm_status.STATUS,
 
-                                            FROM ext_person
-                                            LEFT JOIN adm_status ON ext_person.STATUS_CODE = adm_status.STATUS_CODE
-                                            WHERE ext_person.ID_PERSON = " + list_Persons.id_currentPerson;
+                                       ADM_ORGANIZATION.ORGANIZATION_,
+                                       ADM_DEPARTMENT_INNER.DEPARTMENT_INNER,
+                                       ADM_DEPARTMENT_OUTER.DEPARTMENT_OUTER,
+                                       ADM_ASSIGNEMENT.ASSIGNEMENT
+
+                                       FROM ext_person
+                                       LEFT JOIN adm_status           ON ext_person.STATUS_CODE         = adm_status.STATUS_CODE
+                                       LEFT JOIN ADM_ORGANIZATION     ON ext_person.ID_ORGANIZATION     = ADM_ORGANIZATION.ID
+                                       LEFT JOIN ADM_DEPARTMENT_INNER ON ext_person.ID_DEPARTMENT_INNER = ADM_DEPARTMENT_INNER.ID
+                                       LEFT JOIN ADM_DEPARTMENT_OUTER ON ext_person.ID_DEPARTMENT_OUTER = ADM_DEPARTMENT_OUTER.ID
+                                       LEFT JOIN ADM_ASSIGNEMENT      ON ext_person.ID_ASSIGNEMENT      = ADM_ASSIGNEMENT.ID
+
+                                       WHERE ext_person.ID_PERSON = " + list_Persons.id_currentPerson;
 
 
              }
@@ -1425,5 +1958,17 @@ Rectangle {
 
 }
 
+//    Button {
+//        anchors.bottom: parent.bottom
+//        anchors.horizontalCenter: parent.horizontalCenter
+
+//        text: "testVar_"
+
+//        onClicked: {
+//            console.log("testVar = ", stackview_mainwindow.testVar);
+//            console.log("model_adm_status: ", model_adm_status.get(0)["STATUS"]);
+//        }
+
+//    }
 
 }

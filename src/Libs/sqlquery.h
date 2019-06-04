@@ -52,7 +52,10 @@ public slots:
 
     /// функции Дмитрия
     void getMaxID(const QString& owner_name, const QString &tname, const QString &fname, const QVariant &val);
+    /// owner_name - имя для запроса; tname - имя таблицы; map - данные, у которых индексы - названия полей;
     bool insertRecordIntoTable(const QString& owner_name, const QString &tname, const QMap<QString, QVariant> &map);
+    /// idWhere - по какому полю отбираем; id - чему это поле равно
+    bool updateRecordIntoTable(const QString& owner_name, const QString &tname, const QMap<QString, QVariant> &map, const QString &idWhere, const int &id);
 };
 
 #endif // SQLQUERY_H

@@ -99,6 +99,7 @@ signals:
 
 
 public slots:
+    void checkConnectionDB(int iConnection); /// сгенерирует сигнал для waitDB: запустит подключение к БД с номером, казанным в параметрах
     void checkAllConnectionDB();      /// сгенерирует сигнал для waitDB: запустит подключение ко всем имеющимся БД
     void checkConnectionCurrentDB();  /// сгенерирует сигнал для WaitDB: запустит подклчюение к текущей БД
     void connectionDB(int);           /// сгенерирует сигнал для db(в потоках): запустит подключение к указанной в параметрах БД

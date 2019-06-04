@@ -27,5 +27,6 @@
         <file>icons/menu-right.svg</file>
         <file>icons/Minus.svg</file>
         <file>icons/Plus.svg</file>
+        <file>UpdateWorker.qml</file>
     </qresource>
 </RCC>

@@ -10,6 +10,13 @@ Item {
 
     //property bool isOk: true
 
+    property var model_adm_status
+    property var model_adm_organisation
+    property var model_adm_department_outer
+    property var model_adm_department_inner
+    property var model_adm_assignment
+
+
 
     signal create_confirm(var data_record)
     signal create_cancel()
@@ -46,16 +53,33 @@ Item {
         nw_eMailWork.text = ""
 
 
+
+        ///дозы
+        nw_dose_before_npp.text = "0"
+        nw_dose_chnpp.text = "0"
+        nw_iku_year.text = "0"
+        nw_iku_month.text = "0"
+        nw_Au.text = "0"
+        nw_Iu.text = "0"
+        nw_emergency_dose.currentIndex = -1
+        nw_disable_radiation.currentIndex = -1
     }
 
 
     Item {
         id: modeles
-        property var model_adm_status:           managerDB.createModel(" SELECT STATUS_CODE, STATUS  FROM ADM_STATUS ",                    "adm_status")
-        property var model_adm_organisation_org: managerDB.createModel(" SELECT ORGANIZATION_        FROM ADM_ORGANIZATION ",              "adm_organisation_org")
-        property var model_adm_organisation_dep: managerDB.createModel(" SELECT ID, DEPARTMENT       FROM ADM_ORGANIZATION WHERE ID = 1 ", "adm_organisation_dep")
-        property var model_adm_department_nnp:   managerDB.createModel(" SELECT ID, DEPARTMENT_NPP   FROM ADM_DEPARTMENT_NPP ",            "adm_department_nnp")
-        property var model_adm_assignment:       managerDB.createModel(" SELECT ID, ASSIGNEMENT      FROM ADM_ASSIGNEMENT ",               "adm_department_nnp")
+
+//        property var model_adm_status:           managerDB.createModel(" SELECT STATUS_CODE, STATUS  FROM ADM_STATUS ",                       "adm_status")
+//        property var model_adm_organisation:     managerDB.createModel(" SELECT ID, ORGANIZATION_    FROM ADM_ORGANIZATION ",                 "adm_organisation")
+//        property var model_adm_department_outer: managerDB.createModel(" SELECT ID, DEPARTMENT_OUTER FROM ADM_DEPARTMENT_OUTER WHERE ID = 0", "adm_department_outer")
+//        property var model_adm_department_inner: managerDB.createModel(" SELECT ID, DEPARTMENT_INNER FROM ADM_DEPARTMENT_INNER ",             "adm_department_inner")
+//        property var model_adm_assignment:       managerDB.createModel(" SELECT ID, ASSIGNEMENT      FROM ADM_ASSIGNEMENT ",                  "adm_department_nnp")
+
+        //property var model_adm_organisation_org: managerDB.createModel(" SELECT ORGANIZATION_        FROM ADM_ORGANIZATION ",              "adm_organisation_org")
+        //property var model_adm_organisation_dep: managerDB.createModel(" SELECT ID, DEPARTMENT       FROM ADM_ORGANIZATION WHERE ID = 1 ", "adm_organisation_dep")
+        //property var model_adm_department_nnp:   managerDB.createModel(" SELECT ID, DEPARTMENT_NPP   FROM ADM_DEPARTMENT_NPP ",            "adm_department_nnp")
+
+
     }
 
     Connections {
@@ -515,7 +539,7 @@ Item {
                                             //property var model_:
                                             property var id_status: 1 //"STATUS_CODE"
 
-                                            model: modeles.model_adm_status
+                                            model: main_AddWorker.model_adm_status //modeles.model_adm_status
                                                 //managerDB.createModel(" SELECT STATUS FROM ADM_STATUS ", "adm_status")
 //                                                  ["Работал весь учетный год",
 //                                                "Прикомандирован в отчетном году",
@@ -565,14 +589,22 @@ Item {
                                                 width: 170
                                                 flat: false
                                                 font.pixelSize: 16
-                                                model: (nw_staffType.currentIndex==0) ? ["АЭС"] : modeles.model_adm_organisation_org
-                                                textRole: (nw_staffType.currentIndex==0) ? "" : "ORGANIZATION_"
+                                                model:  main_AddWorker.model_adm_organisation //modeles.model_adm_organisation
+                                                    //["001", "002"]
+                                                    //(nw_staffType.currentIndex==0) ? ["АЭС"] : modeles.model_adm_organisation
+                                                textRole:  "ORGANIZATION_" //(nw_staffType.currentIndex==0) ? "" : "ORGANIZATION_"
+                                                displayText:  (nw_staffType.currentIndex==0) ? "АЭС" : currentText
+
                                                 //меняется содержание списка "Подразделения" в зависмисоти от выбранного названия оргнанизации
                                                 onCurrentTextChanged: {
                                                     //console.log(" >>>>> currentText = ", nw_organisation.currentText, " ", currentIndex)
-                                                    if(nw_staffType.currentIndex==1)
-                                                        modeles.model_adm_organisation_dep.setQueryDB(" SELECT ID, DEPARTMENT FROM ADM_ORGANIZATION WHERE ORGANIZATION_ = '" + currentText + "'");
-                                                        //modeles.model_adm_organisation_dep.query(" SELECT ID, DEPARTMENT FROM ADM_ORGANIZATION WHERE ORGANIZATION_ = '" + currentText + "'");
+                                                    if( nw_staffType.currentIndex == 1 )
+                                                        var id_org = main_AddWorker.model_adm_organisation.getId(currentIndex) //modeles.model_adm_organisation.getId(currentIndex)
+                                                        if( id_org >= 0 ) {
+                                                            main_AddWorker.model_adm_department_outer.setQueryDB(" SELECT ID, DEPARTMENT_OUTER FROM ADM_DEPARTMENT_OUTER WHERE ID_ORGANIZATION = '" + id_org + "'");
+                                                            //modeles.model_adm_department_outer.setQueryDB(" SELECT ID, DEPARTMENT_OUTER FROM ADM_DEPARTMENT_OUTER WHERE ID_ORGANIZATION = '" + id_org + "'");
+                                                            nw_department_outer.currentIndex = -1
+                                                        }
 
                                                 }
                                             }
@@ -642,23 +674,27 @@ Item {
                                         Row {
                                             spacing: 5                                            
                                             ComboBox {
-                                                id: nw_department_npp
+                                                id: nw_department_inner
                                                 width: 180
                                                 flat: false
                                                 font.pixelSize: 16
                                                 visible: (nw_staffType.currentIndex==0) ? true : false
-                                                model: modeles.model_adm_department_nnp  //.setQueryDB(" SELECT STATUS_CODE, ADM_STATUS FROM ADM_STATUS ")
-                                                textRole: "DEPARTMENT_NPP"
+                                                model: //["01","02"]
+                                                    main_AddWorker.model_adm_department_inner
+                                                    //modeles.model_adm_department_inner  //.setQueryDB(" SELECT STATUS_CODE, ADM_STATUS FROM ADM_STATUS ")
+                                                textRole: "DEPARTMENT_INNER"
                                             }
 
                                             ComboBox {
-                                                id: nw_department
+                                                id: nw_department_outer
                                                 width: 180
                                                 flat: false
                                                 font.pixelSize: 16
                                                 visible: (nw_staffType.currentIndex==0) ? false : true
-                                                model: modeles.model_adm_organisation_dep
-                                                textRole: "DEPARTMENT"
+                                                model: //["1", "2"]
+                                                       main_AddWorker.model_adm_department_outer
+                                                       //modeles.model_adm_department_outer
+                                                textRole: "DEPARTMENT_OUTER"
                                             }
 //                                            Button {
 //                                                id: nw_addDepartment
@@ -718,7 +754,7 @@ Item {
                                                 flat: false
                                                 font.pixelSize: 16
 
-                                                model: modeles.model_adm_assignment
+                                                model: main_AddWorker.model_adm_assignment //modeles.model_adm_assignment
                                                 textRole: "ASSIGNEMENT"
                                             }
                                         }
@@ -1083,15 +1119,15 @@ Item {
                                 }
                                 Column {
                                     //Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                                    spacing: 10
-                                    Text {
-                                        text: "Дозы_"
-                                    }
+                                    spacing: 30
+//                                    Text {
+//                                        text: "Дозы_"
+//                                    }
                                     RowLayout {
                                         spacing: 30
                                         Column {
                                             Text {
-                                                text: "Дата постановки на учет (date_on)"
+                                                text: "Дата постановки на учет"
                                                 font.pixelSize: 14
 
                                             }
@@ -1114,7 +1150,7 @@ Item {
                                         }
                                         Column {
                                             Text {
-                                                text: "Дата снятия с учета (date_off)"
+                                                text: "Дата снятия с учета"
                                                 font.pixelSize: 14
                                             }
                                             MyCalendar {
@@ -1139,67 +1175,101 @@ Item {
 
 
                                     RowLayout {
+                                        spacing: 30
                                         Column {
                                             Text {
-                                                text: "dose_before_npp_"
+                                                text: "Доза до АЭС"
                                                 font.pixelSize: 14
                                             }
-                                            TextField {
-                                                id: nw_dose_before_npp
-                                                font.pixelSize: 16
-                                                width: 150
-                                                horizontalAlignment: Text.AlignHCenter
-                                                selectByMouse: true
-                                                onTextEdited: {
-                                                    if (text.length === 1) text = text.toUpperCase()
+                                            Row {
+                                                TextField {
+                                                    id: nw_dose_before_npp
+                                                    font.pixelSize: 16
+                                                    width: 100
+                                                    horizontalAlignment: Text.AlignHCenter
+                                                    selectByMouse: true
+                                                    text: "0"
+                                                    onTextEdited: {
+                                                        if (text.length === 1) text = text.toUpperCase()
+                                                    }
+                                                }
+                                                Text {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    text: "мЗв"
+                                                    font.pixelSize: 14
+                                                }
+                                            }
+
+                                        }
+                                        Column {
+                                            Text {
+                                                text: "Доза, полученная на ЧАЭС"
+                                                font.pixelSize: 14
+                                            }
+                                            Row {
+                                                TextField {
+                                                    id: nw_dose_chnpp
+                                                    font.pixelSize: 16
+                                                    width: 100
+                                                    horizontalAlignment: Text.AlignHCenter
+                                                    selectByMouse: true
+                                                    text: "0"
+                                                    onTextEdited: {
+                                                        if (text.length === 1) text = text.toUpperCase()
+                                                    }
+                                                }
+                                                Text {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    text: "мЗв"
+                                                    font.pixelSize: 14
                                                 }
                                             }
                                         }
                                         Column {
                                             Text {
-                                                text: "dose_chnpp_"
+                                                text: "Годовой ИКУ"
                                                 font.pixelSize: 14
                                             }
-                                            TextField {
-                                                id: nw_dose_chnpp
-                                                font.pixelSize: 16
-                                                width: 150
-                                                horizontalAlignment: Text.AlignHCenter
-                                                selectByMouse: true
-                                                onTextEdited: {
-                                                    if (text.length === 1) text = text.toUpperCase()
+                                            Row {
+                                                TextField {
+                                                    id: nw_iku_year
+                                                    font.pixelSize: 16
+                                                    width: 100
+                                                    horizontalAlignment: Text.AlignHCenter
+                                                    selectByMouse: true
+                                                    text: "0"
+                                                    onTextEdited: {
+                                                        if (text.length === 1) text = text.toUpperCase()
+                                                    }
+                                                }
+                                                Text {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    text: "мЗв"
+                                                    font.pixelSize: 14
                                                 }
                                             }
                                         }
                                         Column {
                                             Text {
-                                                text: "iku_year_"
+                                                text: "Месячный ИКУ"
                                                 font.pixelSize: 14
                                             }
-                                            TextField {
-                                                id: nw_iku_year
-                                                font.pixelSize: 16
-                                                width: 150
-                                                horizontalAlignment: Text.AlignHCenter
-                                                selectByMouse: true
-                                                onTextEdited: {
-                                                    if (text.length === 1) text = text.toUpperCase()
+                                            Row {
+                                                TextField {
+                                                    id: nw_iku_month
+                                                    font.pixelSize: 16
+                                                    width: 100
+                                                    horizontalAlignment: Text.AlignHCenter
+                                                    selectByMouse: true
+                                                    text: "0"
+                                                    onTextEdited: {
+                                                        if (text.length === 1) text = text.toUpperCase()
+                                                    }
                                                 }
-                                            }
-                                        }
-                                        Column {
-                                            Text {
-                                                text: "iku_month_"
-                                                font.pixelSize: 14
-                                            }
-                                            TextField {
-                                                id: nw_iku_month
-                                                font.pixelSize: 16
-                                                width: 150
-                                                horizontalAlignment: Text.AlignHCenter
-                                                selectByMouse: true
-                                                onTextEdited: {
-                                                    if (text.length === 1) text = text.toUpperCase()
+                                                Text {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    text: "мЗв"
+                                                    font.pixelSize: 14
                                                 }
                                             }
                                         }
@@ -1207,70 +1277,88 @@ Item {
                                     }
 
                                     RowLayout {
+                                        spacing: 20
                                         Column {
                                             Text {
-                                                text: "Au_"
+                                                text: "Административный уровень облучения"
                                                 font.pixelSize: 14
                                             }
-                                            TextField {
-                                                id: nw_Au
-                                                font.pixelSize: 16
-                                                width: 150
-                                                horizontalAlignment: Text.AlignHCenter
-                                                selectByMouse: true
-                                                onTextEdited: {
-                                                    if (text.length === 1) text = text.toUpperCase()
+                                            Row {
+                                                TextField {
+                                                    id: nw_Au
+                                                    font.pixelSize: 16
+                                                    width: 100
+                                                    horizontalAlignment: Text.AlignHCenter
+                                                    selectByMouse: true
+                                                    text: "0"
+                                                    onTextEdited: {
+                                                        if (text.length === 1) text = text.toUpperCase()
+                                                    }
+                                                }
+                                                Text {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    text: "мЗв"
+                                                    font.pixelSize: 14
                                                 }
                                             }
                                         }
                                         Column {
                                             Text {
-                                                text: "Iu_"
+                                                text: "Индивидуальный уровень облучения\n(устанавливается приказом директора предприятия)"
                                                 font.pixelSize: 14
                                             }
-                                            TextField {
-                                                id: nw_Iu
-                                                font.pixelSize: 16
-                                                width: 150
-                                                horizontalAlignment: Text.AlignHCenter
-                                                selectByMouse: true
-                                                onTextEdited: {
-                                                    if (text.length === 1) text = text.toUpperCase()
+                                            Row {
+                                                TextField {
+                                                    id: nw_Iu
+                                                    font.pixelSize: 16
+                                                    width: 100
+                                                    horizontalAlignment: Text.AlignHCenter
+                                                    selectByMouse: true
+                                                    text: "0"
+                                                    onTextEdited: {
+                                                        if (text.length === 1) text = text.toUpperCase()
+                                                    }
+                                                }
+                                                Text {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    text: "мЗв"
+                                                    font.pixelSize: 14
                                                 }
                                             }
+
                                         }
+
+                                    }
+
+                                    RowLayout {
+                                        spacing: 30
                                         Column {
                                             Text {
-                                                text: "emergency_dose_"
+                                                text: "Признак получения аварийной дозы"
                                                 font.pixelSize: 14
                                             }
-                                            TextField {
+                                            ComboBox {
                                                 id: nw_emergency_dose
+                                                //width: 135
+                                                flat: false
                                                 font.pixelSize: 16
-                                                width: 150
-                                                horizontalAlignment: Text.AlignHCenter
-                                                selectByMouse: true
-                                                onTextEdited: {
-                                                    if (text.length === 1) text = text.toUpperCase()
-                                                }
+                                                model: ["Нет", "Да"]
                                             }
                                         }
                                         Column {
                                             Text {
-                                                text: "disable_radiation_"
+                                                text: "Статус запрета с ИИИ"
                                                 font.pixelSize: 14
                                             }
-                                            TextField {
+                                            ComboBox {
                                                 id: nw_disable_radiation
+                                                //width: 135
+                                                flat: false
                                                 font.pixelSize: 16
-                                                width: 150
-                                                horizontalAlignment: Text.AlignHCenter
-                                                selectByMouse: true
-                                                onTextEdited: {
-                                                    if (text.length === 1) text = text.toUpperCase()
-                                                }
+                                                model: ["Нет", "Да"]
                                             }
                                         }
+
 
                                     }
 
@@ -1332,17 +1420,21 @@ Item {
                 if (nw_personalNumber.length > 0) data_arr["PERSON_NUMBER"] = parseInt(nw_personalNumber.text,10)
                 if (nw_tld.text.length > 0)       data_arr["ID_TLD"]        = parseInt(nw_tld.text,10)
 
-                data_arr["STATUS_CODE"] = parseInt(modeles.model_adm_status.getId(nw_statusCode.currentIndex), 10) //nw_statusCode.currentIndex + 1
-                data_arr["STAFF_TYPE"]  = nw_staffType.currentText //modeles.model_adm_department_nnp.getId(nw_staffType.currentText)
+                data_arr["STATUS_CODE"] = parseInt(main_AddWorker.model_adm_status.getId(nw_statusCode.currentIndex), 10) //nw_statusCode.currentIndex + 1
+                data_arr["STAFF_TYPE"]  = nw_staffType.currentText
 
-                if(nw_staffType.currentIndex==0) {
-                    data_arr["ID_DEPARTMENT_NPP"] = parseInt(modeles.model_adm_department_nnp.getId(nw_department_npp.currentIndex),10)
-                }
-                else if(nw_staffType.currentIndex==1) {
-                    data_arr["ID_ORGANIZATION"] = parseInt( modeles.model_adm_organisation_dep.getId(nw_department.currentIndex),10 )
+                if( nw_staffType.currentIndex == 0 ) {
+                    data_arr["ID_DEPARTMENT_INNER"] = parseInt(main_AddWorker.model_adm_department_inner.getId(nw_department_inner.currentIndex),10)
+                    data_arr["ID_ORGANIZATION"]     = 0;
+                    data_arr["ID_DEPARTMENT_OUTER"] = 0;
+                }                
+                if( nw_staffType.currentIndex == 1 ) {
+                    data_arr["ID_DEPARTMENT_OUTER"] = parseInt(main_AddWorker.model_adm_department_outer.getId(nw_department_outer.currentIndex),10)
+                    data_arr["ID_DEPARTMENT_INNER"] = 0;
+                    data_arr["ID_ORGANIZATION"]     = parseInt( main_AddWorker.model_adm_organisation.getId(nw_organisation.currentIndex),10 )
                 }
 
-                data_arr["ID_ASSIGNEMENT"] = parseInt( modeles.model_adm_assignment.getId(nw_assignment.currentIndex), 10 )  //nw_assignment.currentText
+                data_arr["ID_ASSIGNEMENT"] = parseInt( main_AddWorker.model_adm_assignment.getId(nw_assignment.currentIndex), 10 )  //nw_assignment.currentText
 
 
 ////                data_arr["IKU_YEAR"] = (nw_iku_year.text.length > 0) ? parseFloat(nw_iku_year.text.replace(",",".")) : 0.0
@@ -1366,10 +1458,24 @@ Item {
 
                 if (nw_workTel.text.length > 0)     data_arr["WORK_TEL"]     = nw_workTel.text
                 if (nw_eMail.text.length > 0)       data_arr["E_MAIL"]       = nw_eMail.text
-                if (nw_workAdress.text.length > 0)  data_arr["HOME_ADDRESS"] = nw_workAdress.text
+                if (nw_workAdress.text.length > 0)  data_arr["WORK_ADDRESS"] = nw_workAdress.text
 
                 //if (nw_date_on.ready)  data_arr["DATE_ON"]  = nw_date_on.date_val
                 //if (nw_date_off.ready) data_arr["DATE_OFF"] = nw_date_off.date_val
+
+                /// дозы
+                if( nw_dose_before_npp.text.length > 0 ) data_arr["DOSE_BEFORE_NPP"] = nw_dose_before_npp.text
+                if( nw_dose_chnpp.text.length > 0 )      data_arr["DOSE_CHNPP"]      = nw_dose_chnpp.text
+                if( nw_iku_year.text.length > 0 )        data_arr["IKU_YEAR"]        = nw_iku_year.text
+                if( nw_iku_month.text.length > 0 )       data_arr["IKU_MONTH"]       = nw_iku_month.text
+
+                if( nw_Au.text.length > 0 ) data_arr["AU"] = nw_Au.text
+                if( nw_Iu.text.length > 0 ) data_arr["IU"] = nw_Iu.text
+
+                 data_arr["EMERGENCY_DOSE"]    = nw_emergency_dose.currentIndex
+                 data_arr["DISABLE_RADIATION"] = nw_disable_radiation.currentIndex
+
+
 
 
                 //console.log(">", nw_organisation.currentText)
