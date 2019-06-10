@@ -39,14 +39,18 @@ Page {
                 //ListElement { name: "Масс. выдача/ сдача дозиметр"; header: "" }
                 //ListElement { name: "Конфигурация";                 header: "" }
 
+
+                ListElement { name: "Ввод доз ТЛД";          header: "" }
+//                ListElement { name: "Ввод доз ТЛД";          header: "Ввод доз" }
+//                ListElement { name: "Ввод архивных доз ТЛД"; header: "Ввод доз" }
+
                 ListElement { name: "Типы дозиметров";    header: "Справочная информация" }
                 ListElement { name: "Дозиметры";          header: "Справочная информация" }
                 ListElement { name: "Касетницы";          header: "Справочная информация" }
                 ListElement { name: "Зоны контроля";      header: "Справочная информация" }
                 ListElement { name: "Подразделения";      header: "Справочная информация" }
 
-                ListElement { name: "Ввод доз ТЛД";          header: "Ввод доз" }
-                ListElement { name: "Ввод архивных доз ТЛД"; header: "Ввод доз" }
+
 
                 ListElement { name: "Отчеты";                       header: "" }
                 }
@@ -58,31 +62,73 @@ Page {
 //            }
 
             onCurrentName: {
-                var namePage
-                switch(name) {
-                case "Карточка работника":
-                    namePage = "WorkersCard.qml";
-                    break;
+                changePage(name)
 
-                case "Отчеты":
-                    namePage = "Report_ESKID.qml";
-                    break;
+//                var namePage
+//                switch(name) {
+//                case "Карточка работника":
+//                    namePage = "WorkersCard.qml";
+//                    break;
 
-                default:
-                    namePage = "TestPage.qml"
-                    break;
-                }
-                stackview_mainwindow.replace(namePage)
+//                case "Ввод доз ТЛД":
+//                    namePage = "InputDoseTLD.qml";
+//                    break;
+
+//                case "Отчеты":
+//                    namePage = "Report_ESKID.qml";
+//                    break;
+
+//                default:
+//                    namePage = "TestPage.qml"
+//                    break;
+//                }
+                //stackview_mainwindow.replace(namePage)
                 //if(name === "Касетница") { stackview_mainwindow.replace(".qml") }
             }
-
 
         }
 
     }
 
-    StackView {
-        id: stackview_mainwindow
+    function changePage(name) {
+        //var namePage
+        pageNotVisible();
+        switch(name) {
+        case "Карточка работника":
+            console.log("name = ", name);
+            //namePage = "WorkersCard.qml";
+            workerCard.visible = true;
+            break;
+
+        case "Ввод доз ТЛД":
+            console.log("name = ", name);
+            //namePage = "InputDoseTLD.qml";
+            inputDoseTLD.visible = true;
+            break;
+
+        case "Отчеты":
+            console.log("name = ", name);
+            //namePage = "Report_ESKID.qml";
+            report_ESKID.visible = true;
+            break;
+
+        default:
+            console.log("name = ", name);
+            //namePage = "TestPage.qml"
+            testPage.visible = true;
+            break;
+        }
+    }
+    function pageNotVisible(){
+        workerCard.visible   = false
+        inputDoseTLD.visible = false
+        report_ESKID.visible = false
+        testPage.visible     = false
+    }
+
+
+    Item {
+        id: pages_main //stackview_mainwindow
         anchors.left: frame1.right
         anchors.right: parent.right
         //anchors.rightMargin: 250
@@ -90,34 +136,93 @@ Page {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 70
 
+
         property var model_adm_status:           managerDB.createModel(" SELECT STATUS_CODE, STATUS  FROM ADM_STATUS ",                    "adm_status_update")
         property var model_adm_assignment:       managerDB.createModel(" SELECT ID, ASSIGNEMENT      FROM ADM_ASSIGNEMENT ",               "adm_department_nnp_update")
         property var model_adm_organisation:     managerDB.createModel(" SELECT ID, ORGANIZATION_    FROM ADM_ORGANIZATION ",                 "adm_organisation")
         property var model_adm_department_outer: managerDB.createModel(" SELECT ID, DEPARTMENT_OUTER FROM ADM_DEPARTMENT_OUTER WHERE ID = 0", "adm_department_outer")
         property var model_adm_department_inner: managerDB.createModel(" SELECT ID, DEPARTMENT_INNER FROM ADM_DEPARTMENT_INNER ",             "adm_department_inner")
 
-        property var testVar: "Hello"
+        property var id_currentPerson: "Сотрудник не выбран"
 
-        initialItem: "WorkersCard.qml"
 
-        replaceEnter: Transition {
-            PropertyAnimation {
-                property: "opacity"
-                from: 0
-                to:1
-                duration: 0
+        WorkersCard {
+            id: workerCard
+            anchors.fill: parent
+            visible: true
+
+            model_adm_status:           pages_main.model_adm_status
+            model_adm_assignment:       pages_main.model_adm_assignment
+            model_adm_organisation:     pages_main.model_adm_organisation
+            model_adm_department_outer: pages_main.model_adm_department_outer
+            model_adm_department_inner: pages_main.model_adm_department_inner
+
+
+            onId_currentPersonChange: {
+                pages_main.id_currentPerson = id_currentPerson
             }
         }
-        replaceExit: Transition {
-            PropertyAnimation {
-                property: "opacity"
-                from: 1
-                to:0
-                duration: 0
-            }
+        InputDoseTLD {
+            id: inputDoseTLD
+            anchors.fill: parent
+            visible: false
+            id_currentPerson: pages_main.id_currentPerson
+
         }
+        Report_ESKID {
+            id: report_ESKID
+            anchors.fill: parent
+            visible: false
+        }
+        TestPage {
+            id: testPage
+            anchors.fill: parent
+            visible: false
+        }
+
 
     }
+
+
+//    StackView {
+//        id: stackview_mainwindow
+//        anchors.left: frame1.right
+//        anchors.right: parent.right
+//        //anchors.rightMargin: 250
+//        anchors.top: parent.top
+//        anchors.bottom: parent.bottom
+//        anchors.bottomMargin: 70
+
+//        property var model_adm_status:           managerDB.createModel(" SELECT STATUS_CODE, STATUS  FROM ADM_STATUS ",                    "adm_status_update")
+//        property var model_adm_assignment:       managerDB.createModel(" SELECT ID, ASSIGNEMENT      FROM ADM_ASSIGNEMENT ",               "adm_department_nnp_update")
+//        property var model_adm_organisation:     managerDB.createModel(" SELECT ID, ORGANIZATION_    FROM ADM_ORGANIZATION ",                 "adm_organisation")
+//        property var model_adm_department_outer: managerDB.createModel(" SELECT ID, DEPARTMENT_OUTER FROM ADM_DEPARTMENT_OUTER WHERE ID = 0", "adm_department_outer")
+//        property var model_adm_department_inner: managerDB.createModel(" SELECT ID, DEPARTMENT_INNER FROM ADM_DEPARTMENT_INNER ",             "adm_department_inner")
+
+//        property var id_currentPerson
+
+//        //property var testVar: "Hello"
+
+//        initialItem: "WorkersCard.qml"
+
+//        replaceEnter: Transition {
+//            PropertyAnimation {
+//                property: "opacity"
+//                from: 0
+//                to:1
+//                duration: 0
+//            }
+//        }
+//        replaceExit: Transition {
+//            PropertyAnimation {
+//                property: "opacity"
+//                from: 1
+//                to:0
+//                duration: 0
+//            }
+//        }
+
+//    }
 
 
     /// индикаторы сосотояний подключения

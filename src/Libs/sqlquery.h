@@ -40,7 +40,7 @@ private:
 
 signals:
     void signalCheckConnectionDB();
-    void signalSendResult(const QString& owner_name, const bool& res, const QVariant& var_res);
+    void signalSendResult(const QString& owner_name, const bool& res, const QVariant& var_res, const QString& messageError);
 
 public slots:
     void setQuery(const QString &query);
@@ -50,12 +50,17 @@ public slots:
 
     void checkNameConnection(QString); //, bool
 
+    void setQueryWithName(const QString& owner_name,const QString &query); /// задает SQL запрос и имя запроса
+    /// метод не реализован
+    void checkAddRecord(const QString& owner_name,const QString &query); ///проверка существования записи в БД
+
     /// функции Дмитрия
     void getMaxID(const QString& owner_name, const QString &tname, const QString &fname, const QVariant &val);
     /// owner_name - имя для запроса; tname - имя таблицы; map - данные, у которых индексы - названия полей;
     bool insertRecordIntoTable(const QString& owner_name, const QString &tname, const QMap<QString, QVariant> &map);
     /// idWhere - по какому полю отбираем; id - чему это поле равно
     bool updateRecordIntoTable(const QString& owner_name, const QString &tname, const QMap<QString, QVariant> &map, const QString &idWhere, const int &id);
+
 };
 
 #endif // SQLQUERY_H

@@ -176,7 +176,7 @@ Item {
                 width: implicitWidth
             }
             TabButton {
-                text: "Информация по дозам"
+                text: "Информация о здоровье"  // "Информация по дозам"
                 width: implicitWidth
             }
 //            TabButton {
@@ -192,6 +192,9 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             currentIndex: tabbar_addNewPerson.currentIndex
+
+
+            /// Персональная информация
             Item {
                 Pane {
                     id: pane_pesonalInfo
@@ -914,6 +917,7 @@ Item {
                 }
             }
 
+            /// Контактная информация
             Item {
                 Pane {
                     id: pane_contactInfo
@@ -1091,6 +1095,7 @@ Item {
                 }
             }
 
+            /// Информация о здоровье
             Item {
                 Pane {
                     id: pane_doseInfo

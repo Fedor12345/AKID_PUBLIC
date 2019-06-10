@@ -97,6 +97,7 @@ void SQLquery::checkNameConnection(QString connectionName) //, bool isNewName
         }
         else
         {
+            emit signalSendResult(sender_name, false, NULL, "Соединение с БД отстутсвует");
             /// ВЫПОЛНЯТЬ В СЛУЧАЕ ЕСЛИ ИМЯ СОЕДИНЕНИЯ 0
         }
     }
@@ -114,6 +115,14 @@ void SQLquery::checkNameConnection(QString connectionName) //, bool isNewName
 
 }
 
+void SQLquery::setQueryWithName(const QString &owner_name, const QString &query)
+{
+    this->sender_name = owner_name;
+    setQuery(query);
+}
+
+
+
 void SQLquery::queryExecute(QString query)
 {
     //qDebug() << "queryExecute";
@@ -121,49 +130,64 @@ void SQLquery::queryExecute(QString query)
     QSqlQuery querySQL(db);
     QString str = "";
 
+
     if(!querySQL.exec(query))
     {
         ///Ошибка при выполнении запроса
         str = this->connectionName + ": error: " + querySQL.lastError().text();
+
         qDebug() << " -> SQLquery: queryExecute:  "  << str << query;
-        emit signalSendResult(sender_name, false, NULL);
+        emit signalSendResult(sender_name, false, NULL, querySQL.lastError().text());
     }
     else
     {
-        if(querySQL.first())//query->next();
-        {
-            bool fl = false;
-            str = querySQL.value(0).toString();
-            int i = 1;
-            while(!fl) {
-                if(querySQL.value(i) == QVariant()){
-                     fl = true;
-                     break;
+        query = query.toUpper();
+        if(query.indexOf("SELECT")) {
+            if(querySQL.first())//query->next();
+            {
+                bool fl = false;
+                str = querySQL.value(0).toString();
+                int i = 1;
+                while(!fl) {
+                    if(querySQL.value(i) == QVariant()){
+                         fl = true;
+                         break;
+                    }
+                    str = str + "; " + querySQL.value(i).toString();
+                    i++;
                 }
-                str = str + "; " + querySQL.value(i).toString();
-                i++;
-            }
 
-            //str = this->connectionName + ": " + str; // query->record();
-            qDebug() << " -> SQLquery: queryExecute:  " << this->connectionName << ": " << str << query;   //.numRowsAffected();
-            if(i>1) {
-                emit signalSendResult(sender_name, true, str); }
+                //str = this->connectionName + ": " + str; // query->record();
+                qDebug() << " -> SQLquery: queryExecute:  " << this->connectionName << ": " << str << query;   //.numRowsAffected();
+                if(i>1) {
+                    emit signalSendResult(sender_name, true, str, ""); }
+                else {
+                    emit signalSendResult(sender_name, true, querySQL.value(0), "");
+                }
+
+            }
             else {
-                emit signalSendResult(sender_name, true, querySQL.value(0));
+                str = this->connectionName + ": error: " + "Нет такой записи";
+                qDebug() << " -> SQLquery: queryExecute:  " << str << query;
+                emit signalSendResult(sender_name, true, NULL, "error: Нет такой записи");
             }
-
         }
         else {
-            str = this->connectionName + ": error: " + "Нет такой записи";
-            qDebug() << " -> SQLquery: queryExecute:  " << str << query;
-            emit signalSendResult(sender_name, true, NULL);
+            emit signalSendResult(sender_name, true, NULL, "");
         }
+
 
 
     }
 
 }
 
+
+void SQLquery::checkAddRecord(const QString &owner_name, const QString &query)
+{
+    //setQuery(query);
+    //return true;
+}
 
 
 /// функции Дмитрия

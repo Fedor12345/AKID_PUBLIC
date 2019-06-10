@@ -10,15 +10,15 @@ Page {
     id: main_
     property int space_margin: 15
 
-    property var model_adm_status:           stackview_mainwindow.model_adm_status
-    property var model_adm_assignment:       stackview_mainwindow.model_adm_assignment
-    property var model_adm_organisation:     stackview_mainwindow.model_adm_organisation
-    property var model_adm_department_outer: stackview_mainwindow.model_adm_department_outer
-    property var model_adm_department_inner: stackview_mainwindow.model_adm_department_inner
+    property var model_adm_status //:           stackview_mainwindow.model_adm_status
+    property var model_adm_assignment //:       stackview_mainwindow.model_adm_assignment
+    property var model_adm_organisation //:     stackview_mainwindow.model_adm_organisation
+    property var model_adm_department_outer //: stackview_mainwindow.model_adm_department_outer
+    property var model_adm_department_inner //: stackview_mainwindow.model_adm_department_inner
 
+    signal id_currentPersonChange(var id_currentPerson)
 
-
-    Component.onCompleted: {
+    function workerModelQuery(id_person){
         workersModel.query = " SELECT
                                ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
                                SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
@@ -44,9 +44,40 @@ Page {
                                LEFT JOIN ADM_DEPARTMENT_OUTER ON ext_person.ID_DEPARTMENT_OUTER = ADM_DEPARTMENT_OUTER.ID
                                LEFT JOIN ADM_ASSIGNEMENT      ON ext_person.ID_ASSIGNEMENT      = ADM_ASSIGNEMENT.ID
 
-                               WHERE ext_person.ID_PERSON = " + 1;
-
+                               WHERE ext_person.ID_PERSON = " + id_person;
     }
+
+
+
+//    Component.onCompleted: {
+//        workersModel.query = " SELECT
+//                               ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
+//                               SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
+//                               WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
+//                               ID_TLD, STAFF_TYPE,
+
+//                               PASSPORT_NUMBER, PASSPORT_GIVE,
+//                               PASSPORT_DATE, POLICY_NUMBER, SNILS,
+//                               HOME_ADDRESS, HOME_TEL,
+//                               WORK_TEL,MOBILE_TEL, WORK_ADDRESS, E_MAIL,
+
+//                               adm_status.STATUS,
+
+//                               ADM_ORGANIZATION.ORGANIZATION_,
+//                               ADM_DEPARTMENT_INNER.DEPARTMENT_INNER,
+//                               ADM_DEPARTMENT_OUTER.DEPARTMENT_OUTER,
+//                               ADM_ASSIGNEMENT.ASSIGNEMENT
+
+//                               FROM ext_person
+//                               LEFT JOIN adm_status           ON ext_person.STATUS_CODE         = adm_status.STATUS_CODE
+//                               LEFT JOIN ADM_ORGANIZATION     ON ext_person.ID_ORGANIZATION     = ADM_ORGANIZATION.ID
+//                               LEFT JOIN ADM_DEPARTMENT_INNER ON ext_person.ID_DEPARTMENT_INNER = ADM_DEPARTMENT_INNER.ID
+//                               LEFT JOIN ADM_DEPARTMENT_OUTER ON ext_person.ID_DEPARTMENT_OUTER = ADM_DEPARTMENT_OUTER.ID
+//                               LEFT JOIN ADM_ASSIGNEMENT      ON ext_person.ID_ASSIGNEMENT      = ADM_ASSIGNEMENT.ID
+
+//                               WHERE ext_person.ID_PERSON = " + 1;
+
+//    }
 
 
 
@@ -86,22 +117,22 @@ Page {
                     txt_tld.text        = workersModel.get(0)["ID_TLD"]
                     txt_status.text     = workersModel.get(0)["STATUS"]
 
-                    txt_iku_month.text = workersModel.get(0)["IKU_MONTH"]
-                    txt_iku_year.text  = workersModel.get(0)["IKU_YEAR"]
+//                    txt_iku_month.text = workersModel.get(0)["IKU_MONTH"]
+//                    txt_iku_year.text  = workersModel.get(0)["IKU_YEAR"]
 
-                    txt_dose_before_npp.text = workersModel.get(0)["DOSE_BEFORE_NPP"]
-                    txt_dose_chnpp.text      = workersModel.get(0)["DOSE_CHNPP"]
+//                    txt_dose_before_npp.text = workersModel.get(0)["DOSE_BEFORE_NPP"]
+//                    txt_dose_chnpp.text      = workersModel.get(0)["DOSE_CHNPP"]
 
-                    str = workersModel.get(0)["DATE_ON"]
+//                    str = workersModel.get(0)["DATE_ON"]
 //                     var options = {
 //                       year: 'numeric',
 //                       month: 'long',
 //                       day: 'numeric'
 //                     };
 //                     str.toLocaleString("ru", options)
-                    txt_date_on.text  = str.getDate() + "." + (str.getMonth()+1)  + "." + str.getFullYear()   //String(workersModel.get(0)["DATE_ON"]).substring(0,20)
-                    str = workersModel.get(0)["DATE_OFF"]
-                    txt_date_off.text = str.getDate() + "." + (str.getMonth()+1)  + "." + str.getFullYear()
+//                    txt_date_on.text  = str.getDate() + "." + (str.getMonth()+1)  + "." + str.getFullYear()   //String(workersModel.get(0)["DATE_ON"]).substring(0,20)
+//                    str = workersModel.get(0)["DATE_OFF"]
+//                    txt_date_off.text = str.getDate() + "." + (str.getMonth()+1)  + "." + str.getFullYear()
 
 
                     if( workersModel.get(0)["EMERGENCY_DOSE"] === "1" ) {
@@ -296,8 +327,6 @@ Item {
         }
 
 
-
-
         Row {
             id: row
             spacing: 10
@@ -359,32 +388,33 @@ Item {
                 if (id_rec !== -1) {
                     //popup_wait.open()
                     console.log("-!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!->");
-                    workersModel.query = " SELECT
-                                           ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
-                                           SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
-                                           WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
-                                           ID_TLD, STAFF_TYPE,
+                    main_.workerModelQuery(id_rec)
+//                    workersModel.query = " SELECT
+//                                           ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
+//                                           SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
+//                                           WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
+//                                           ID_TLD, STAFF_TYPE,
 
-                                           PASSPORT_NUMBER, PASSPORT_GIVE,
-                                           PASSPORT_DATE, POLICY_NUMBER, SNILS,
-                                           HOME_ADDRESS, HOME_TEL,
-                                           WORK_TEL,MOBILE_TEL, WORK_ADDRESS, E_MAIL,
+//                                           PASSPORT_NUMBER, PASSPORT_GIVE,
+//                                           PASSPORT_DATE, POLICY_NUMBER, SNILS,
+//                                           HOME_ADDRESS, HOME_TEL,
+//                                           WORK_TEL,MOBILE_TEL, WORK_ADDRESS, E_MAIL,
 
-                                           adm_status.STATUS,
+//                                           adm_status.STATUS,
 
-                                           ADM_ORGANIZATION.ORGANIZATION_,
-                                           ADM_DEPARTMENT_INNER.DEPARTMENT_INNER,
-                                           ADM_DEPARTMENT_OUTER.DEPARTMENT_OUTER,
-                                           ADM_ASSIGNEMENT.ASSIGNEMENT
+//                                           ADM_ORGANIZATION.ORGANIZATION_,
+//                                           ADM_DEPARTMENT_INNER.DEPARTMENT_INNER,
+//                                           ADM_DEPARTMENT_OUTER.DEPARTMENT_OUTER,
+//                                           ADM_ASSIGNEMENT.ASSIGNEMENT
 
-                                           FROM ext_person
-                                           LEFT JOIN adm_status           ON ext_person.STATUS_CODE         = adm_status.STATUS_CODE
-                                           LEFT JOIN ADM_ORGANIZATION     ON ext_person.ID_ORGANIZATION     = ADM_ORGANIZATION.ID
-                                           LEFT JOIN ADM_DEPARTMENT_INNER ON ext_person.ID_DEPARTMENT_INNER = ADM_DEPARTMENT_INNER.ID
-                                           LEFT JOIN ADM_DEPARTMENT_OUTER ON ext_person.ID_DEPARTMENT_OUTER = ADM_DEPARTMENT_OUTER.ID
-                                           LEFT JOIN ADM_ASSIGNEMENT      ON ext_person.ID_ASSIGNEMENT      = ADM_ASSIGNEMENT.ID
+//                                           FROM ext_person
+//                                           LEFT JOIN adm_status           ON ext_person.STATUS_CODE         = adm_status.STATUS_CODE
+//                                           LEFT JOIN ADM_ORGANIZATION     ON ext_person.ID_ORGANIZATION     = ADM_ORGANIZATION.ID
+//                                           LEFT JOIN ADM_DEPARTMENT_INNER ON ext_person.ID_DEPARTMENT_INNER = ADM_DEPARTMENT_INNER.ID
+//                                           LEFT JOIN ADM_DEPARTMENT_OUTER ON ext_person.ID_DEPARTMENT_OUTER = ADM_DEPARTMENT_OUTER.ID
+//                                           LEFT JOIN ADM_ASSIGNEMENT      ON ext_person.ID_ASSIGNEMENT      = ADM_ASSIGNEMENT.ID
 
-                                           WHERE ext_person.ID_PERSON = " + id_rec;
+//                                           WHERE ext_person.ID_PERSON = " + id_rec;
                 }
             }
         }
@@ -410,7 +440,7 @@ Item {
 
         background: Rectangle {
             anchors.fill: parent
-            color: "#eaeaea" //"#d6d6d6"//"White"
+            color: "White" // "#eaeaea" //"#d6d6d6"//"White"
             border.color: "#9E9E9E" //"LightGray"
             //radius: 7
         }
@@ -532,13 +562,14 @@ Item {
                 anchors.right: parent.right
                 anchors.rightMargin: 50
                 anchors.verticalCenter: parent.verticalCenter
-                width: 350
+                width: 370
                 height: 70
-                border.color: "LightGray"
+                border.color: "#9E9E9E" //"LightGray"
+                radius: 4
 
                 Item {
                     anchors.fill: parent
-                    anchors.margins: 5
+                    anchors.margins: 10
 
                     Item {
                         id: txt_emergency_dose
@@ -649,201 +680,201 @@ Item {
     }
 
 
-    Frame {
-        id: frame_dose_summary
-        anchors.left: parent.left
-        anchors.top: frame_who.bottom
-        anchors.right: parent.right
-        anchors.margins: space_margin
+//    Frame {
+//        id: frame_dose_summary
+//        anchors.left: parent.left
+//        anchors.top: frame_who.bottom
+//        anchors.right: parent.right
+//        anchors.margins: space_margin
 
-        padding: 1
-        topPadding: 10
-        bottomPadding: 10
-        leftPadding: 10
+//        padding: 1
+//        topPadding: 10
+//        bottomPadding: 10
+//        leftPadding: 10
 
-        //height: 90
-        background: Rectangle {
-            anchors.fill: parent
-            color: "White"
-            border.color: "LightGray"
-            //radius: 7
-        }
+//        //height: 90
+//        background: Rectangle {
+//            anchors.fill: parent
+//            color: "White"
+//            border.color: "LightGray"
+//            //radius: 7
+//        }
 
-        Row {
-            Column {
-                width: 100
-                spacing: 5
-                rightPadding: 10
-                Label {
-                    text: "ИКУ (в год)"
-                    //anchors.right: parent.right
-                    font.pixelSize: 14
-                    color: "black"
-                }
-                Label {
-                    text: "ИКУ (в месяц)"
-                    //anchors.right: parent.right
-                    font.pixelSize: 14
-                    color: "black"
-                }
+//        Row {
+//            Column {
+//                width: 100
+//                spacing: 5
+//                rightPadding: 10
+//                Label {
+//                    text: "ИКУ (в год)"
+//                    //anchors.right: parent.right
+//                    font.pixelSize: 14
+//                    color: "black"
+//                }
+//                Label {
+//                    text: "ИКУ (в месяц)"
+//                    //anchors.right: parent.right
+//                    font.pixelSize: 14
+//                    color: "black"
+//                }
 
-            }
-            Column {
-                width: 100
-                spacing: 5
-                Row {
-                    spacing: 5
-                    TextEdit {
-                        id: txt_iku_year
-                        font.bold: true
-                        color: Material.color(Material.LightGreen)
-                        selectByMouse: true
-                        selectionColor: Material.color(Material.Red)
-                        text: ".."
-                        font.pixelSize: 15
-                    }
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: qsTr("мЗв")
-                        font.pixelSize: 14
-                    }
-                }
+//            }
+//            Column {
+//                width: 100
+//                spacing: 5
+//                Row {
+//                    spacing: 5
+//                    TextEdit {
+//                        id: txt_iku_year
+//                        font.bold: true
+//                        color: Material.color(Material.LightGreen)
+//                        selectByMouse: true
+//                        selectionColor: Material.color(Material.Red)
+//                        text: ".."
+//                        font.pixelSize: 15
+//                    }
+//                    Text {
+//                        anchors.verticalCenter: parent.verticalCenter
+//                        text: qsTr("мЗв")
+//                        font.pixelSize: 14
+//                    }
+//                }
 
-                Row {
-                    spacing: 5
-                    TextEdit {
-                        id: txt_iku_month
-                        font.bold: true
-                        color: Material.color(Material.LightGreen)
-                        selectByMouse: true
-                        selectionColor: Material.color(Material.Red)
-                        text: ".."
-                        font.pixelSize: 15
-                    }
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: qsTr("мЗв")
-                        font.pixelSize: 14
-                    }
-                }
-            }
+//                Row {
+//                    spacing: 5
+//                    TextEdit {
+//                        id: txt_iku_month
+//                        font.bold: true
+//                        color: Material.color(Material.LightGreen)
+//                        selectByMouse: true
+//                        selectionColor: Material.color(Material.Red)
+//                        text: ".."
+//                        font.pixelSize: 15
+//                    }
+//                    Text {
+//                        anchors.verticalCenter: parent.verticalCenter
+//                        text: qsTr("мЗв")
+//                        font.pixelSize: 14
+//                    }
+//                }
+//            }
 
-            Column {
-                //anchors.bottom: parent.bottom
-                width: 180
-                spacing: 5
-                rightPadding: 10
-                Label {
-                    text: "Доза до АЭС"
-                    font.pixelSize: 14
-                    color: "black"
-                }
-                Label {
-                    text: "Доза, полученная на ЧАЭС"
-                    font.pixelSize: 14
-                    color: "black"
-                }
-            }
-            Column {
-                //anchors.bottom: parent.bottom
-                width: 100
-                spacing: 5
-                rightPadding: 10
+//            Column {
+//                //anchors.bottom: parent.bottom
+//                width: 180
+//                spacing: 5
+//                rightPadding: 10
+//                Label {
+//                    text: "Доза до АЭС"
+//                    font.pixelSize: 14
+//                    color: "black"
+//                }
+//                Label {
+//                    text: "Доза, полученная на ЧАЭС"
+//                    font.pixelSize: 14
+//                    color: "black"
+//                }
+//            }
+//            Column {
+//                //anchors.bottom: parent.bottom
+//                width: 100
+//                spacing: 5
+//                rightPadding: 10
 
-                Row {
-                    spacing: 5
-                    TextEdit {
-                        id: txt_dose_before_npp
-                        font.bold: true
-                        color: Material.color(Material.LightGreen)
-                        selectByMouse: true
-                        selectionColor: Material.color(Material.Red)
-                        text: ".."
-                        font.pixelSize: 15
-                    }
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: qsTr("мЗв")
-                        font.pixelSize: 14
-                    }
-                }
+//                Row {
+//                    spacing: 5
+//                    TextEdit {
+//                        id: txt_dose_before_npp
+//                        font.bold: true
+//                        color: Material.color(Material.LightGreen)
+//                        selectByMouse: true
+//                        selectionColor: Material.color(Material.Red)
+//                        text: ".."
+//                        font.pixelSize: 15
+//                    }
+//                    Text {
+//                        anchors.verticalCenter: parent.verticalCenter
+//                        text: qsTr("мЗв")
+//                        font.pixelSize: 14
+//                    }
+//                }
 
-                Row {
-                    spacing: 5
-                    TextEdit {
-                        id: txt_dose_chnpp
-                        font.bold: true
-                        color: Material.color(Material.LightGreen)
-                        selectByMouse: true
-                        selectionColor: Material.color(Material.Red)
-                        text: ".."
-                        font.pixelSize: 15
-                    }
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: qsTr("мЗв")
-                        font.pixelSize: 14
-                    }
-                }
-
-
-            }
+//                Row {
+//                    spacing: 5
+//                    TextEdit {
+//                        id: txt_dose_chnpp
+//                        font.bold: true
+//                        color: Material.color(Material.LightGreen)
+//                        selectByMouse: true
+//                        selectionColor: Material.color(Material.Red)
+//                        text: ".."
+//                        font.pixelSize: 15
+//                    }
+//                    Text {
+//                        anchors.verticalCenter: parent.verticalCenter
+//                        text: qsTr("мЗв")
+//                        font.pixelSize: 14
+//                    }
+//                }
 
 
-            Column {
-                //anchors.bottom: parent.bottom
-                width: 170
-                spacing: 5
-                rightPadding: 10
-                Label {
-                    text: "Дата постановки на учет"// "Дата следущего котроля на СИЧ"
-                    //anchors.right: parent.right
-                    font.pixelSize: 14
-                    color: "black"
-                }
-                Label {
-                    text: "Дата снятия с учета" //"Тип следующего контроля на СИЧ"
-                    //anchors.right: parent.right
-                    font.pixelSize: 14
-                    color: "black"
-                }
-            }
-            Column {
-                //anchors.bottom: parent.bottom
-                //width: 230
-                spacing: 5
-                rightPadding: 10
+//            }
 
-                TextEdit {
-                    id: txt_date_on
-                    font.bold: true
-                    color: Material.color(Material.LightGreen)
-                    selectByMouse: true
-                    selectionColor: Material.color(Material.Red)
-                    text: ".."
-                    font.pixelSize: 15
-                }
-                TextEdit {
-                    id: txt_date_off
-                    font.bold: true
-                    color: Material.color(Material.LightGreen)
-                    selectByMouse: true
-                    selectionColor: Material.color(Material.Red)
-                    text: ".."
-                    font.pixelSize: 15
-                }
 
-            }
-        }
+//            Column {
+//                //anchors.bottom: parent.bottom
+//                width: 170
+//                spacing: 5
+//                rightPadding: 10
+//                Label {
+//                    text: "Дата постановки на учет"// "Дата следущего котроля на СИЧ"
+//                    //anchors.right: parent.right
+//                    font.pixelSize: 14
+//                    color: "black"
+//                }
+//                Label {
+//                    text: "Дата снятия с учета" //"Тип следующего контроля на СИЧ"
+//                    //anchors.right: parent.right
+//                    font.pixelSize: 14
+//                    color: "black"
+//                }
+//            }
+//            Column {
+//                //anchors.bottom: parent.bottom
+//                //width: 230
+//                spacing: 5
+//                rightPadding: 10
 
-    }
+//                TextEdit {
+//                    id: txt_date_on
+//                    font.bold: true
+//                    color: Material.color(Material.LightGreen)
+//                    selectByMouse: true
+//                    selectionColor: Material.color(Material.Red)
+//                    text: ".."
+//                    font.pixelSize: 15
+//                }
+//                TextEdit {
+//                    id: txt_date_off
+//                    font.bold: true
+//                    color: Material.color(Material.LightGreen)
+//                    selectByMouse: true
+//                    selectionColor: Material.color(Material.Red)
+//                    text: ".."
+//                    font.pixelSize: 15
+//                }
+
+//            }
+//        }
+
+//    }
 
 
 
     Frame {
         id: frame_tabbar
         anchors.left: parent.left
-        anchors.top: frame_dose_summary.bottom
+        anchors.top: frame_who.bottom  //frame_dose_summary.bottom
         anchors.bottom: parent.bottom
         anchors.right: parent.right
         anchors.margins: space_margin
@@ -871,10 +902,14 @@ Item {
                 text: "Информация о работе"
                 width: implicitWidth
                 //enabled: false
+
+
+
             }
             TabButton {
                 text: "Персональная информация"
                 width: implicitWidth
+
             }
             TabButton {
                 text: "Информация по дозам"
@@ -1807,8 +1842,20 @@ Rectangle {
             id: list_Persons
             anchors.fill: parent
             anchors.margins: 5
-            property var id_currentPerson
-            currentIndex: 0
+            currentIndex: -1 //0
+            property var id_currentPerson: modeles.model_ext_person_list.getId(currentIndex)
+
+
+//            onCurrentIndexChanged: {
+//                stackview_mainwindow.id_currentPerson = modeles.model_ext_person_list.getId(list_Persons.currentIndex)
+//            }
+
+//            Component.onCompleted: {
+//                list_Persons.id_currentPerson = id_currentPerson //modeles.model_ext_person_list.getId(list_Persons.currentIndex)
+//                //timer_persons.restart()
+//                //timer_persons0.restart()
+//            }
+
 
             highlightFollowsCurrentItem: true
             model: modeles.model_ext_person_list
@@ -1886,11 +1933,14 @@ Rectangle {
                 }
 
                 onClicked: {
+                    //console.log(" !&!&!&!&&! ", modeles.model_ext_person_list.getId(list_Persons.currentIndex))
                     //console.log("Click: " + " " + index)
                     if (list_Persons.currentIndex !== index) {
                         list_Persons.currentIndex = index
                     }
+                    //list_Persons.id_currentPerson         = modeles.model_ext_person_list.getId(index)
                     list_Persons.id_currentPerson = modeles.model_ext_person_list.getId(index)
+                    id_currentPersonChange(list_Persons.id_currentPerson)
 
                     timer_persons.restart()
                 }
@@ -1917,36 +1967,47 @@ Rectangle {
         }
 
         Timer {
+            id: timer_persons0
+            interval: 100
+            repeat: false
+            onTriggered: {
+                list_Persons.id_currentPerson = modeles.model_ext_person_list.getId(0);
+            }
+        }
+
+
+        Timer {
             id: timer_persons
             interval: 410
             repeat: false
             onTriggered: {
-                workersModel.query = " SELECT
-                                       ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
-                                       SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
-                                       WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
-                                       ID_TLD, STAFF_TYPE,
+                main_.workerModelQuery(list_Persons.id_currentPerson)
+//                workersModel.query = " SELECT
+//                                       ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
+//                                       SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
+//                                       WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
+//                                       ID_TLD, STAFF_TYPE,
 
-                                       PASSPORT_NUMBER, PASSPORT_GIVE,
-                                       PASSPORT_DATE, POLICY_NUMBER, SNILS,
-                                       HOME_ADDRESS, HOME_TEL,
-                                       WORK_TEL,MOBILE_TEL, WORK_ADDRESS, E_MAIL,
+//                                       PASSPORT_NUMBER, PASSPORT_GIVE,
+//                                       PASSPORT_DATE, POLICY_NUMBER, SNILS,
+//                                       HOME_ADDRESS, HOME_TEL,
+//                                       WORK_TEL,MOBILE_TEL, WORK_ADDRESS, E_MAIL,
 
-                                       adm_status.STATUS,
+//                                       adm_status.STATUS,
 
-                                       ADM_ORGANIZATION.ORGANIZATION_,
-                                       ADM_DEPARTMENT_INNER.DEPARTMENT_INNER,
-                                       ADM_DEPARTMENT_OUTER.DEPARTMENT_OUTER,
-                                       ADM_ASSIGNEMENT.ASSIGNEMENT
+//                                       ADM_ORGANIZATION.ORGANIZATION_,
+//                                       ADM_DEPARTMENT_INNER.DEPARTMENT_INNER,
+//                                       ADM_DEPARTMENT_OUTER.DEPARTMENT_OUTER,
+//                                       ADM_ASSIGNEMENT.ASSIGNEMENT
 
-                                       FROM ext_person
-                                       LEFT JOIN adm_status           ON ext_person.STATUS_CODE         = adm_status.STATUS_CODE
-                                       LEFT JOIN ADM_ORGANIZATION     ON ext_person.ID_ORGANIZATION     = ADM_ORGANIZATION.ID
-                                       LEFT JOIN ADM_DEPARTMENT_INNER ON ext_person.ID_DEPARTMENT_INNER = ADM_DEPARTMENT_INNER.ID
-                                       LEFT JOIN ADM_DEPARTMENT_OUTER ON ext_person.ID_DEPARTMENT_OUTER = ADM_DEPARTMENT_OUTER.ID
-                                       LEFT JOIN ADM_ASSIGNEMENT      ON ext_person.ID_ASSIGNEMENT      = ADM_ASSIGNEMENT.ID
+//                                       FROM ext_person
+//                                       LEFT JOIN adm_status           ON ext_person.STATUS_CODE         = adm_status.STATUS_CODE
+//                                       LEFT JOIN ADM_ORGANIZATION     ON ext_person.ID_ORGANIZATION     = ADM_ORGANIZATION.ID
+//                                       LEFT JOIN ADM_DEPARTMENT_INNER ON ext_person.ID_DEPARTMENT_INNER = ADM_DEPARTMENT_INNER.ID
+//                                       LEFT JOIN ADM_DEPARTMENT_OUTER ON ext_person.ID_DEPARTMENT_OUTER = ADM_DEPARTMENT_OUTER.ID
+//                                       LEFT JOIN ADM_ASSIGNEMENT      ON ext_person.ID_ASSIGNEMENT      = ADM_ASSIGNEMENT.ID
 
-                                       WHERE ext_person.ID_PERSON = " + list_Persons.id_currentPerson;
+//                                       WHERE ext_person.ID_PERSON = " + list_Persons.id_currentPerson;
 
 
              }
@@ -1958,17 +2019,17 @@ Rectangle {
 
 }
 
-//    Button {
-//        anchors.bottom: parent.bottom
-//        anchors.horizontalCenter: parent.horizontalCenter
+    Button {
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
 
-//        text: "testVar_"
+        text: "testVar_"
 
-//        onClicked: {
-//            console.log("testVar = ", stackview_mainwindow.testVar);
-//            console.log("model_adm_status: ", model_adm_status.get(0)["STATUS"]);
-//        }
+        onClicked: {
+            console.log("testVar = ", list_Persons.id_currentPerson);
+            //console.log("model_adm_status: ", model_adm_status.get(0)["STATUS"]);
+        }
 
-//    }
+    }
 
 }
