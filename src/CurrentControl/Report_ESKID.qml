@@ -8,7 +8,7 @@ import QtQuick.Dialogs 1.2
 
 
 Page {
-    id: page
+    id: page_report_ESKID
     property int space_margin: 15
 
 //    Label {

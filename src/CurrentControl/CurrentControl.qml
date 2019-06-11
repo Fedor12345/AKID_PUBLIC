@@ -109,7 +109,8 @@ Page {
         case "Отчеты":
             console.log("name = ", name);
             //namePage = "Report_ESKID.qml";
-            report_ESKID.visible = true;
+            //report_ESKID.visible = true;
+            reports.visible = true;
             break;
 
         default:
@@ -122,7 +123,8 @@ Page {
     function pageNotVisible(){
         workerCard.visible   = false
         inputDoseTLD.visible = false
-        report_ESKID.visible = false
+        //report_ESKID.visible = false
+        reports.visible = false
         testPage.visible     = false
     }
 
@@ -145,6 +147,9 @@ Page {
 
         property var id_currentPerson: "Сотрудник не выбран"
 
+        property var model_SQLQiueries: managerDB.createModel(" SELECT ID, SQLQUERY, DESCRIPTION FROM REP_SQLQUERIES ", "rep_sqlqueries")
+
+
 
         WorkersCard {
             id: workerCard
@@ -157,7 +162,6 @@ Page {
             model_adm_department_outer: pages_main.model_adm_department_outer
             model_adm_department_inner: pages_main.model_adm_department_inner
 
-
             onId_currentPersonChange: {
                 pages_main.id_currentPerson = id_currentPerson
             }
@@ -169,11 +173,18 @@ Page {
             id_currentPerson: pages_main.id_currentPerson
 
         }
-        Report_ESKID {
-            id: report_ESKID
+        Reports {
+            id: reports
             anchors.fill: parent
             visible: false
+
+            model_SQLQiueries: pages_main.model_SQLQiueries
         }
+//        Report_ESKID {
+//            id: report_ESKID
+//            anchors.fill: parent
+//            visible: false
+//        }
         TestPage {
             id: testPage
             anchors.fill: parent
