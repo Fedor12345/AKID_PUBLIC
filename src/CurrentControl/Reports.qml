@@ -11,11 +11,29 @@ Page {
     id: page_reports
     property int space_margin: 15
     property var model_SQLQiueries
+    property var model_tableReports
 
 //    Label {
 //        anchors.centerIn: parent
 //        text:"report_ESKID_&"
 //    }
+
+
+    Connections {
+        target: model_tableReports
+        onSignalUpdateDone: { /// ( переменные от сигнала: nameModel, res, errorMessage )
+            if (res) {
+                rect_Table.createTable_fun(model_tableReports);
+            }
+            else {
+                rect_Table.createEmptyTable_fun("OOPS! Что-то не так с запросом!   " + errorMessage)
+            }
+        }
+    }
+
+
+
+
 
     Rectangle {
         id: rect_page_header
@@ -138,19 +156,67 @@ Page {
                         spacing: 40
 
                         Label {
-                            id: lebelQuerySQL
+                            id: label_QuerySQL
                             Layout.minimumWidth: 50
                             Layout.preferredWidth: 50
                             text: "SQL вопрос:"
 
                         }
                         TextField {
-                            id: txtFieldQuerySQL
+                            id: txt_FieldQuerySQL
+                            property var censure: ""
                             Layout.fillWidth: true
                             Layout.preferredWidth: 100
                             anchors.margins: 5
                             selectByMouse: true
                             wrapMode: TextEdit.WordWrap
+                            onTextEdited: {
+                               //console.log(" ENTER TEXT ");
+                               if (text.length > 0) {
+                                   text = text.toUpperCase();
+                                   if(~text.indexOf("DELETE") || ~text.indexOf("INSERT") || ~text.indexOf("UPDATE")) {
+                                       //console.log(" --!CENSURE!-- ");
+                                       color = "#ff0000";
+                                       button_addQuery.enabled = false;
+                                       censure = "Некорректный запрос: недопускается использование слов DELETE, INSERT, UPDATE"
+                                       //censure = true;
+                                   }
+                                   else {
+                                       color = "black";
+                                       button_addQuery.enabled = true;
+                                       censure = "";
+//                                       censure = false;
+                                   }
+
+                               }
+                            }
+
+//                            ToolTip.visible: censure
+//                            ToolTip.text: qsTr("Некорректный запрос")
+                            ToolTip {
+                                 id: toolTip_CENSURE
+                                 parent: txt_FieldQuerySQL //.handle
+                                 text: (txt_FieldQuerySQL.censure === "") ? qsTr("OK") : qsTr(txt_FieldQuerySQL.censure)  //qsTr("Некорректный запрос")
+                                 //anchors.centerIn: parent
+                                 y: parent.y - 35 //parent.height
+                                 //x: parent.x
+                                 font.pixelSize: 15
+
+                                 //anchors.centerIn: parent
+                                 visible: txt_FieldQuerySQL.censure
+                                 delay: 200 //задержка
+                                 contentItem: Text {
+                                     text: toolTip_CENSURE.text
+                                     font: toolTip_CENSURE.font
+                                     color: "white" // "white" //"#21be2b"
+                                 }
+
+//                                 background: Rectangle {
+//                                     border.color: "#21be2b"
+//                                 }
+                            }
+
+
                             //color: "#eeeeee"
                         }
                     }
@@ -164,12 +230,13 @@ Page {
                         spacing: 40
 
                         Label {
+                            //id: labe_description
                             Layout.minimumWidth: 50
                             Layout.preferredWidth: 50
                             text: "Описание:"
                         }
                         TextField {
-                            id: txtFieldQueryDescription
+                            id: txt_FieldQueryDescription
                             Layout.fillWidth: true
                             Layout.preferredWidth: 100
                             anchors.margins: 5
@@ -180,6 +247,7 @@ Page {
                     }
 
                     Button {
+                        id: button_addQuery
                         anchors.bottom: parent.bottom
                         anchors.left: parent.left
                         anchors.right: parent.horizontalCenter
@@ -189,6 +257,14 @@ Page {
                         //Material.foreground: Material.Orange
                         text: "Добавить запрос"
                         font.pixelSize: 14
+                        onClicked: {
+                            var SQLquery;
+                            SQLquery = " INSERT INTO REP_SQLQUERIES ( SQLQUERY , DESCRIPTION ) VALUES ( '"
+                                       + txt_FieldQuerySQL.text + "', '" + txt_FieldQueryDescription.text + "' ) ";
+                            //console.log("SQLquery ======= ", SQLquery);
+                            Query1.setQuery(SQLquery);
+                            popup_addQuery.close();
+                        }
                     }
                     Button {
                         anchors.bottom: parent.bottom
@@ -230,6 +306,7 @@ Page {
                 anchors.margins: 5
                 currentIndex: -1 //0
                 property var id_currentPerson //: page_reports.model_SQLQiueries.getId(currentIndex)
+                property var sqlQuery
 
                 highlightFollowsCurrentItem: true
 
@@ -244,7 +321,7 @@ Page {
                     ItemDelegate {
                     id: delegate_SQLqueryList
                     width: list_SQLQueries.width - 20 // 210
-                    height: txt_delegate_SQLqueryList_1.height + txt_delegate_SQLqueryList_2.height + 15 //60 //implicitContentHeight
+                    height: txt_delegate_SQLqueryList_1.height + txt_delegate_SQLqueryList_2.height + 20 //60 //implicitContentHeight
                     Row {
                         spacing: 5
                         Rectangle {
@@ -272,6 +349,7 @@ Page {
                         anchors.left: parent.left
                         anchors.leftMargin: 5
                         Column {
+                            spacing: 5
                             Text {
                                 id: txt_delegate_SQLqueryList_1
                                 text: DESCRIPTION
@@ -286,7 +364,61 @@ Page {
                             }
                             Text {
                                 id: txt_delegate_SQLqueryList_2
-                                text: SQLQUERY
+                                text: {
+                                    //list_SQLQueries.sqlQuery = SQLQUERY;
+                                    var strQuery = SQLQUERY.toUpperCase(); /// в верхний регистр
+                                    var str_all = "";
+                                    var str_0   = "";
+                                    var str_1   = "";
+
+                                    //console.log(" ####################### ")
+
+                                    /// ~n эквивалентен выражению -(n+1)
+                                    for (var i = 0; i < strQuery.length; i++) {
+                                        if ( strQuery[i] !== " "  && i < strQuery.length-1) {
+                                            str_0 = str_0 + strQuery[i];
+                                            //console.log("str_0 = ", str_0);
+                                        }
+                                        else if ( strQuery[i] === " " || i === strQuery.length-1) {
+                                            if(i === strQuery.length-1) {
+                                                str_0 = str_0 + strQuery[i];
+                                            }
+
+                                            if ( str_0 === "SELECT"   || str_0 === "FROM"     || str_0 === "WHERE"    ||
+                                                 str_0 === "AND"      || str_0 === "ORDER"    || str_0 === "BY"       ||
+                                                 str_0 === "INNER"    || str_0 === "JOIN"     || str_0 === "AS"       ||
+                                                 str_0 === "ON"       || str_0 === "DISTINCT" || str_0 === "INTO"     ||
+                                                 str_0 === "LIKE"     || str_0 === "EXISTS"   || str_0 === "JOIN"     ||
+                                                 str_0 === "IN"       || str_0 === "GROUP"    || str_0 === "BY"       ||
+                                                 str_0 === "GROUP"
+                                                    ) {
+                                                str_0 = "<b>" + str_0 + "</b>";
+                                            }
+
+                                            if ( str_0 === "*" ) {
+                                                str_0 = '<font color="#cc2e2e">' + str_0 + '</font>'
+
+                                            }
+
+
+                                            str_all = str_all + str_0 + " ";
+                                            //console.log("str_all = ", str_all);
+                                            str_0 = "";
+                                        }
+                                    }
+
+                                    //console.log(" ####################### ")
+
+//                                    if(~strQuery.indexOf("FROM")) {
+//                                        str_all = strQuery.slice(0,strQuery.indexOf("FROM"));
+//                                        str_0 = strQuery.slice(strQuery.indexOf("FROM"),strQuery.indexOf("FROM")+4)
+//                                        str_0 = "<b>" + str_0 + "</b>"  //str_0 = str_0.bold();
+//                                        str_all = str_all + str_0 + strQuery.slice(strQuery.indexOf("FROM")+4);
+//                                    }
+
+                                    return str_all;
+                                }
+
                                 font.pixelSize: 10
                                 width: delegate_SQLqueryList.width - 30
                                 color: "#777777"
@@ -355,6 +487,47 @@ Page {
 
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                width: 170
+                height: 40
+                color: "transparent"
+                border.color: "LightGray"
+                radius: 7
+                Text {
+                    id: txtButton_ShowReport
+                    anchors.centerIn: parent
+                    text: "Отобразить данные"
+                    font.pixelSize: 14
+                    color: "LightGray"
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered:  { parent.border.color = "#35dd89";   txtButton_ShowReport.color = "#35dd89" }
+                    onExited:   { parent.border.color = "LightGray"; txtButton_ShowReport.color = "LightGray" }
+                    onPressed:  { parent.color = "#f6ffed" }
+                    onReleased: { parent.color = "transparent" }
+                    onClicked:  {
+                        var SQLquery = model_SQLQiueries.getCurrentDate("SQLQUERY",list_SQLQueries.currentIndex);
+                        //console.log("SQLquery ===== ",SQLquery);
+                        if ( SQLquery === "" || SQLquery === " " ) {
+                            rect_Table.createEmptyTable_fun("<- Выберите SQL запрос из списка слева");
+                            //console.log("SQLquery ===== |",SQLquery, "|");
+                        }
+                        else {
+                            SQLquery = " " + SQLquery + " ";
+                            model_tableReports.setQueryDB(SQLquery);
+                        }
+                    }
+                }
+
+            }
+
+
+
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
                 anchors.rightMargin: 10
                 width: 170
@@ -383,6 +556,7 @@ Page {
         }
 
 
+        /// Рамка с таблицей
         Rectangle {
             id: rect_Table
             anchors.top: rect_Table_header.bottom
@@ -394,6 +568,82 @@ Page {
             color: "#EEEEEE"//"White" Material.color(Material.Grey, Material.Shade200)
             border.color: "LightGray"
             radius: 7
+
+            property var table_dynamic
+
+
+            /////////////////////////////////////////////////////////////////
+            //Следующие функции нужны для обновления данных таблицы
+            // при изменении модели
+
+            // функция создания таблицы на основе ListView из файла MyListViewTable_dynamic.qml
+            // в параметр model передается модель с данными для таблицы
+            function createTable_fun(model){
+                console.log("createTable_fun: создание таблицы...");
+                destroyObj_fun();
+                createObj_fun();
+
+                var roles = [];
+                var columnCount = model.columnCount();
+
+                for (var i=0; i<columnCount; i++){
+                    roles[i]=model.headerData(i, Qt.Horizontal, 0)
+                }
+
+                // первым необходимо определить роли, потом число столбцов, затем только модель
+                table_dynamic.roles_ = roles;
+                table_dynamic.columnCount = columnCount;
+                table_dynamic.model_ = model;
+
+            }
+
+            function createEmptyTable_fun(headerText){
+                console.log("createEmptyTable_fun: создание пустой таблицы...");
+                destroyObj_fun();
+                createObj_fun();
+
+                var roles = [headerText];
+                var columnCount = 1;
+
+//                for (var i=0; i<columnCount; i++){
+//                    roles[i]=model.headerData(i, Qt.Horizontal, 0)
+//                }
+
+                // первым необходимо определить роли, потом число столбцов, затем только модель
+                table_dynamic.roles_ = roles;
+                table_dynamic.columnCount = columnCount;
+                table_dynamic.isEmpty = true;
+                //table_dynamic.model_ = model;
+
+            }
+
+
+            // функция создания компонента таблица (на основе ListView) из файла MyListViewTable_dynamic.qml
+            function createObj_fun(){
+                console.log("createObj_fun: создание нового объекта...");
+                var component = Qt.createComponent("MyListViewTable_dynamic.qml");
+
+//                if( component.status != Component.Ready )
+//                {
+//                    if( component.status == Component.Error )
+//                        console.debug("Error:"+ component.errorString() );
+//                    return; // or maybe throw
+//                }
+//                var dlg = component.createObject( parentId, {} );
+                var object = component.createObject(rect_Table);
+                table_dynamic = object;
+
+            }
+
+            // функция удаления компонента, помещенного в свойство listView_dynamic
+            //  (удаление созданного listview)
+            function destroyObj_fun(){ //(object)
+                console.log("destroyObj_fun: удаление старого объекта(если он существует)...");
+                if(table_dynamic!=undefined){table_dynamic.destroy();}   // object.destroy();}
+            }
+            /////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////
+
 
 
         }

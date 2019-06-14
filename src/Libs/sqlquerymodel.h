@@ -63,7 +63,7 @@ private:
 
 signals:
     void signalCheckConnectionDB();
-    void signalUpdateDone(QString nameModel);
+    void signalUpdateDone(QString nameModel, const bool &res, const QString &errorMessage);
 
 public slots:    
     void updateModel();
@@ -72,6 +72,8 @@ public slots:
     int getIndexRow(const QString &columnName, const QString &value);
     QString getFirstColumn(int row);
     QVariantMap get(int row);
+    /// Вытаскивает данные из ячейки с заданным номером строки и указанным именем столбца (роли)
+    QString getCurrentDate( const QByteArray &columnName, const int &row );
 
     bool setQueryDB(QString query); //запрос к БД    
     void checkNameConnection(QString);

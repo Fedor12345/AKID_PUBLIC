@@ -102,7 +102,7 @@ Page {
                      font.pixelSize: 15
 
                      //anchors.centerIn: parent
-                     visible: "Один сотрудник" ? ma_ONE.containsMouse : false //hovered
+                     visible: ma_ONE.containsMouse //"Один сотрудник" ? ma_ONE.containsMouse : false //hovered
                      delay: 800 //задержка
                      contentItem: Text {
                          text: toolTip_ONE.text
@@ -157,7 +157,7 @@ Page {
 
                     y: rect_MANY.y + rect_MANY.height + 5
                     //anchors.centerIn: parent
-                    visible: "Подразделение" ? ma_MANY.containsMouse : false //hovered
+                    visible: ma_MANY.containsMouse // "Подразделение" ? ma_MANY.containsMouse : false //hovered
                     delay: 800 //задержка
 
                     contentItem: Text {

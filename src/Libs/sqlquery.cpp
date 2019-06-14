@@ -142,7 +142,7 @@ void SQLquery::queryExecute(QString query)
     else
     {
         query = query.toUpper();
-        if(query.indexOf("SELECT")) {
+        if(~query.indexOf("SELECT")) {
             if(querySQL.first())//query->next();
             {
                 bool fl = false;

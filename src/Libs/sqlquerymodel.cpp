@@ -54,21 +54,22 @@ QHash<int, QByteArray> SQLQueryModel::roleNames() const {
     for (int i=0; i<record().count(); i++) {
         roles.insert(Qt::UserRole + i + 1, record().fieldName(i).toUtf8());
     }
+    qDebug() << "roles = " << roles;
     return roles;
 
 //    QHash<int, QByteArray> roles;
 //    int columnsNumber = this->columnCount(); //число столбцов
-//    qDebug()<<"columnsNumber= " << columnsNumber;
+//    //qDebug()<<"columnsNumber= " << columnsNumber;
 //    int j=0;
 //    QString nameColumn;
 //    for (int i=0; i<columnsNumber; i++) {
 //        nameColumn = this->headerData(i, Qt::Horizontal, 0).toString();
 //        j = i_ID + i;
-//        qDebug()<<"nameColumn = "<< nameColumn<< " i="<<j;
+//        //qDebug()<<"nameColumn = "<< nameColumn<< " i="<<j;
 //        roles[j] = nameColumn.toUtf8();  //.toAcii();
 //    }
-
 //    return roles;
+
 }
 
 
@@ -112,6 +113,18 @@ QString SQLQueryModel::getFirstColumn(int row) {
     QString str="";
     str = this->data( this->index(row, 0), this->i_ID ).toString();  /// this->i_ID = Qt::UserRole + 1
     //qDebug() << " -> SQLmodel(" << this->nameModel << "):" << "id_ = " << id_;
+    return str;
+}
+
+/// Вытаскивает данные из ячейки с заданным номером строки и указанным именем столбца (роли)
+QString SQLQueryModel::getCurrentDate(const QByteArray &columnName, const int &row)
+{
+    QString str = "";
+    int iDate = 0;
+    iDate = roleNames().key(columnName);
+    str = this->data( this->index(row, 0), iDate).toString();
+    qDebug() << " iDate = " << iDate << " role: " << roleNames().values() << "str = " << str;
+
     return str;
 }
 
@@ -165,6 +178,7 @@ QVariantMap SQLQueryModel::get(int row)
 }
 
 
+
 bool SQLQueryModel::setQueryDB(QString query)
 {
     qDebug() << " -> SQLmodel(" << this->nameModel << "): setQuery(): query = " << query << "| thread = " << QThread::currentThreadId();
@@ -213,12 +227,22 @@ void SQLQueryModel::queryExecute()
     qDebug() << " -> SQLmodel(" << this->nameModel << "): queryExecute(): querySQL = " << this->querySQL;
     this->setQuery(this->querySQL,db);
 
+    /// Проверка на ошибки выполнения запроса
+    bool res = true;
+    QString errorMessage = "";
+    if (this->lastError().isValid()) {
+        qDebug() << this->lastError();
+        errorMessage = this->lastError().text();
+        res = false;
+    }
+
+
     //QSqlQuery querySQL(db);
     //if(querySQL.lastError().isValid()) { qDebug() << " -> SQLmodel(" << this->nameModel << "): setQuery_ERROR: " << querySQL.lastError().text(); }
     qDebug() << " -> SQLmodel(" << this->nameModel << "): roleNames : "<<this->roleNames();
     //qDebug() << " -> SQLmodel: roleNames : " << this->roleNames().values().value(0);
 
-    emit signalUpdateDone(this->nameModel);
+    emit signalUpdateDone(this->nameModel, res, errorMessage);
 }
 
 

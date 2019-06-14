@@ -52,7 +52,8 @@ Page {
 
 
 
-                ListElement { name: "Отчеты";                       header: "" }
+                ListElement { name: "SQL запросы";                       header: "Отчеты" }
+                ListElement { name: "Накопленные дозы";                  header: "Отчеты" }
                 }
 
 //            onCurrentName: {
@@ -106,10 +107,17 @@ Page {
             inputDoseTLD.visible = true;
             break;
 
-        case "Отчеты":
+        case "SQL запросы":
             console.log("name = ", name);
             //namePage = "Report_ESKID.qml";
             //report_ESKID.visible = true;
+            reports.visible = true;
+            break;
+
+        case "Накопленные дозы":
+            console.log("name = ", name);
+            //namePage = "Report_ESKID.qml";
+            report_ESKID.visible = true;
             reports.visible = true;
             break;
 
@@ -123,7 +131,7 @@ Page {
     function pageNotVisible(){
         workerCard.visible   = false
         inputDoseTLD.visible = false
-        //report_ESKID.visible = false
+        report_ESKID.visible = false
         reports.visible = false
         testPage.visible     = false
     }
@@ -147,7 +155,8 @@ Page {
 
         property var id_currentPerson: "Сотрудник не выбран"
 
-        property var model_SQLQiueries: managerDB.createModel(" SELECT ID, SQLQUERY, DESCRIPTION FROM REP_SQLQUERIES ", "rep_sqlqueries")
+        property var model_SQLQiueries:  managerDB.createModel(" SELECT ID, SQLQUERY, DESCRIPTION FROM REP_SQLQUERIES ", "rep_sqlqueries")
+        property var model_tableReports: managerDB.createModel("", "tableReports")
 
 
 
@@ -179,12 +188,14 @@ Page {
             visible: false
 
             model_SQLQiueries: pages_main.model_SQLQiueries
+            model_tableReports: pages_main.model_tableReports
+
         }
-//        Report_ESKID {
-//            id: report_ESKID
-//            anchors.fill: parent
-//            visible: false
-//        }
+        Report_ESKID {
+            id: report_ESKID
+            anchors.fill: parent
+            visible: false
+        }
         TestPage {
             id: testPage
             anchors.fill: parent
