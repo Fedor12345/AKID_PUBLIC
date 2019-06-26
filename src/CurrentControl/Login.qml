@@ -9,6 +9,8 @@ Item {
 
     property bool flg_active_state: true
 
+    Component.onCompleted: console.log("Login           completed")
+
 //    Popup {
 //        id: popup_wait
 //        modal: true

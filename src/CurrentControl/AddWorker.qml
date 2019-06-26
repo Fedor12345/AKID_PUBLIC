@@ -10,12 +10,14 @@ Item {
 
     //property bool isOk: true
 
+    Component.onCompleted: console.log("AddWorker       completed")
+
+
     property var model_adm_status
     property var model_adm_organisation
     property var model_adm_department_outer
     property var model_adm_department_inner
     property var model_adm_assignment
-
 
 
     signal create_confirm(var data_record)
@@ -551,7 +553,7 @@ Item {
 //                                                "Умер в отчетном году"]
 
                                             textRole: "STATUS"
-                                           // onCurrentIndexChanged: {id_status = model.getId(currentIndex)}
+                                           // onCurrentIndexChanged: {id_status = model.getFirstColumnInt(currentIndex)}
                                         }
                                     }
 
@@ -602,7 +604,7 @@ Item {
                                                 onCurrentTextChanged: {
                                                     //console.log(" >>>>> currentText = ", nw_organisation.currentText, " ", currentIndex)
                                                     if( nw_staffType.currentIndex == 1 )
-                                                        var id_org = main_AddWorker.model_adm_organisation.getId(currentIndex) //modeles.model_adm_organisation.getId(currentIndex)
+                                                        var id_org = main_AddWorker.model_adm_organisation.getFirstColumnInt(currentIndex) //modeles.model_adm_organisation.getFirstColumnInt(currentIndex)
                                                         if( id_org >= 0 ) {
                                                             main_AddWorker.model_adm_department_outer.setQueryDB(" SELECT ID, DEPARTMENT_OUTER FROM ADM_DEPARTMENT_OUTER WHERE ID_ORGANIZATION = '" + id_org + "'");
                                                             //modeles.model_adm_department_outer.setQueryDB(" SELECT ID, DEPARTMENT_OUTER FROM ADM_DEPARTMENT_OUTER WHERE ID_ORGANIZATION = '" + id_org + "'");
@@ -655,7 +657,7 @@ Item {
                                                                 var query = " INSERT INTO ADM_ORGANIZATION VALUES ("
                                                                                + "'" + txt_addOrganization.text + "', "
                                                                                + "'" + txt_addDepartment.text   + "') ";
-                                                                Query1.setQuery(query);
+                                                                ///Query1.setQuery(query);
                                                                 popup_addOrganisation.close();
                                                             }
                                                         }
@@ -1417,7 +1419,7 @@ Item {
 
                 //if (nw_birthday.ready) data_arr["BIRTH_DATE"] = nw_birthday.date_val
 
-                data_arr["SEX"] = nw_gender.currentIndex // (nw_gender.currentIndex==0) ? "M" : "F"
+                data_arr["SEX"] = ( nw_gender.currentIndex == 0 ) ? "M" : "F" //nw_gender.currentIndex //
                 data_arr["WEIGHT"] = parseInt(nw_weight.text, 10)
                 data_arr["HEIGHT"] = parseInt(nw_hieght.text, 10)
 
@@ -1425,21 +1427,21 @@ Item {
                 if (nw_personalNumber.length > 0) data_arr["PERSON_NUMBER"] = parseInt(nw_personalNumber.text,10)
                 if (nw_tld.text.length > 0)       data_arr["ID_TLD"]        = parseInt(nw_tld.text,10)
 
-                data_arr["STATUS_CODE"] = parseInt(main_AddWorker.model_adm_status.getId(nw_statusCode.currentIndex), 10) //nw_statusCode.currentIndex + 1
+                data_arr["STATUS_CODE"] = parseInt(main_AddWorker.model_adm_status.getFirstColumnInt(nw_statusCode.currentIndex), 10) //nw_statusCode.currentIndex + 1
                 data_arr["STAFF_TYPE"]  = nw_staffType.currentText
 
                 if( nw_staffType.currentIndex == 0 ) {
-                    data_arr["ID_DEPARTMENT_INNER"] = parseInt(main_AddWorker.model_adm_department_inner.getId(nw_department_inner.currentIndex),10)
+                    data_arr["ID_DEPARTMENT_INNER"] = parseInt(main_AddWorker.model_adm_department_inner.getFirstColumnInt(nw_department_inner.currentIndex),10)
                     data_arr["ID_ORGANIZATION"]     = 0;
                     data_arr["ID_DEPARTMENT_OUTER"] = 0;
                 }                
                 if( nw_staffType.currentIndex == 1 ) {
-                    data_arr["ID_DEPARTMENT_OUTER"] = parseInt(main_AddWorker.model_adm_department_outer.getId(nw_department_outer.currentIndex),10)
+                    data_arr["ID_DEPARTMENT_OUTER"] = parseInt(main_AddWorker.model_adm_department_outer.getFirstColumnInt(nw_department_outer.currentIndex),10)
                     data_arr["ID_DEPARTMENT_INNER"] = 0;
-                    data_arr["ID_ORGANIZATION"]     = parseInt( main_AddWorker.model_adm_organisation.getId(nw_organisation.currentIndex),10 )
+                    data_arr["ID_ORGANIZATION"]     = parseInt( main_AddWorker.model_adm_organisation.getFirstColumnInt(nw_organisation.currentIndex),10 )
                 }
 
-                data_arr["ID_ASSIGNEMENT"] = parseInt( main_AddWorker.model_adm_assignment.getId(nw_assignment.currentIndex), 10 )  //nw_assignment.currentText
+                data_arr["ID_ASSIGNEMENT"] = parseInt( main_AddWorker.model_adm_assignment.getFirstColumnInt(nw_assignment.currentIndex), 10 )  //nw_assignment.currentText
 
 
 ////                data_arr["IKU_YEAR"] = (nw_iku_year.text.length > 0) ? parseFloat(nw_iku_year.text.replace(",",".")) : 0.0

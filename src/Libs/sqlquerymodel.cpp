@@ -54,7 +54,7 @@ QHash<int, QByteArray> SQLQueryModel::roleNames() const {
     for (int i=0; i<record().count(); i++) {
         roles.insert(Qt::UserRole + i + 1, record().fieldName(i).toUtf8());
     }
-    qDebug() << "roles = " << roles;
+    //qDebug() << "roles = " << roles;
     return roles;
 
 //    QHash<int, QByteArray> roles;
@@ -74,34 +74,8 @@ QHash<int, QByteArray> SQLQueryModel::roleNames() const {
 
 
 
-/// обновление модели
-void SQLQueryModel:: updateModel() {
-    qDebug() << " -> SQLmodel: обновление модели... | thread = " << QThread::currentThreadId();
-    this->setQuery(this->query().lastQuery());
-
-    if (this->lastError().isValid()) {
-        qDebug() << " -> SQLmodel: ОШИБКА ОБНОВЛЕНИЯ МОДЕЛИ : "<<this->lastError();
-    }
-    else {
-        qDebug()<<" -> SQLmodel: обновление модели прошло удачно";
-    }
-}
-
-void SQLQueryModel:: updateModel(QString query) {
-    qDebug() << " -> SQLmodel: обновление модели... | thread = " << QThread::currentThreadId();
-//    qDebug() << query;
-    this->setQuery(query);
-    qDebug() << "lastQuery = " << this->query().lastQuery();
-    if (this->lastError().isValid()) {
-        qDebug() << " -> SQLmodel: ОШИБКА ОБНОВЛЕНИЯ МОДЕЛИ : "<<this->lastError();
-    }
-    else {
-        qDebug() << " -> SQLmodel: обновление модели прошло удачно";
-    }
-}
-
 // получить данные в первом столбце из запроса (в интежере)
-int SQLQueryModel::getId(int row) {
+int SQLQueryModel::getFirstColumnInt(int row) {
     int id_=0;
     id_ = this->data( this->index(row, 0), this->i_ID ).toInt(); /// this->i_ID = Qt::UserRole + 1
     //qDebug() << " -> SQLmodel(" << this->nameModel << "):" << "id_ = " << id_;
@@ -117,13 +91,24 @@ QString SQLQueryModel::getFirstColumn(int row) {
 }
 
 /// Вытаскивает данные из ячейки с заданным номером строки и указанным именем столбца (роли)
-QString SQLQueryModel::getCurrentDate(const QByteArray &columnName, const int &row)
+QString SQLQueryModel::getCurrentDateByName(const QByteArray &columnName, const int &row)
 {
     QString str = "";
     int iDate = 0;
     iDate = roleNames().key(columnName);
+    str = this->data( this->index(row, 0 ), iDate).toString();
+    //qDebug() << " (QByteArray) iDate = " << iDate << " role: " << roleNames().values() << "str = " << str;
+
+    return str;
+}
+
+QString SQLQueryModel::getCurrentDate(const int &columnNumber, const int &row)
+{
+    QString str = "";
+    int iDate = 0;
+    iDate = Qt::UserRole + 1 + columnNumber;
     str = this->data( this->index(row, 0), iDate).toString();
-    qDebug() << " iDate = " << iDate << " role: " << roleNames().values() << "str = " << str;
+    //qDebug() << " (int) iDate = " << iDate << " role: " << roleNames().values() << "str = " << str;
 
     return str;
 }
@@ -179,6 +164,39 @@ QVariantMap SQLQueryModel::get(int row)
 
 
 
+
+
+
+
+/// обновление модели
+void SQLQueryModel:: updateModel() {
+    qDebug() << " -> SQLmodel: обновление модели... | thread = " << QThread::currentThreadId();
+    //this->setQuery(this->query().lastQuery());
+    setQueryDB( this->querySQL );
+
+    if (this->lastError().isValid()) {
+        qDebug() << " -> SQLmodel: ОШИБКА ОБНОВЛЕНИЯ МОДЕЛИ : "<<this->lastError();
+    }
+    else {
+        qDebug()<<" -> SQLmodel: обновление модели прошло удачно";
+    }
+}
+
+//void SQLQueryModel:: updateModel(QString query) {
+//    qDebug() << " -> SQLmodel: обновление модели... | thread = " << QThread::currentThreadId();
+////    qDebug() << query;
+//    this->setQuery(query);
+//    qDebug() << "lastQuery = " << this->query().lastQuery();
+//    if (this->lastError().isValid()) {
+//        qDebug() << " -> SQLmodel: ОШИБКА ОБНОВЛЕНИЯ МОДЕЛИ : "<<this->lastError();
+//    }
+//    else {
+//        qDebug() << " -> SQLmodel: обновление модели прошло удачно";
+//    }
+//}
+
+
+
 bool SQLQueryModel::setQueryDB(QString query)
 {
     qDebug() << " -> SQLmodel(" << this->nameModel << "): setQuery(): query = " << query << "| thread = " << QThread::currentThreadId();
@@ -198,12 +216,12 @@ bool SQLQueryModel::setQueryDB(QString query)
 
 void SQLQueryModel::checkNameConnection(QString connectionName)
 {
-    qDebug() << "\n -> SQLmodel(" << this->nameModel << "): checkNameConnection() 1" << "| thread = " << QThread::currentThreadId();
+    qDebug() << "\n -> SQLmodel(" << this->nameModel << "): checkNameConnection(): got the signal connect..." << "| thread = " << QThread::currentThreadId();
 
     /// т.к. эта функция запускается от сигнала от менеджера при удачном подключении к бд,
     /// необходимо игнорировать выполнение функции, если перед ее запуском не была нажата соответсвующая кнопка
-    //if(!this->fl_setQuery) { return; }
-    qDebug() << "\n -> SQLmodel(" << this->nameModel << "): checkNameConnection() 2" << "| thread = " << QThread::currentThreadId();
+    if(!this->fl_setQuery) { return; }
+    qDebug() << "\n -> SQLmodel(" << this->nameModel << "): checkNameConnection()" << "| thread = " << QThread::currentThreadId();
 
 
     if(connectionName != "0"){  // !="local"
@@ -224,7 +242,7 @@ QString SQLQueryModel::queryStr() const
 void SQLQueryModel::queryExecute()
 {
     QSqlDatabase db = QSqlDatabase::database(this->connectionName, false);
-    qDebug() << " -> SQLmodel(" << this->nameModel << "): queryExecute(): querySQL = " << this->querySQL;
+    qDebug() << "\n -> SQLmodel(" << this->nameModel << "): queryExecute(): querySQL = \n" << this->querySQL << "\n";
     this->setQuery(this->querySQL,db);
 
     /// Проверка на ошибки выполнения запроса

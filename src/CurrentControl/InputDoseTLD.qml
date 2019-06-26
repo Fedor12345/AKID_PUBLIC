@@ -10,12 +10,17 @@ Page {
     id: main_
     property int space_margin: 15
 
-    property var id_currentPerson: 0
+    property var id_currentPerson
+    property string fio_currentPerson
+    property string sex
+
+
     property int sizeHeader: 14
     property int sizeTxt: 14
     property int heightAll: 60
     property int widthAll: 400
 
+    Component.onCompleted: console.log("InputDoseTLD    completed")
 
 //    TextField {
 //        id:txt_startInputDoseTLD
@@ -66,6 +71,7 @@ Page {
                 radius: 7
                 //border.width: 1
             }
+
 
 
             Connections {
@@ -132,6 +138,8 @@ Page {
                         data_arr["TLD_G_HP007"]     = parseInt(inputDose_tld_g_hp007.text,10)
                         data_arr["TLD_N_HP10"]      = parseInt(inputDose_tld_n_hp10.text,10)
                         data_arr["TLD_N_HP10_DOWN"] = parseInt(inputDose_tld_n_hp10_down.text,10)
+                        data_arr["TLD_N_HP3"]       = parseInt(inputDose_tld_n_hp3.text,10)
+                        data_arr["TLD_N_HP007"]     = parseInt(inputDose_tld_n_hp007.text,10)
                         data_arr["TLD_B_HP3"]       = parseInt(inputDose_tld_b_hp3.text,10)
                         data_arr["TLD_B_HP007"]     = parseInt(inputDose_tld_b_hp007.text,10)
                         data_arr["FON_DOSE"]        = parseInt(inputDose_fon_dose.text,10)
@@ -173,7 +181,18 @@ Page {
                 }
                 ToolSeparator {}
                 ToolButton {
-                    text: "Обновить"
+                    text: "Обновить (?)"
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.pixelSize: 14
+                    flat: true
+                    enabled: false
+                    onClicked: {
+                        popup_clearFilds.open()
+                    }
+                }
+                ToolSeparator {}
+                ToolButton {
+                    text: "Удалить (?)"
                     anchors.verticalCenter: parent.verticalCenter
                     font.pixelSize: 14
                     flat: true
@@ -305,6 +324,8 @@ Page {
                                 inputDose_tld_g_hp007.text      = 0
                                 inputDose_tld_n_hp10.text       = 0
                                 inputDose_tld_n_hp10_down.text  = 0
+                                inputDose_tld_n_hp3.text        = 0
+                                inputDose_tld_n_hp007.text      = 0
                                 inputDose_tld_b_hp3.text        = 0
                                 inputDose_tld_b_hp007.text      = 0
                                 calendar_date_from.ready  = false
@@ -359,6 +380,18 @@ Page {
 
                 Row {
                     spacing: 10
+                    TextEdit {
+                        id: inputDose_FIO_person
+                        font.pixelSize: 20 //main_.sizeTxt
+                        font.bold: true
+                        font.capitalization: Font.AllUppercase // в верхний регистр
+                        color: Material.color(Material.Teal)
+                        selectByMouse: true
+                        selectionColor: Material.color(Material.Red)
+                        text: main_.fio_currentPerson //.toUpperCase()
+
+                    }
+
                     Label {
                         text: qsTr("id_person:")
                         font.pixelSize: main_.sizeTxt
@@ -372,6 +405,12 @@ Page {
                         selectionColor: Material.color(Material.Red)
                         text: main_.id_currentPerson
                     }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: "LightGray"
                 }
 
                 Row {
@@ -527,8 +566,11 @@ Page {
                             Label {
                                 //leftPadding: 20
                                 width: 220
-                                text: qsTr("Низ живота женщин (до 45 лет)")
+                                text: qsTr("Низ живота женщин_ (до 45 лет)")
                                 font.pixelSize: main_.sizeTxt
+
+                                enabled: (main_.sex === "M") ? false : true
+                                opacity: (main_.sex === "M") ? 0.4 : 1
                             }
                                 TextField {
                                     id: inputDose_tld_g_hp10_down
@@ -538,12 +580,16 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    text: "0"
+                                    text: (main_.sex === "M") ? "" : "0"
+
+                                    enabled: (main_.sex === "M") ? false : true
                                 }
                                 Label {
                                     //leftPadding: 5
                                     text: qsTr("мЗв")
                                     font.pixelSize: main_.sizeTxt
+                                    enabled: (main_.sex === "M") ? false : true
+                                    opacity: (main_.sex === "M") ? 0.4 : 1
                                 }
                         }
 
@@ -562,7 +608,7 @@ Page {
                             spacing: 10
                             Label {
                                 width: 150 //220
-                                text: qsTr("Xрусталик глаза")
+                                text: qsTr("Хрусталик глаза")
                                 font.pixelSize: main_.sizeTxt
                             }
                                 TextField {
@@ -636,59 +682,180 @@ Page {
 
                 Row {
                     Layout.topMargin: 5
-                    spacing: 10
-                    Label {
-                        width: 220
-                        text: qsTr("ИЭД нейтронного излучения")
-                        font.pixelSize: main_.sizeTxt
-                    }
-                    TextField {
-                        id: inputDose_tld_n_hp10
-                        font.pixelSize: main_.sizeTxt
-                        font.bold: true
-                        color: Material.color(Material.Teal)
-                        selectByMouse: true
-                        selectionColor: Material.color(Material.Red)
-                        horizontalAlignment: Text.AlignHCenter
-                        text: "0"
+                    spacing: 50
+                    Column {
+                        spacing: 10
+                        Row {
+                            //Layout.topMargin: 5
+                            spacing: 10
+                            Label {
+                                width: 220
+                                text: qsTr("ИЭД нейтронного излучения")
+                                font.pixelSize: main_.sizeTxt
+                            }
+                                TextField {
+                                    id: inputDose_tld_n_hp10
+                                    font.pixelSize: main_.sizeTxt
+                                    font.bold: true
+                                    color: Material.color(Material.Teal)
+                                    selectByMouse: true
+                                    selectionColor: Material.color(Material.Red)
+                                    horizontalAlignment: Text.AlignHCenter
+                                    text: "0"
+                                }
+
+                                Label {
+                                    //leftPadding: 5
+                                    text: qsTr("мЗв")
+                                    font.pixelSize: main_.sizeTxt
+                                }
+                        }
+
+                        Row {
+                            spacing: 10
+                            Label {
+                                //leftPadding: 20
+                                width: 220
+                                text: qsTr("Низ живота женщин (до 45 лет)")
+                                font.pixelSize: main_.sizeTxt
+
+                                //enabled: (main_.sex) ? false : true
+                            }
+                                TextField {
+                                    id: inputDose_tld_n_hp10_down
+                                    font.pixelSize: main_.sizeTxt
+                                    font.bold: true
+                                    color: Material.color(Material.Teal)
+                                    selectByMouse: true
+                                    selectionColor: Material.color(Material.Red)
+                                    horizontalAlignment: Text.AlignHCenter
+                                    text: "0"
+
+                                    //enabled: (main_.sex) ? false : true
+                                }
+                                Label {
+                                    //leftPadding: 5
+                                    text: qsTr("мЗв")
+                                    font.pixelSize: main_.sizeTxt
+                                }
+                        }
 
                     }
-                    Label {
-                        //leftPadding: 5
-                        text: qsTr("мЗв")
-                        font.pixelSize: main_.sizeTxt
+
+                    Rectangle {
+                        width: 1
+                        height: parent.height
+                        color: "LightGray"
                     }
 
-//                    Rectangle {
-//                        width: 1
-//                        height: parent.height
-//                        color: "LightGray"
+                    Column {
+                        spacing: 10
+                        Row {
+                            Layout.topMargin: 5
+                            spacing: 10
+                            Label {
+                                width: 150 //220
+                                text: qsTr("Хрусталик глаза")
+                                font.pixelSize: main_.sizeTxt
+                            }
+                                TextField {
+                                    id: inputDose_tld_n_hp3
+                                    font.pixelSize: main_.sizeTxt
+                                    font.bold: true
+                                    color: Material.color(Material.Teal)
+                                    selectByMouse: true
+                                    selectionColor: Material.color(Material.Red)
+                                    horizontalAlignment: Text.AlignHCenter
+                                    text: "0"
+
+                                }
+                                Label {
+                                    //leftPadding: 5
+                                    text: qsTr("мЗв")
+                                    font.pixelSize: main_.sizeTxt
+                                }
+                        }
+
+                        Row {
+                            spacing: 10
+                            Label {
+                                //leftPadding: 20
+                                width: 150 //220
+                                text: qsTr("Кожа, кисти и стопы")
+                                font.pixelSize: main_.sizeTxt
+                            }
+                                TextField {
+                                    id: inputDose_tld_n_hp007
+                                    font.pixelSize: main_.sizeTxt
+                                    font.bold: true
+                                    color: Material.color(Material.Teal)
+                                    selectByMouse: true
+                                    selectionColor: Material.color(Material.Red)
+                                    horizontalAlignment: Text.AlignHCenter
+                                    text: "0"
+                                }
+                                Label {
+                                    //leftPadding: 5
+                                    text: qsTr("мЗв")
+                                    font.pixelSize: main_.sizeTxt
+                                }
+                        }
+
+                    }
+
+
+//                    Label {
+//                        width: 220
+//                        text: qsTr("ИЭД нейтронного излучения")
+//                        font.pixelSize: main_.sizeTxt
+//                    }
+//                    TextField {
+//                        id: inputDose_tld_n_hp10
+//                        font.pixelSize: main_.sizeTxt
+//                        font.bold: true
+//                        color: Material.color(Material.Teal)
+//                        selectByMouse: true
+//                        selectionColor: Material.color(Material.Red)
+//                        horizontalAlignment: Text.AlignHCenter
+//                        text: "0"
+
+//                    }
+//                    Label {
+//                        //leftPadding: 5
+//                        text: qsTr("мЗв")
+//                        font.pixelSize: main_.sizeTxt
 //                    }
 
+////                    Rectangle {
+////                        width: 1
+////                        height: parent.height
+////                        color: "LightGray"
+////                    }
 
-                    Label {
-                        leftPadding: 91
-                        width: 240
-                        text: qsTr("Низ живота женщин\n(до 45 лет лет)")
-                        font.pixelSize: main_.sizeTxt
-                        //background: Rectangle {color: "red"}
-                    }
-                    TextField {
-                        id: inputDose_tld_n_hp10_down
-                        font.pixelSize: main_.sizeTxt
-                        font.bold: true
-                        color: Material.color(Material.Teal)
-                        selectByMouse: true
-                        selectionColor: Material.color(Material.Red)
-                        horizontalAlignment: Text.AlignHCenter
-                        text: "0"
 
-                    }
-                    Label {
-                        //leftPadding: 5
-                        text: qsTr("мЗв")
-                        font.pixelSize: main_.sizeTxt
-                    }
+//                    Label {
+//                        leftPadding: 91
+//                        width: 240
+//                        text: qsTr("Низ живота женщин\n(до 45 лет лет)")
+//                        font.pixelSize: main_.sizeTxt
+//                        //background: Rectangle {color: "red"}
+//                    }
+//                    TextField {
+//                        id: inputDose_tld_n_hp10_down
+//                        font.pixelSize: main_.sizeTxt
+//                        font.bold: true
+//                        color: Material.color(Material.Teal)
+//                        selectByMouse: true
+//                        selectionColor: Material.color(Material.Red)
+//                        horizontalAlignment: Text.AlignHCenter
+//                        text: "0"
+
+//                    }
+//                    Label {
+//                        //leftPadding: 5
+//                        text: qsTr("мЗв")
+//                        font.pixelSize: main_.sizeTxt
+//                    }
 
 
                 }
@@ -696,6 +863,7 @@ Page {
 
                 ///////////////////////////////////////////////
                 RowLayout {
+                    id: header_Beta
                     Layout.topMargin: 10
                     spacing: 5
                     Rectangle {
@@ -774,10 +942,35 @@ Page {
 
 
 
+
+
             }
+
+
 
         }
 
+
+        Rectangle {
+            id: rect_info2
+            //anchors.bottom: parent.bottom
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.topMargin: 350
+            //anchors.bottomMargin: 5
+            anchors.rightMargin: 70
+            width: 300
+            height: 50
+
+            color: "transparent"
+            border.color: "LightGray"
+            Label {
+                anchors.centerIn: parent
+                font.pixelSize: 15
+                text: qsTr("ИЭД - индивидуальный эквивалент дозы")
+                opacity: 0.5
+            }
+        }
 
     }
 

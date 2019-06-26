@@ -545,7 +545,7 @@ Item {
 //                                                "Умер в отчетном году"]
 
                                             textRole: "STATUS"
-                                           // onCurrentIndexChanged: {id_status = model.getId(currentIndex)}
+                                           // onCurrentIndexChanged: {id_status = model.getFirstColumnInt(currentIndex)}
                                         }
                                     }
 
@@ -593,7 +593,7 @@ Item {
                                                 onCurrentTextChanged: {
                                                     //console.log(" >>>>> currentText = ", nw_organisation.currentText, " ", currentIndex)
                                                     if(nw_staffType.currentIndex==1)
-                                                        var id_org = main_UpdateWorker.model_adm_organisation.getId(currentIndex)
+                                                        var id_org = main_UpdateWorker.model_adm_organisation.getFirstColumnInt(currentIndex)
                                                         main_UpdateWorker.model_adm_department_outer.setQueryDB(" SELECT ID, DEPARTMENT_OUTER FROM ADM_DEPARTMENT_OUTER WHERE ID_ORGANIZATION = '" + id_org + "'");
                                                         nw_department_outer.currentIndex = -1
                                                         //main_UpdateWorker.model_adm_organisation_dep.setQueryDB(" SELECT ID, DEPARTMENT FROM ADM_ORGANIZATION WHERE ORGANIZATION_ = '" + currentText + "'");
@@ -1356,16 +1356,16 @@ Item {
                 if (nw_personalNumber.length > 0) data_arr["PERSON_NUMBER"] = parseInt( nw_personalNumber.text, 10 )
                 if (nw_tld.text.length > 0)       data_arr["ID_TLD"]        = parseInt( nw_tld.text, 10 )
 
-                data_arr["STATUS_CODE"] = parseInt( main_UpdateWorker.model_adm_status.getId(nw_statusCode.currentIndex), 10 ) //nw_statusCode.currentIndex + 1                data_arr["STAFF_TYPE"]  = nw_staffType.currentText //main_UpdateWorker.model_adm_department_nnp.getId(nw_staffType.currentText)
+                data_arr["STATUS_CODE"] = parseInt( main_UpdateWorker.model_adm_status.getFirstColumnInt(nw_statusCode.currentIndex), 10 ) //nw_statusCode.currentIndex + 1                data_arr["STAFF_TYPE"]  = nw_staffType.currentText //main_UpdateWorker.model_adm_department_nnp.getFirstColumnInt(nw_staffType.currentText)
 
                 if(nw_staffType.currentIndex==0) {
-                    data_arr["ID_DEPARTMENT_NPP"] = parseInt( main_UpdateWorker.model_adm_department_nnp.getId(nw_department_npp.currentIndex), 10 )
+                    data_arr["ID_DEPARTMENT_NPP"] = parseInt( main_UpdateWorker.model_adm_department_nnp.getFirstColumnInt(nw_department_npp.currentIndex), 10 )
                 }
                 else if(nw_staffType.currentIndex==1) {
-                    data_arr["ID_ORGANIZATION"] = parseInt( main_UpdateWorker.model_adm_organisation_dep.getId(nw_department.currentIndex), 10 )
+                    data_arr["ID_ORGANIZATION"] = parseInt( main_UpdateWorker.model_adm_organisation_dep.getFirstColumnInt(nw_department.currentIndex), 10 )
                 }
 
-                data_arr["ID_ASSIGNEMENT"] = parseInt( main_UpdateWorker.model_adm_assignment.getId(nw_assignment.currentIndex), 10 )  //nw_assignment.currentText
+                data_arr["ID_ASSIGNEMENT"] = parseInt( main_UpdateWorker.model_adm_assignment.getFirstColumnInt(nw_assignment.currentIndex), 10 )  //nw_assignment.currentText
 
 
 ////                data_arr["IKU_YEAR"] = (nw_iku_year.text.length > 0) ? parseFloat(nw_iku_year.text.replace(",",".")) : 0.0

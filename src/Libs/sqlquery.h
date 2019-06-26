@@ -19,8 +19,9 @@ public:
 
 private:
     QString query;
-    QStringList queries;
+    QStringList queries; /// список SQL запросов, поступивших во время ожидания ответа от системы подключения к БД
     int numberQuery = 0;
+    int iQuery = 0;
     QStringList queriesGroup; /// список SQL запросов (в случае групповых запросов)
     QString connectionName;
     bool isNewName = false;
@@ -28,12 +29,14 @@ private:
     int iQueryGroup = 0;  /// номер запроса в массиве queriesGroup на выполнение
     bool fl_setQuery; /// станавливается в true, если запрос был послан от интерфейса,
                       /// что бы блокировать обработку сигнала от менеджера при каждом новом подключении к бд
-    QString sender_name = ""; /// ? - Дмитрий
+    QString sender_name = ""; /// имя отправителя запроса (необходимо для идентификации, когда QML принимает сигнал от запроса с результатом
+    QStringList sender_names; /// список имен отправителей
 
 private:
     void queryExecute(QString query); /// получает ссылку на текущеее(проверенное) подключение
                          /// и выполняет запрос с обработкой ошибок
 
+    QMap<QString, QVariant> result_data;    //набор данных
     //QMutex mutex;
     //QWaitCondition waitThreads;
 
@@ -41,16 +44,16 @@ private:
 signals:
     void signalCheckConnectionDB();
     void signalSendResult(const QString& owner_name, const bool& res, const QVariant& var_res, const QString& messageError);
+    //void signalSendResult(const QString& owner_name, const bool& res, const QMap<QString, QVariant>& var_res, const QString& messageError);
 
 public slots:
     void setQuery(const QString &query);
     void setQuery(const QString &query, const bool &isGroup);
-    void setQueryAndName(const QString &query, const QString& owner_name);
+    void setQueryAndName(const QString &query, const QString &owner_name);
+    //void setQueryWithName(const QString& owner_name,const QString &query); /// задает SQL запрос и имя запроса
     void clearqueriesGroup();
 
     void checkNameConnection(QString); //, bool
-
-    void setQueryWithName(const QString& owner_name,const QString &query); /// задает SQL запрос и имя запроса
     /// метод не реализован
     void checkAddRecord(const QString& owner_name,const QString &query); ///проверка существования записи в БД
 

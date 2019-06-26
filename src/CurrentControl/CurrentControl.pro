@@ -34,7 +34,9 @@ SOURCES += \
     ../Libs/managerconnectdb.cpp \
     ../Libs/sqlquery.cpp \
     ../Libs/sqlquerymodel.cpp \
-    ../Libs/waitdb_thread.cpp
+    ../Libs/waitdb_thread.cpp \
+    ../Libs/cursorshapearea.cpp \
+    createreport.cpp
 
 RESOURCES += qml.qrc
 
@@ -55,6 +57,9 @@ HEADERS += \
     ../Libs/managerconnectdb.h \
     ../Libs/sqlquery.h \
     ../Libs/sqlquerymodel.h \
-    ../Libs/waitdb_thread.h
+    ../Libs/waitdb_thread.h \
+    ../Libs/cursorshapearea.h \
+    createreport.h
+
 
 DISTFILES +=

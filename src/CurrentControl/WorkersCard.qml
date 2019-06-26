@@ -16,7 +16,7 @@ Page {
     property var model_adm_department_outer //: stackview_mainwindow.model_adm_department_outer
     property var model_adm_department_inner //: stackview_mainwindow.model_adm_department_inner
 
-    signal id_currentPersonChange(var id_currentPerson)
+    signal currentPersonChange(var id_currentPerson, var fio_currentPerson, var sex, var staff_type, var age)
 
     function workerModelQuery(id_person){
         workersModel.query = " SELECT
@@ -91,6 +91,18 @@ Page {
         property var model_ext_person_list: managerDB.createModel(" SELECT ID_PERSON, W_NAME, W_SURNAME, W_PATRONYMIC, PERSON_NUMBER, ID_TLD FROM EXT_PERSON ORDER BY W_SURNAME", "ext_person" )
     }
 
+    Connections {
+        target: Query1
+        onSignalSendResult: {
+            if (owner_name === "WorkersCard") {
+                if (res) {
+                    modeles.model_ext_person_list.updateModel();
+                }
+            }
+
+        }
+    }
+
 
     Connections {
         target: workersModel
@@ -155,7 +167,7 @@ Page {
 
 
                     //3
-                    txt_gender.text   = (workersModel.get(0)["SEX"] == 0) ? "М" : "Ж"
+                    txt_gender.text   = (workersModel.get(0)["SEX"] === "M") ? "М" : "Ж"
                     str = workersModel.get(0)["BIRTH_DATE"]
                     txt_birthday.text = str.getDate() + "." + (str.getMonth()+1) + "." + str.getFullYear()
                     txt_weight.text   = workersModel.get(0)["WEIGHT"]
@@ -179,6 +191,13 @@ Page {
                     txt_work_phone.text = workersModel.get(0)["WORK_TEL"]
                     txt_work_address.text = workersModel.get(0)["WORK_ADDRESS"]
                     txt_work_email.text = workersModel.get(0)["E_MAIL"]
+
+
+                    /// генерируется сигнал о изменении выбранного сотрудника из спсика
+                    var sex = (txt_gender.text === "М") ? "M" : "F"  /// txt_gender.text === "М", тут М на кириллице
+                    var age = 25; /// ДОДЕЛАТЬ ОПРЕДЕЛЕНИЕ ВОЗРАСТА ВЫБРАННОГО СОТРУДНИКА
+                    currentPersonChange(list_Persons.id_currentPerson, list_Persons.fio_currentPerson, sex, txt_staff_type.text, age)
+
 
                 }
 
@@ -1843,15 +1862,22 @@ Rectangle {
             anchors.fill: parent
             anchors.margins: 5
             currentIndex: -1 //0
-            property var id_currentPerson: modeles.model_ext_person_list.getId(currentIndex)
-
+            property string id_currentPerson: modeles.model_ext_person_list.getFirstColumnInt(currentIndex)
+            property string fio_currentPerson:
+            {
+                var str;
+                str = modeles.model_ext_person_list.getCurrentDate(1,currentIndex) + " " +
+                      modeles.model_ext_person_list.getCurrentDate(2,currentIndex) + " " +
+                      modeles.model_ext_person_list.getCurrentDate(3,currentIndex);
+                return str;
+            }
 
 //            onCurrentIndexChanged: {
-//                stackview_mainwindow.id_currentPerson = modeles.model_ext_person_list.getId(list_Persons.currentIndex)
+//                stackview_mainwindow.id_currentPerson = modeles.model_ext_person_list.getFirstColumnInt(list_Persons.currentIndex)
 //            }
 
 //            Component.onCompleted: {
-//                list_Persons.id_currentPerson = id_currentPerson //modeles.model_ext_person_list.getId(list_Persons.currentIndex)
+//                list_Persons.id_currentPerson = id_currentPerson //modeles.model_ext_person_list.getFirstColumnInt(list_Persons.currentIndex)
 //                //timer_persons.restart()
 //                //timer_persons0.restart()
 //            }
@@ -1933,15 +1959,10 @@ Rectangle {
                 }
 
                 onClicked: {
-                    //console.log(" !&!&!&!&&! ", modeles.model_ext_person_list.getId(list_Persons.currentIndex))
-                    //console.log("Click: " + " " + index)
                     if (list_Persons.currentIndex !== index) {
                         list_Persons.currentIndex = index
                     }
-                    //list_Persons.id_currentPerson         = modeles.model_ext_person_list.getId(index)
-                    list_Persons.id_currentPerson = modeles.model_ext_person_list.getId(index)
-                    id_currentPersonChange(list_Persons.id_currentPerson)
-
+                    list_Persons.id_currentPerson = modeles.model_ext_person_list.getFirstColumnInt(index)
                     timer_persons.restart()
                 }
             }
@@ -1971,7 +1992,7 @@ Rectangle {
             interval: 100
             repeat: false
             onTriggered: {
-                list_Persons.id_currentPerson = modeles.model_ext_person_list.getId(0);
+                list_Persons.id_currentPerson = modeles.model_ext_person_list.getFirstColumnInt(0);
             }
         }
 
@@ -2019,17 +2040,5 @@ Rectangle {
 
 }
 
-    Button {
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-
-        text: "testVar_"
-
-        onClicked: {
-            console.log("testVar = ", list_Persons.id_currentPerson);
-            //console.log("model_adm_status: ", model_adm_status.get(0)["STATUS"]);
-        }
-
-    }
 
 }

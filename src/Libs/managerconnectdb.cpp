@@ -215,7 +215,7 @@ void ManagerConnectDB::checkConnectionCurrentDB()
  /// iDB - номер ДБ
 void ManagerConnectDB::connectionDB(int iDB)
 {
-    qDebug()<<" @ Manager:: connectionDB: " << iDB << " | thread = " << QThread::currentThreadId();
+    qDebug()<<" @ Manager: connectionDB: check " << iDB << " | thread = " << QThread::currentThreadId();
 
     //QString databaseName   = this->databaseName[iDB];
     QString userName       = this->userName[iDB];
@@ -333,7 +333,7 @@ void ManagerConnectDB::connectionIsEmpty() {
 
 /// задается пароль и логин
 void ManagerConnectDB::setLoginPwd(const QString &login_str, const QString &pwd_str) {
-    qDebug() << " @ Manager: set login/password";
+    qDebug() << "\n @ Manager: set login/password";
     this->userName[0] = login_str; //"user_replication_1";
     this->userName[1] = login_str; // "user_replication_1";
     this->password[0] = pwd_str; // "alpha1";

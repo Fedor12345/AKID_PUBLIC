@@ -43,13 +43,31 @@ Rectangle {
 
                       property bool shown: false
 
+//                      Rectangle {
+//                          anchors.left: parent.left
+//                          anchors.leftMargin: (header === "") ? 20 : 35
+//                          width: 30
+//                          height: 30
+//                          color: "transparent" //"aliceblue"//"whitesmoke"
+//                          Image {
+//                              anchors.centerIn: parent
+//                              opacity: 0.2
+//                              sourceSize.height: parent.height //100
+//                              sourceSize.width: parent.width //100
+//                              anchors.verticalCenter: parent.verticalCenter
+//                              anchors.horizontalCenter: parent.horizontalCenter
+//                              source: image //"icons/face.svg"
+
+//                          }
+//                      }
+
                       Text {
                           id: mainText;
                           anchors.verticalCenter: parent.verticalCenter
                           anchors.left: parent.left
-                          anchors.leftMargin: (header==="") ? 35 : 50
+                          anchors.leftMargin: (header === "") ? 35 : 50
                           text: name;
-                          font.bold:  (header==="") ? true : false
+                          font.bold:  (header === "") ? true : false
                           font.pixelSize: 18
                           color: "white"
                       }
@@ -120,6 +138,24 @@ Rectangle {
                                       visible: (section==="") ? false : true
                                   }
                               }
+
+//                              Rectangle {
+//                                  anchors.left: parent.left
+//                                  anchors.leftMargin: 35
+//                                  width: 30
+//                                  height: 30
+//                                  color: "transparent" //"aliceblue"//"whitesmoke"
+//                                  Image {
+//                                      anchors.centerIn: parent
+//                                      opacity: 0.2
+//                                      sourceSize.height: parent.height //100
+//                                      sourceSize.width: parent.width //100
+//                                      anchors.verticalCenter: parent.verticalCenter
+//                                      anchors.horizontalCenter: parent.horizontalCenter
+//                                      source: image //"icons/face.svg"
+
+//                                  }
+//                              }
 
 
                               Text {

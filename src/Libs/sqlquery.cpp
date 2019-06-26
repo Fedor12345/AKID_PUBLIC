@@ -3,7 +3,9 @@
 #include <QMap>
 #include <QDate>
 
-#include <QMutex>
+//#include <QMutex>
+
+#include <QSqlRecord>
 
 
 SQLquery::SQLquery(QObject *parent) : QObject(parent)
@@ -16,7 +18,7 @@ void SQLquery::setQuery(const QString &query)
 {
     this->fl_setQuery = true;
     this->query = query;
-    this->queries.append(query);
+    this->queries.append(query);    
     this->numberQuery++;
 
     clearqueriesGroup();
@@ -42,8 +44,18 @@ void SQLquery::setQuery(const QString &query, const bool &isGroup)
 void SQLquery::setQueryAndName(const QString &query, const QString &owner_name)
 {
     this->sender_name = owner_name;
+    this->sender_names.append(owner_name);
     this->setQuery(query);
 }
+
+
+//void SQLquery::setQueryWithName(const QString &owner_name, const QString &query)
+//{
+//    this->sender_name = owner_name;
+//    setQuery(query);
+//}
+
+
 
 /// очищает список вопросов
 void SQLquery::clearqueriesGroup(){
@@ -88,8 +100,9 @@ void SQLquery::checkNameConnection(QString connectionName) //, bool isNewName
 
     for ( int i = 0; i < this->queries.length(); i++ )
     {
+        this->iQuery = i;
         query = this->queries.at(i);
-        qDebug() << " -> SQLquery: checkNameConnection: query: " << query;
+//        qDebug() << " -> SQLquery: checkNameConnection: query: " << query;
 
         if(connectionName != "0")
         {
@@ -102,7 +115,9 @@ void SQLquery::checkNameConnection(QString connectionName) //, bool isNewName
         }
     }
     this->queries.clear();
+    this->sender_names.clear();
     this->numberQuery = 0;
+    this->iQuery = 0;
 
 
 
@@ -115,21 +130,19 @@ void SQLquery::checkNameConnection(QString connectionName) //, bool isNewName
 
 }
 
-void SQLquery::setQueryWithName(const QString &owner_name, const QString &query)
-{
-    this->sender_name = owner_name;
-    setQuery(query);
-}
-
-
-
 void SQLquery::queryExecute(QString query)
 {
     //qDebug() << "queryExecute";
     QSqlDatabase db = QSqlDatabase::database(this->connectionName, false);
     QSqlQuery querySQL(db);
     QString str = "";
+    int numberOfRecords = 0;
 
+    result_data.clear();
+
+    //qDebug() << " !!!! ПРОВЕРКА " << this->iQuery;
+    //qDebug() << " !!!! ПРОВЕРКА " << sender_names.at(this->iQuery);
+    QString sender_name_current = sender_names.at(this->iQuery);
 
     if(!querySQL.exec(query))
     {
@@ -137,43 +150,62 @@ void SQLquery::queryExecute(QString query)
         str = this->connectionName + ": error: " + querySQL.lastError().text();
 
         qDebug() << " -> SQLquery: queryExecute:  "  << str << query;
-        emit signalSendResult(sender_name, false, NULL, querySQL.lastError().text());
+        //result_data.clear();
+        emit signalSendResult(sender_names.at(this->iQuery), false, NULL, querySQL.lastError().text());
     }
     else
     {
+        qDebug() << " -> SQLquery: queryExecute:  "  << "Запрос прошел: " << sender_name_current << ": " << query;
         query = query.toUpper();
         if(~query.indexOf("SELECT")) {
-            if(querySQL.first())//query->next();
-            {
-                bool fl = false;
-                str = querySQL.value(0).toString();
-                int i = 1;
-                while(!fl) {
-                    if(querySQL.value(i) == QVariant()){
-                         fl = true;
-                         break;
-                    }
-                    str = str + "; " + querySQL.value(i).toString();
-                    i++;
+            QSqlRecord rec;
+            if (querySQL.first()) {
+                rec = querySQL.record();
+                for (int i = 0; i < rec.count(); ++i) {
+                    numberOfRecords++;
+                    result_data.insert(rec.fieldName(i),querySQL.value(i));
                 }
-
-                //str = this->connectionName + ": " + str; // query->record();
-                qDebug() << " -> SQLquery: queryExecute:  " << this->connectionName << ": " << str << query;   //.numRowsAffected();
-                if(i>1) {
-                    emit signalSendResult(sender_name, true, str, ""); }
-                else {
-                    emit signalSendResult(sender_name, true, querySQL.value(0), "");
-                }
-
+                //qDebug() << " ->1 result_data = " << result_data;
             }
             else {
-                str = this->connectionName + ": error: " + "Нет такой записи";
-                qDebug() << " -> SQLquery: queryExecute:  " << str << query;
-                emit signalSendResult(sender_name, true, NULL, "error: Нет такой записи");
+                emit signalSendResult(sender_name_current, true, NULL, "error: Нет такой записи");
             }
+            /// Если запись только одна (число столбцов в результате запроса),
+            /// то посылается строка с результатом запроса
+            if ( numberOfRecords <= 1 ) {
+                querySQL.first();
+                //str = querySQL.value(0).toString();
+                emit signalSendResult(sender_name_current, true, querySQL.value(0), "");
+            }
+            /// Если записей много, то посылается объект result_data класса QMap с множеством записей (столбцов)
+            else {
+                emit signalSendResult(sender_name_current, true, result_data, "");
+            }
+
+
+            /// Если в результате запроса содержится несколько полей (т.е. строк), то необходимо дописать код:
+            /// в цикле (по rec.count) объект result_data добавлять в дополнительный массив,
+            /// т.к result_data - это запись лишь одной строки
+//          bool queryExecuteOK = false;
+//            while (querySQL.next()) {
+//                queryExecuteOK = true;
+//                numberOfRecords = 0;
+//                rec = querySQL.record();
+//                for (int i = 0; i < rec.count(); ++i) {
+//                    numberOfRecords++;
+//                    result_data.insert(rec.fieldName(i),querySQL.value(i));
+//                }
+//            }
+//            /// Если не было обноруженно ниодной записи (queryExecuteOK в цикле не сменился на true),
+//            /// то послыется сообщение
+//            if(!queryExecuteOK) {
+//                qDebug() << " -> SQLquery: queryExecute:  " << str << query;
+//                emit signalSendResult(sender_name, true, NULL, "error: Нет такой записи");
+//            }
+
         }
         else {
-            emit signalSendResult(sender_name, true, NULL, "");
+            emit signalSendResult(sender_name_current, true, NULL, "");
         }
 
 
@@ -197,7 +229,9 @@ void SQLquery::checkAddRecord(const QString &owner_name, const QString &query)
 //fname - имя поля
 //val - значение отбора
 void SQLquery::getMaxID(const QString& owner_name, const QString &tname, const QString &fname, const QVariant &val) {
-    sender_name = owner_name;
+    //sender_name = owner_name;
+    this->sender_name = owner_name;
+    this->sender_names.append(owner_name);
 
     QString tstr1 = "";
 
@@ -217,14 +251,16 @@ void SQLquery::getMaxID(const QString& owner_name, const QString &tname, const Q
 bool SQLquery::insertRecordIntoTable(const QString& owner_name, const QString &tname, const QMap<QString, QVariant> &map) {
 //    QSqlQuery query;
 
-    sender_name = owner_name;
+    //sender_name = owner_name;
+    this->sender_name = owner_name;
+    this->sender_names.append(owner_name);
 
     QString tstr1 = "INSERT INTO ", tstr2 = "VALUES (";
     tstr1 = tstr1 + tname + " (";
 
     //подготовка запроса > INSERT INTO table ([field1], ...) VALUES (:param1, ...)
     foreach (QString key, map.keys()) {
-        tstr1 = tstr1 + key+",";//tstr1 +"["+ key+"],";
+        tstr1 = tstr1 + key + ",";//tstr1 +"["+ key+"],";
 //        tstr2 = tstr2 +"'"+ map.value(key).toString() + "',";
 
 //        switch (map.value(key).type()) {
@@ -260,7 +296,9 @@ bool SQLquery::insertRecordIntoTable(const QString& owner_name, const QString &t
 bool SQLquery::updateRecordIntoTable(const QString &owner_name, const QString &tname, const QMap<QString, QVariant> &map, const QString &idWhere, const int &id)
 {
    // return NULL;
-    sender_name = owner_name;
+    //sender_name = owner_name;
+    this->sender_name = owner_name;
+    this->sender_names.append(owner_name);
 
     QString tstr = " UPDATE " + tname + " SET ";
 

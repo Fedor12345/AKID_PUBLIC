@@ -32,9 +32,6 @@ Page {
     }
 
 
-
-
-
     Rectangle {
         id: rect_page_header
         height: 50
@@ -106,7 +103,7 @@ Page {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered:  { parent.border.color = "#35dd89";   txtButton_addQuery.color = "#35dd89" }
+                    onEntered:  { parent.border.color = "#4CAF50";   txtButton_addQuery.color = "#4CAF50" }
                     onExited:   { parent.border.color = "LightGray"; txtButton_addQuery.color = "LightGray" }
                     onPressed:  { parent.color = "#f6ffed";          popup_addQuery.open() }
                     onReleased: { parent.color = "transparent" }
@@ -262,7 +259,9 @@ Page {
                             SQLquery = " INSERT INTO REP_SQLQUERIES ( SQLQUERY , DESCRIPTION ) VALUES ( '"
                                        + txt_FieldQuerySQL.text + "', '" + txt_FieldQueryDescription.text + "' ) ";
                             //console.log("SQLquery ======= ", SQLquery);
-                            Query1.setQuery(SQLquery);
+                            Query1.setQueryAndName(SQLquery, "Reports");
+
+                            parent.clearFilds();
                             popup_addQuery.close();
                         }
                     }
@@ -280,8 +279,13 @@ Page {
                         //highlighted: true
                         //Material.accent: Material.Orange
                         onClicked: {
-                            popup_addQuery.close()
+                            parent.clearFilds();
+                            popup_addQuery.close();
                         }
+                    }
+                    function clearFilds(){
+                        txt_FieldQuerySQL.text = ""
+                        txt_FieldQueryDescription.text = ""
                     }
                 }
             }
@@ -305,7 +309,7 @@ Page {
                 anchors.fill: parent
                 anchors.margins: 5
                 currentIndex: -1 //0
-                property var id_currentPerson //: page_reports.model_SQLQiueries.getId(currentIndex)
+                property var id_currentPerson //: page_reports.model_SQLQiueries.getFirstColumnInt(currentIndex)
                 property var sqlQuery
 
                 highlightFollowsCurrentItem: true
@@ -432,7 +436,7 @@ Page {
                         if (list_SQLQueries.currentIndex !== index) {
                             list_SQLQueries.currentIndex = index
                         }
-                        list_SQLQueries.id_currentPerson = page_reports.model_SQLQiueries.getId(index)
+                        list_SQLQueries.id_currentPerson = page_reports.model_SQLQiueries.getFirstColumnInt(index)
                         //id_currentPersonChange(list_SQLQueries.id_currentPerson)
                     }
                 }
@@ -455,15 +459,15 @@ Page {
     Rectangle {
         id: rectMain_Table
         anchors.top: rect_page_header.bottom
-        //anchors.topMargin: 20
+        anchors.topMargin: 20
         anchors.bottom: parent.bottom
         anchors.left: rectMain_SQLQueries.right
-        //anchors.leftMargin: 20
+        anchors.leftMargin: 20
         anchors.right: parent.right
-        anchors.margins: 20
+        anchors.rightMargin: 20
 
         color: "transparent"
-        //border.color: "LightGray"
+        //border.color: "Green" //"LightGray"
 
 
         Rectangle {
@@ -499,24 +503,25 @@ Page {
                     anchors.centerIn: parent
                     text: "Отобразить данные"
                     font.pixelSize: 14
-                    color: "LightGray"
+                    color: "#4CAF50" //"LightGray"
                 }
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered:  { parent.border.color = "#35dd89";   txtButton_ShowReport.color = "#35dd89" }
-                    onExited:   { parent.border.color = "LightGray"; txtButton_ShowReport.color = "LightGray" }
+                    onEntered:  { parent.border.color = "#FF5722";   txtButton_ShowReport.color = "#FF5722" }
+                    onExited:   { parent.border.color = "LightGray"; txtButton_ShowReport.color = "#4CAF50" }
                     onPressed:  { parent.color = "#f6ffed" }
                     onReleased: { parent.color = "transparent" }
                     onClicked:  {
-                        var SQLquery = model_SQLQiueries.getCurrentDate("SQLQUERY",list_SQLQueries.currentIndex);
-                        //console.log("SQLquery ===== ",SQLquery);
+                        var SQLquery = model_SQLQiueries.getCurrentDateByName( "SQLQUERY", list_SQLQueries.currentIndex );
+                        console.log(" SQLquery ===== ",SQLquery);
                         if ( SQLquery === "" || SQLquery === " " ) {
                             rect_Table.createEmptyTable_fun("<- Выберите SQL запрос из списка слева");
                             //console.log("SQLquery ===== |",SQLquery, "|");
                         }
                         else {
                             SQLquery = " " + SQLquery + " ";
+                            rect_Table.destroyObj_fun();
                             model_tableReports.setQueryDB(SQLquery);
                         }
                     }
@@ -545,14 +550,50 @@ Page {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered:  { parent.border.color = "#35dd89";   txtButton_CreateFileReport.color = "#35dd89" }
-                    onExited:   { parent.border.color = "LightGray"; txtButton_CreateFileReport.color = "LightGray" }
-                    onPressed:  { parent.color = "#f6ffed" }
-                    onReleased: { parent.color = "transparent" }
-                    //onClicked:  {}
+                    onEntered:  { parent.border.color = "#4CAF50";   txtButton_CreateFileReport.color = "#4CAF50"     }
+                    onExited:   { parent.border.color = "LightGray"; txtButton_CreateFileReport.color = "LightGray"   }
+                    onPressed:  { parent.border.color = "#35dd89";   txtButton_CreateFileReport.color = "#35dd89"; parent.color = "#f6ffed"      }
+                    onReleased: { parent.border.color = "#4CAF50";   txtButton_CreateFileReport.color = "#4CAF50"; parent.color = "transparent"  }
+                    onClicked:  { popup_createReport.open() }
                 }
 
             }
+            Popup {
+                id: popup_createReport
+                width:  createReport.width + padding*2
+                height: createReport.height + padding*2
+                modal: true
+                focus: true
+                closePolicy: Popup.CloseOnEscape
+                parent: Overlay.overlay
+                x: Math.round((parent.width - width) / 2)
+                y: Math.round((parent.height - height) / 2)
+                padding: 0
+                Item {
+                    id: createReport
+                    height: 400
+                    width:  600
+
+                    Label {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.top: parent.top
+                        anchors.topMargin: 20
+                        text: "ФОРМА ДЛЯ СОЗДАНИЯ ФАЙЛА ОТЧЕТА"
+                    }
+                    Button {
+                        anchors.centerIn: parent
+                        text: "Отмена"
+                        onClicked: {
+                            popup_createReport.close()
+                        }
+                    }
+                }
+            }
+
+
+
+
+
         }
 
 
@@ -568,8 +609,9 @@ Page {
             color: "#EEEEEE"//"White" Material.color(Material.Grey, Material.Shade200)
             border.color: "LightGray"
             radius: 7
+            clip: true
 
-            property var table_dynamic
+            property var table_dynamic: undefined
 
 
             /////////////////////////////////////////////////////////////////
@@ -591,6 +633,8 @@ Page {
                 }
 
                 // первым необходимо определить роли, потом число столбцов, затем только модель
+
+                //table_dynamic.border.color = "LightGray";
                 table_dynamic.roles_ = roles;
                 table_dynamic.columnCount = columnCount;
                 table_dynamic.model_ = model;
@@ -632,14 +676,22 @@ Page {
 //                var dlg = component.createObject( parentId, {} );
                 var object = component.createObject(rect_Table);
                 table_dynamic = object;
-
             }
 
             // функция удаления компонента, помещенного в свойство listView_dynamic
             //  (удаление созданного listview)
             function destroyObj_fun(){ //(object)
-                console.log("destroyObj_fun: удаление старого объекта(если он существует)...");
-                if(table_dynamic!=undefined){table_dynamic.destroy();}   // object.destroy();}
+                //console.log("destroyObj_fun: удаление старого объекта(если он существует)...");
+                if(table_dynamic !== undefined){
+                    table_dynamic.columnCount  = 0
+                    table_dynamic.columnWidth  = 0
+                    table_dynamic.columnHeight = 0
+                    table_dynamic.rowHeight    = 0
+                    table_dynamic.model_       = undefined
+                    table_dynamic.destroy();
+                    console.log("destroyObj_fun: удаление старого объекта...");
+                    table_dynamic = undefined;
+                }
             }
             /////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////

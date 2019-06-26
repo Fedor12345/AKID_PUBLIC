@@ -30,7 +30,7 @@ Page {
 
         Label {
             anchors.centerIn: parent
-            text: "ОТЧЕТ ЕСКИД"
+            text: "ОТЧЕТ № 1-ДОЗ"
             font.pixelSize: 14
             font.bold: true
         }
@@ -233,6 +233,7 @@ Page {
             font.pixelSize: 18
             text: "Выберите год"
         }
+
         Rectangle {
             id: year_
             anchors.horizontalCenter: parent.horizontalCenter
@@ -240,6 +241,7 @@ Page {
             anchors.topMargin: 50
             width: 100
             height: 30
+            //visible: false
             border.color: "LightGray"
             Text {
                 anchors.centerIn: parent

@@ -10,6 +10,7 @@ Page {
     //    width: 1200
     //    height: 800
 
+    Component.onCompleted: console.log("CurrentControl  completed")
 
     Pane {
         id: frame1
@@ -26,34 +27,27 @@ Page {
             color: Material.color(Material.Grey, Material.Shade800)
         }
 
-        MyListViewUnfolding {
+        MyListViewUnfolding_v2 {
             anchors.fill: parent
+            anchors.topMargin: 10
 
             model:
                 ListModel {
                     //id: animalsModel
 
-                ListElement { name: "Карточка работника";           header: "" }
+                ListElement { image:"icons/face.svg"; name: "Карточка работника"; header: "" }
 
-                //ListElement { name: "Касетница";                    header: "" }
-                //ListElement { name: "Масс. выдача/ сдача дозиметр"; header: "" }
-                //ListElement { name: "Конфигурация";                 header: "" }
+                ListElement { image:""; name: "Ввод доз ТЛД";       header: "" }
 
+                ListElement { image:""; name: "SQL запросы";        header: "Отчеты" }
+                ListElement { image:""; name: "Накопленные дозы";   header: "Отчеты" }
+                ListElement { image:""; name: "Отчет № 1-ДОЗ";      header: "Отчеты" }
 
-                ListElement { name: "Ввод доз ТЛД";          header: "" }
-//                ListElement { name: "Ввод доз ТЛД";          header: "Ввод доз" }
-//                ListElement { name: "Ввод архивных доз ТЛД"; header: "Ввод доз" }
-
-                ListElement { name: "Типы дозиметров";    header: "Справочная информация" }
-                ListElement { name: "Дозиметры";          header: "Справочная информация" }
-                ListElement { name: "Касетницы";          header: "Справочная информация" }
-                ListElement { name: "Зоны контроля";      header: "Справочная информация" }
-                ListElement { name: "Подразделения";      header: "Справочная информация" }
-
-
-
-                ListElement { name: "SQL запросы";                       header: "Отчеты" }
-                ListElement { name: "Накопленные дозы";                  header: "Отчеты" }
+                ListElement { image:""; name: "Типы дозиметров";    header: "Справочник" } //Справочная информация
+                ListElement { image:""; name: "Дозиметры";          header: "Справочник" }
+                ListElement { image:""; name: "Касетницы";          header: "Справочник" }
+                ListElement { image:""; name: "Зоны контроля";      header: "Справочник" }
+                ListElement { image:""; name: "Подразделения";      header: "Справочник" }
                 }
 
 //            onCurrentName: {
@@ -76,7 +70,7 @@ Page {
 //                    break;
 
 //                case "Отчеты":
-//                    namePage = "Report_ESKID.qml";
+//                    namePage = "Report_1DOZ.qml";
 //                    break;
 
 //                default:
@@ -109,16 +103,19 @@ Page {
 
         case "SQL запросы":
             console.log("name = ", name);
-            //namePage = "Report_ESKID.qml";
-            //report_ESKID.visible = true;
+            //namePage = "Report_1DOZ.qml";
             reports.visible = true;
             break;
 
         case "Накопленные дозы":
             console.log("name = ", name);
-            //namePage = "Report_ESKID.qml";
-            report_ESKID.visible = true;
-            reports.visible = true;
+            //namePage = "Report_AccumulatedDose.qml";
+            report_AccumulatedDose.visible = true;
+            break;
+        case "Отчет № 1-ДОЗ":
+            console.log("name = ", name);
+            //namePage = "Report_1DOZ.qml";
+            report_1DOZ.visible = true;
             break;
 
         default:
@@ -129,11 +126,12 @@ Page {
         }
     }
     function pageNotVisible(){
-        workerCard.visible   = false
-        inputDoseTLD.visible = false
-        report_ESKID.visible = false
-        reports.visible = false
-        testPage.visible     = false
+        workerCard.visible             = false
+        inputDoseTLD.visible           = false
+        report_AccumulatedDose.visible = false
+        report_1DOZ.visible            = false
+        reports.visible                = false
+        testPage.visible               = false
     }
 
 
@@ -153,7 +151,11 @@ Page {
         property var model_adm_department_outer: managerDB.createModel(" SELECT ID, DEPARTMENT_OUTER FROM ADM_DEPARTMENT_OUTER WHERE ID = 0", "adm_department_outer")
         property var model_adm_department_inner: managerDB.createModel(" SELECT ID, DEPARTMENT_INNER FROM ADM_DEPARTMENT_INNER ",             "adm_department_inner")
 
-        property var id_currentPerson: "Сотрудник не выбран"
+        property string id_currentPerson: "Сотрудник не выбран"
+        property string fio_currentPerson: "Сотрудник не выбран"
+        property string sex: "Сотрудник не выбран"
+        property string staff_type: "Сотрудник не выбран"
+        property int age: 0
 
         property var model_SQLQiueries:  managerDB.createModel(" SELECT ID, SQLQUERY, DESCRIPTION FROM REP_SQLQUERIES ", "rep_sqlqueries")
         property var model_tableReports: managerDB.createModel("", "tableReports")
@@ -171,8 +173,12 @@ Page {
             model_adm_department_outer: pages_main.model_adm_department_outer
             model_adm_department_inner: pages_main.model_adm_department_inner
 
-            onId_currentPersonChange: {
-                pages_main.id_currentPerson = id_currentPerson
+            onCurrentPersonChange: {
+                pages_main.id_currentPerson  = id_currentPerson
+                pages_main.fio_currentPerson = fio_currentPerson
+                pages_main.sex = sex
+                pages_main.staff_type = staff_type
+                pages_main.age = age
             }
         }
         InputDoseTLD {
@@ -180,6 +186,8 @@ Page {
             anchors.fill: parent
             visible: false
             id_currentPerson: pages_main.id_currentPerson
+            fio_currentPerson: pages_main.fio_currentPerson
+            sex: pages_main.sex
 
         }
         Reports {
@@ -191,10 +199,21 @@ Page {
             model_tableReports: pages_main.model_tableReports
 
         }
-        Report_ESKID {
-            id: report_ESKID
+        Report_1DOZ {
+            id: report_1DOZ
             anchors.fill: parent
             visible: false
+        }
+        Report_AccumulatedDose {
+            id: report_AccumulatedDose
+            anchors.fill: parent
+            visible: false
+
+            id_currentPerson: pages_main.id_currentPerson
+            fio_currentPerson: pages_main.fio_currentPerson
+            staff_type: pages_main.staff_type
+            sex: pages_main.sex
+            age: pages_main.age
         }
         TestPage {
             id: testPage
@@ -253,8 +272,10 @@ Page {
         anchors.margins: 10
         anchors.right: parent.right
         anchors.rightMargin: 15
+        anchors.left: parent.left
+        anchors.leftMargin: 370
 
-        width: 1120
+        //width: 1120
         height: 1
         color: "LightGray"
 

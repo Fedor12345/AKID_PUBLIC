@@ -12,6 +12,7 @@ ApplicationWindow {
     //height: 800
     title: qsTr(".: АРМ Текущий контроль")
 
+    Component.onCompleted: console.log("main qml        completed")
 
     // Блокировка интерфейса с отображающимся индикатором загрузки
     Popup {

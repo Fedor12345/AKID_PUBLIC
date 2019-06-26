@@ -11,7 +11,7 @@
         <file>MyFindField.qml</file>
         <file>MyListViewUnfolding.qml</file>
         <file>RectangleWithHeader.qml</file>
-        <file>Report_ESKID.qml</file>
+        <file>Report_1DOZ.qml</file>
         <file>StartPage.qml</file>
         <file>TestPage.qml</file>
         <file>WorkersCard.qml</file>
@@ -29,5 +29,9 @@
         <file>icons/Plus.svg</file>
         <file>UpdateWorker.qml</file>
         <file>InputDoseTLD.qml</file>
+        <file>Reports.qml</file>
+        <file>MyListViewTable_dynamic.qml</file>
+        <file>MyListViewUnfolding_v2.qml</file>
+        <file>Report_AccumulatedDose.qml</file>
     </qresource>
 </RCC>

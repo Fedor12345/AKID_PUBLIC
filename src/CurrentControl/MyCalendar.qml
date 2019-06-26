@@ -140,7 +140,7 @@ Item {
             anchors.fill: parent
             onClicked: {
                 ready = false
-                //date_val = null
+                date_val = new Date()
             }
         }
     }
