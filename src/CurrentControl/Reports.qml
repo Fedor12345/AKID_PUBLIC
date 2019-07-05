@@ -30,6 +30,17 @@ Page {
             }
         }
     }
+    Connections {
+        target: Query1
+        onSignalSendResult: {
+            if (owner_name === "Reports") {
+                if (res) {
+                    model_SQLQiueries.updateModel();
+                }
+            }
+        }
+
+    }
 
 
     Rectangle {
@@ -580,6 +591,15 @@ Page {
                         anchors.topMargin: 20
                         text: "ФОРМА ДЛЯ СОЗДАНИЯ ФАЙЛА ОТЧЕТА"
                     }
+
+                    Label {
+                       anchors.horizontalCenter: parent.horizontalCenter
+                       anchors.top: parent.top
+                       anchors.topMargin: 60
+                       font.pixelSize: 12
+                       text: "Тут пока что пусто..."
+                    }
+
                     Button {
                         anchors.centerIn: parent
                         text: "Отмена"

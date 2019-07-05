@@ -33,5 +33,6 @@
         <file>MyListViewTable_dynamic.qml</file>
         <file>MyListViewUnfolding_v2.qml</file>
         <file>Report_AccumulatedDose.qml</file>
+        <file>EmptyPage.qml</file>
     </qresource>
 </RCC>

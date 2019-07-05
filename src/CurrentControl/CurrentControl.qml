@@ -33,21 +33,26 @@ Page {
 
             model:
                 ListModel {
-                    //id: animalsModel
 
-                ListElement { image:"icons/face.svg"; name: "Карточка работника"; header: "" }
+                /// header: "имя заголовка not fold"  - блокирует сворачивание списка для данного заголовка
 
-                ListElement { image:""; name: "Ввод доз ТЛД";       header: "" }
+                ListElement { image:"icons/face.svg"; name: "Выбор сотрудника";   header: "" } ///Карточка работника
+                ListElement { image:"";               name: "Ввод доз ТЛД";       header: "" }
 
-                ListElement { image:""; name: "SQL запросы";        header: "Отчеты" }
-                ListElement { image:""; name: "Накопленные дозы";   header: "Отчеты" }
-                ListElement { image:""; name: "Отчет № 1-ДОЗ";      header: "Отчеты" }
+                ListElement { image:""; name: "Новый сотрудник";    header: "" }
+
+
+                ListElement { image:""; name: "SQL запросы";        header: "Отчеты not fold" }
+                ListElement { image:""; name: "Накопленные дозы";   header: "Отчеты not fold" }
+                ListElement { image:""; name: "Отчет № 1-ДОЗ";      header: "Отчеты not fold" }
 
                 ListElement { image:""; name: "Типы дозиметров";    header: "Справочник" } //Справочная информация
                 ListElement { image:""; name: "Дозиметры";          header: "Справочник" }
                 ListElement { image:""; name: "Касетницы";          header: "Справочник" }
                 ListElement { image:""; name: "Зоны контроля";      header: "Справочник" }
                 ListElement { image:""; name: "Подразделения";      header: "Справочник" }
+
+                ListElement { image:""; name: "Тесты";      header: "Временное" }
                 }
 
 //            onCurrentName: {
@@ -89,7 +94,7 @@ Page {
         //var namePage
         pageNotVisible();
         switch(name) {
-        case "Карточка работника":
+        case "Выбор сотрудника": //Карточка работника
             console.log("name = ", name);
             //namePage = "WorkersCard.qml";
             workerCard.visible = true;
@@ -118,10 +123,14 @@ Page {
             report_1DOZ.visible = true;
             break;
 
+        case "Тесты":
+            console.log("name = ", name);
+            testPage.visible = true;
+            break;
+
         default:
             console.log("name = ", name);
-            //namePage = "TestPage.qml"
-            testPage.visible = true;
+            emptyPage.visible = true;
             break;
         }
     }
@@ -132,6 +141,8 @@ Page {
         report_1DOZ.visible            = false
         reports.visible                = false
         testPage.visible               = false
+
+        emptyPage.visible              = false
     }
 
 
@@ -156,6 +167,9 @@ Page {
         property string sex: "Сотрудник не выбран"
         property string staff_type: "Сотрудник не выбран"
         property int age: 0
+        property string imagePath: "icons/face.svg"
+        property string burn_date_lost: "Сотрудник не выбран"
+ //
 
         property var model_SQLQiueries:  managerDB.createModel(" SELECT ID, SQLQUERY, DESCRIPTION FROM REP_SQLQUERIES ", "rep_sqlqueries")
         property var model_tableReports: managerDB.createModel("", "tableReports")
@@ -180,6 +194,12 @@ Page {
                 pages_main.staff_type = staff_type
                 pages_main.age = age
             }
+            onCurrentPersonChange_photo: {
+                pages_main.imagePath = imagePath
+            }
+            onCurrentPersonChange_date_burn: {
+                pages_main.burn_date_lost = burn_date_lost
+            }
         }
         InputDoseTLD {
             id: inputDoseTLD
@@ -188,6 +208,7 @@ Page {
             id_currentPerson: pages_main.id_currentPerson
             fio_currentPerson: pages_main.fio_currentPerson
             sex: pages_main.sex
+            burn_date_lost: pages_main.burn_date_lost
 
         }
         Reports {
@@ -214,13 +235,18 @@ Page {
             staff_type: pages_main.staff_type
             sex: pages_main.sex
             age: pages_main.age
+            imagePath: pages_main.imagePath
         }
         TestPage {
             id: testPage
             anchors.fill: parent
             visible: false
         }
-
+        EmptyPage {
+            id: emptyPage
+            anchors.fill: parent
+            visible: false
+        }
 
     }
 

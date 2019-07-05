@@ -17,6 +17,9 @@ Page {
     property var model_adm_department_inner //: stackview_mainwindow.model_adm_department_inner
 
     signal currentPersonChange(var id_currentPerson, var fio_currentPerson, var sex, var staff_type, var age)
+    signal currentPersonChange_photo(var imagePath)
+    signal currentPersonChange_date_burn(var burn_date_lost)
+
 
     function workerModelQuery(id_person){
         workersModel.query = " SELECT
@@ -81,10 +84,10 @@ Page {
 
 
 
-    Label {
-        anchors.centerIn: parent
-        text:"workerCard_&"
-    }
+//    Label {
+//        anchors.centerIn: parent
+//        text:"workerCard_&"
+//    }
 
     Item {
         id: modeles
@@ -99,9 +102,39 @@ Page {
                     modeles.model_ext_person_list.updateModel();
                 }
             }
+            if (owner_name === "pullOutPhotoCurrentPerson") {
+                console.log(" pullOutPhotoCurrentPerson: ", res, var_res, messageError );
+                image_photoPerson.source = "";
+                var imagePath;
+                if ( var_res == 0 ) {
+                    image_photoPerson.emptyPhoto = true;
+                    imagePath = "icons/face.svg";
+                    //image_photoPerson.source = "icons/face.svg";
+                }
+                else {
+                    image_photoPerson.emptyPhoto = false;
+                    imagePath = "image://images/photo_person";
+                    //image_photoPerson.source = "image://images/photo_person";
+                }
+                image_photoPerson.source = imagePath;
+
+                /// сигнал currentPersonChange_photo вызывается дважды для того чтобы очистить кэш в элементах Image
+                /// (при первом вызове параметр imagePath = 0) иначе в объекте ImageProvider не будет вызываться метод requestPixmap
+                /// и изображения обновятся
+                currentPersonChange_photo("");
+                currentPersonChange_photo(imagePath);
+            }
+            if ( owner_name === "getDATA_BURN_lust" ) {
+                if (res) {
+                    var date_burn = var_res.toLocaleDateString("ru_RU", "dd.MM.yyyy");
+                    currentPersonChange_date_burn(date_burn);
+                }
+            }
+
 
         }
     }
+
 
 
     Connections {
@@ -193,11 +226,12 @@ Page {
                     txt_work_email.text = workersModel.get(0)["E_MAIL"]
 
 
+                    ////////////////////////////////////////////////////////////////////////////////
                     /// генерируется сигнал о изменении выбранного сотрудника из спсика
                     var sex = (txt_gender.text === "М") ? "M" : "F"  /// txt_gender.text === "М", тут М на кириллице
                     var age = 25; /// ДОДЕЛАТЬ ОПРЕДЕЛЕНИЕ ВОЗРАСТА ВЫБРАННОГО СОТРУДНИКА
                     currentPersonChange(list_Persons.id_currentPerson, list_Persons.fio_currentPerson, sex, txt_staff_type.text, age)
-
+                    ////////////////////////////////////////////////////////////////////////////////
 
                 }
 
@@ -406,34 +440,10 @@ Item {
             onId_recChanged: {
                 if (id_rec !== -1) {
                     //popup_wait.open()
-                    console.log("-!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!->");
+                    //console.log("-!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!--!->");
                     main_.workerModelQuery(id_rec)
-//                    workersModel.query = " SELECT
-//                                           ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
-//                                           SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
-//                                           WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
-//                                           ID_TLD, STAFF_TYPE,
-
-//                                           PASSPORT_NUMBER, PASSPORT_GIVE,
-//                                           PASSPORT_DATE, POLICY_NUMBER, SNILS,
-//                                           HOME_ADDRESS, HOME_TEL,
-//                                           WORK_TEL,MOBILE_TEL, WORK_ADDRESS, E_MAIL,
-
-//                                           adm_status.STATUS,
-
-//                                           ADM_ORGANIZATION.ORGANIZATION_,
-//                                           ADM_DEPARTMENT_INNER.DEPARTMENT_INNER,
-//                                           ADM_DEPARTMENT_OUTER.DEPARTMENT_OUTER,
-//                                           ADM_ASSIGNEMENT.ASSIGNEMENT
-
-//                                           FROM ext_person
-//                                           LEFT JOIN adm_status           ON ext_person.STATUS_CODE         = adm_status.STATUS_CODE
-//                                           LEFT JOIN ADM_ORGANIZATION     ON ext_person.ID_ORGANIZATION     = ADM_ORGANIZATION.ID
-//                                           LEFT JOIN ADM_DEPARTMENT_INNER ON ext_person.ID_DEPARTMENT_INNER = ADM_DEPARTMENT_INNER.ID
-//                                           LEFT JOIN ADM_DEPARTMENT_OUTER ON ext_person.ID_DEPARTMENT_OUTER = ADM_DEPARTMENT_OUTER.ID
-//                                           LEFT JOIN ADM_ASSIGNEMENT      ON ext_person.ID_ASSIGNEMENT      = ADM_ASSIGNEMENT.ID
-
-//                                           WHERE ext_person.ID_PERSON = " + id_rec;
+                    var query = " SELECT PHOTO from EXT_PERSON WHERE ID_PERSON = " + id_rec;
+                    Query1.setQueryAndName(query, "pullOutPhotoCurrentPerson");
                 }
             }
         }
@@ -478,6 +488,7 @@ Item {
                     //                anchors.right: parent.right
                     spacing: 20
                     padding: 10
+                    leftPadding: 20
 
                     Rectangle {
                         width: 115
@@ -485,17 +496,33 @@ Item {
 
                         //                    border.color: "Silver"
                         //                    color: Material.color(Material.BlueGrey, Material.Shade100)
-                        border.color: "LightGray"
+                        //border.color: "LightGray"
                         //color: "aliceblue"//"whitesmoke"
                         Image {
-                            opacity: 0.2
-                            sourceSize.height: 100
-                            sourceSize.width: 100
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            source: "icons/face.svg"
+                            id:image_photoPerson
+                            property bool emptyPhoto: true
+                            cache: false
+                            fillMode: Image.PreserveAspectFit
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
 
+                            anchors.topMargin:    (emptyPhoto) ? 0 : 2
+                            anchors.leftMargin:   (emptyPhoto) ? 0 : 2
+                            anchors.rightMargin:  (emptyPhoto) ? 0 : 2
+                            anchors.bottomMargin: (emptyPhoto) ? 0 : 2
+                            opacity: (emptyPhoto) ? 0.2 : 1
+                            sourceSize.height: 100
+                            sourceSize.width:  100
+                            source: "icons/face.svg"
                         }
+                    }
+
+                    Rectangle {
+                        width: 1
+                        height: 130
+                        color: "LightGray"
                     }
 
                     Column {
@@ -506,8 +533,10 @@ Item {
                             id: txt_fio
                             text: ".."
                             font.family: "Tahoma"
-                            font.pixelSize: 28
-                            color: Material.color(Material.DeepOrange) //"midnightblue"//"#333333"//"steelblue"
+                            font.pixelSize: 25
+                            font.bold: true
+                            //color: "#474747" //Material.color(Material.DeepOrange) //"midnightblue"//"#333333"//"steelblue"
+                            color: Material.color(Material.DeepOrange)
                         }
                         Row {
                             id: row1
@@ -921,9 +950,6 @@ Item {
                 text: "Информация о работе"
                 width: implicitWidth
                 //enabled: false
-
-
-
             }
             TabButton {
                 text: "Персональная информация"
@@ -1058,7 +1084,6 @@ Item {
 
 
                 }
-
 
 
 
@@ -1849,6 +1874,35 @@ Rectangle {
             text: qsTr("Список сотрудников")
             font.pixelSize: 12
         }
+        Rectangle {
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            anchors.margins: 1
+            width: 40
+            Text {
+                id: txt_button_update
+                //anchors.centerIn: parent
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.rightMargin: 2
+                anchors.topMargin: -10
+                font.pixelSize: 35
+                color: "LightGray"
+                text: qsTr("⟳") //✓ ⟳ ☺ 😐
+            }
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered:  { txt_button_update.color = "#FF5722" }
+                onExited:   { txt_button_update.color = "LightGray" } // = "#4CAF50"
+                onPressed:  { parent.color = "#f6ffed" }
+                onReleased: { parent.color = "transparent" }
+                onClicked:  {
+                    modeles.model_ext_person_list.updateModel();
+                }
+            }
+        }
     }
     Item {
         id: body_allPersons
@@ -2002,35 +2056,11 @@ Rectangle {
             interval: 410
             repeat: false
             onTriggered: {
-                main_.workerModelQuery(list_Persons.id_currentPerson)
-//                workersModel.query = " SELECT
-//                                       ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
-//                                       SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
-//                                       WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
-//                                       ID_TLD, STAFF_TYPE,
-
-//                                       PASSPORT_NUMBER, PASSPORT_GIVE,
-//                                       PASSPORT_DATE, POLICY_NUMBER, SNILS,
-//                                       HOME_ADDRESS, HOME_TEL,
-//                                       WORK_TEL,MOBILE_TEL, WORK_ADDRESS, E_MAIL,
-
-//                                       adm_status.STATUS,
-
-//                                       ADM_ORGANIZATION.ORGANIZATION_,
-//                                       ADM_DEPARTMENT_INNER.DEPARTMENT_INNER,
-//                                       ADM_DEPARTMENT_OUTER.DEPARTMENT_OUTER,
-//                                       ADM_ASSIGNEMENT.ASSIGNEMENT
-
-//                                       FROM ext_person
-//                                       LEFT JOIN adm_status           ON ext_person.STATUS_CODE         = adm_status.STATUS_CODE
-//                                       LEFT JOIN ADM_ORGANIZATION     ON ext_person.ID_ORGANIZATION     = ADM_ORGANIZATION.ID
-//                                       LEFT JOIN ADM_DEPARTMENT_INNER ON ext_person.ID_DEPARTMENT_INNER = ADM_DEPARTMENT_INNER.ID
-//                                       LEFT JOIN ADM_DEPARTMENT_OUTER ON ext_person.ID_DEPARTMENT_OUTER = ADM_DEPARTMENT_OUTER.ID
-//                                       LEFT JOIN ADM_ASSIGNEMENT      ON ext_person.ID_ASSIGNEMENT      = ADM_ASSIGNEMENT.ID
-
-//                                       WHERE ext_person.ID_PERSON = " + list_Persons.id_currentPerson;
-
-
+                var query = " SELECT PHOTO from EXT_PERSON WHERE ID_PERSON = " + list_Persons.id_currentPerson;
+                Query1.setQueryAndName(query, "pullOutPhotoCurrentPerson");
+                query = " select max(BURN_DATE) FROM EXT_DOSE WHERE ID_PERSON = " + list_Persons.id_currentPerson;
+                Query1.setQueryAndName(query, "getDATA_BURN_lust");
+                main_.workerModelQuery(list_Persons.id_currentPerson);
              }
         }
 

@@ -15,7 +15,7 @@ void CreateReport::startScript(QString path)
     //system("taskkill /F /IM имя")
     QProcess p;
     qDebug() << "path = " << path;
-    path = path + "/run_1.1.bat";   // path = path + "/report_test.bat";
+    path = path + "/report_2.bat";  //path + "/run_1.1.bat"  // path = path + "/report_test.bat";
     qDebug() << "path = " << path;
     p.startDetached("cmd.exe", QStringList() << "/c" << path);
     //p.startDetached("cmd.exe", QStringList() << "/c" << "taskkill /F /IM IM ARM_CurrentControl2.exe");
@@ -261,7 +261,7 @@ void CreateReport::beginCreateReport()
 
     QString path = qApp->applicationDirPath();
 
-    QString nameFile = path + "/query_1.1.txt"; //"/report_test.txt";
+    QString nameFile = path + "/query_2.txt"; //"/report_test.txt";
     QFile file(nameFile);
     if (!file.open(QIODevice::WriteOnly)) {
         // error message0
@@ -284,8 +284,8 @@ void CreateReport::beginCreateReport()
         file.close();
     }
 
-    //killProcess("WINWORD.EXE");
-    //startScript(path); ///запускаем скрипт создания отчета
+    killProcess("WINWORD.EXE");
+    startScript(path); ///запускаем скрипт создания отчета
 
 
 

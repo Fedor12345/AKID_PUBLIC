@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.12
+import QtQuick.Dialogs 1.2
 
 Item {
     //id: item3
@@ -229,25 +230,80 @@ Item {
                                 width: 135
                                 height: 155
                                 id: photo_frame
-                                //                    anchors.top: parent.top
-                                //                    anchors.left: parent.left
-                                //                    anchors.margins: 10
 
                                 border.color: "LightGray"
                                 //color: "aliceblue"//"whitesmoke"
                                 radius: 2
-                                //anchors.leftMargin: 10
                                 Image {
+                                    id: item_Photo
+                                    property bool emptyPhoto: true
+                                    fillMode: Image.PreserveAspectFit
                                     anchors.top: parent.top
-                                    anchors.topMargin: 18
-                                    opacity: 0.2
-                                    sourceSize.height: 120
-                                    sourceSize.width: 120
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    source: "icons/face.svg"
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.bottom: parent.bottom
 
+                                    anchors.topMargin:    (emptyPhoto) ? 18 : 2
+                                    anchors.leftMargin:   (emptyPhoto) ? 0  : 2
+                                    anchors.rightMargin:  (emptyPhoto) ? 0  : 2
+                                    anchors.bottomMargin: (emptyPhoto) ? 0  : 2
+                                    opacity: (emptyPhoto) ? 0.2 : 1
+                                    sourceSize.height: 120
+                                    sourceSize.width:  120
+                                    source: "icons/face.svg"
                                 }
+
+                                Rectangle {
+                                    id: chosePhoto_rect
+                                    anchors.fill: parent
+                                    anchors.margins: 1
+                                    opacity: 0
+//                                    anchors.bottom: parent.bottom
+//                                    anchors.left: parent.left
+//                                    anchors.right: parent.right
+//                                    height: 50
+                                    //border.color: "LightGray"
+                                    //color: "transparent"
+                                    Label {
+                                        id: chosePhoto_label
+                                        anchors.centerIn: parent
+                                        text: "Выбрать фото"
+                                        font.pixelSize: 15
+                                    }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        onEntered:  { chosePhoto_rect.opacity = 0.8; chosePhoto_label.opacity = 0.9 }
+                                        onExited:   { chosePhoto_rect.opacity = 0;   chosePhoto_label.opacity = 0.2 }
+                                        onPressed:  {  }
+                                        onReleased: {  }
+                                        onClicked:  { openFileDialog.open(); }
+
+                                    }
+                                }
+
+                                FileDialog {
+                                    id: openFileDialog
+                                    title: "Выбирите фото"
+                                    folder: shortcuts.home
+                                    selectExisting: true
+                                    nameFilters: [ "Image files (*.jpg *.png)", "All files (*)" ]
+                                    onAccepted: {
+                                        console.log("You chose: " + openFileDialog.fileUrls)
+                                        var str = openFileDialog.fileUrl;
+                                        console.log("str: " + str)
+                                        item_Photo.emptyPhoto = false;
+                                        item_Photo.source = openFileDialog.fileUrl;
+                                        console.log(item_Photo.sourceSize.height + " " + item_Photo.sourceSize.width)
+                                        //Qt.quit()
+                                    }
+                                    onRejected: {
+                                        console.log("Canceled")
+                                        //Qt.quit()
+                                    }
+                                }
+
+
                             }
 
                             // ФИО
@@ -345,7 +401,7 @@ Item {
                                             MyCalendar {
                                                 id: nw_birthday
                                                 date_val: new Date()
-                                                enabled: false //true
+                                                enabled: true
                                             }
                                         }
                                         Column {
@@ -832,7 +888,7 @@ Item {
                                             MyCalendar {
                                                 id: nw_pass_date
                                                 date_val: new Date()
-                                                enabled: false //true
+                                                enabled: true
                                             }
                                         }
                                         Column {
@@ -1416,8 +1472,9 @@ Item {
                 data_arr["W_SURNAME"]    = nw_surname.text
                 data_arr["W_PATRONYMIC"] = nw_patronymic.text
 
+                data_arr["PHOTO"] = item_Photo.source
 
-                //if (nw_birthday.ready) data_arr["BIRTH_DATE"] = nw_birthday.date_val
+                if (nw_birthday.ready) data_arr["BIRTH_DATE"] = nw_birthday.date_val
 
                 data_arr["SEX"] = ( nw_gender.currentIndex == 0 ) ? "M" : "F" //nw_gender.currentIndex //
                 data_arr["WEIGHT"] = parseInt(nw_weight.text, 10)
@@ -1454,7 +1511,7 @@ Item {
                 if (nw_passportGive.text.length > 0) data_arr["PASSPORT_GIVE"]    = nw_passportGive.text
 
                 ///ДАТА РАСКОМЕНТИРОВАТЬ if (nw_pass_date.ready) data_arr["PASSPORT_DATE"] = nw_pass_date.date_val
-                //data_arr["PASSPORT_DATE"] = nw_pass_date.date_val
+                data_arr["PASSPORT_DATE"] = nw_pass_date.date_val
 
                 if (nw_SNILS.text.length > 0)   data_arr["SNILS"] = nw_SNILS.text
                 //PANSION_NUMBER

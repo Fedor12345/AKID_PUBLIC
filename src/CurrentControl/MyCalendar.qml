@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.3
 
 Item {
     id: root
-    width: 135 //id_cb.width//+img_erase.width+8   //contentWidth
+    width: 160 //id_cb.width//+img_erase.width+8   //contentWidth
     height: id_cb.height //contentHeight
 
     property date date_val
@@ -13,7 +13,7 @@ Item {
     property alias cbwidth: id_cb.width
     ComboBox {
         id: id_cb
-        width: root.width //135
+        width: root.width - img_erase.width //135
         padding: 0
         font.pixelSize: 16
         hoverEnabled: true
@@ -126,11 +126,16 @@ Item {
 
     Image {
         id: img_erase
-        sourceSize.height: 16
-        sourceSize.width: 16
-        //anchors.verticalCenter: parent.verticalCenter
-        anchors.right: id_cb.right
-        anchors.bottom: id_cb.top
+        sourceSize.height: 21 /// 16
+        sourceSize.width: 21 /// 16
+
+        anchors.left: id_cb.right
+        anchors.verticalCenter: id_cb.verticalCenter
+
+        ///////////////////////////
+        // anchors.right: id_cb.right
+        // anchors.bottom: id_cb.top
+        ///////////////////////////
 
         anchors.leftMargin: 8
         source: "icons/eraser-variant.svg"

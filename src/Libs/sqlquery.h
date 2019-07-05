@@ -10,6 +10,8 @@
 #include <QMutex>
 #include <QWaitCondition>
 
+#include <QByteArray>
+
 
 class SQLquery : public QObject
 {
@@ -20,7 +22,10 @@ public:
 private:
     QString query;
     QStringList queries; /// список SQL запросов, поступивших во время ожидания ответа от системы подключения к БД
-    int numberQuery = 0;
+    //QVector<QByteArray> byteValues;
+    QVector<QVector<QByteArray>> byteValues; /// двумерный массив для хранения данных не являющихся строко или числом (например побитовое представление файлов с фото)
+    QStringList types;  /// типы запросов, если пусто, то реузльтат - обычные текстовые данные, помимо них могут быть файлы .jpg, .bmp, .txt, .docm, .docx
+    int numberQuery = -1;
     int iQuery = 0;
     QStringList queriesGroup; /// список SQL запросов (в случае групповых запросов)
     QString connectionName;
@@ -36,7 +41,7 @@ private:
     void queryExecute(QString query); /// получает ссылку на текущеее(проверенное) подключение
                          /// и выполняет запрос с обработкой ошибок
 
-    QMap<QString, QVariant> result_data;    //набор данных
+    QMap<QString, QVariant> result_data; ///набор данных
     //QMutex mutex;
     //QWaitCondition waitThreads;
 
@@ -45,6 +50,9 @@ signals:
     void signalCheckConnectionDB();
     void signalSendResult(const QString& owner_name, const bool& res, const QVariant& var_res, const QString& messageError);
     //void signalSendResult(const QString& owner_name, const bool& res, const QMap<QString, QVariant>& var_res, const QString& messageError);
+    void signalSendImageToProvider(const QByteArray &outByteArray, const QString &nameImage);
+
+
 
 public slots:
     void setQuery(const QString &query);
@@ -64,6 +72,8 @@ public slots:
     /// idWhere - по какому полю отбираем; id - чему это поле равно
     bool updateRecordIntoTable(const QString& owner_name, const QString &tname, const QMap<QString, QVariant> &map, const QString &idWhere, const int &id);
 
+
+    //void insertImageIntoTable(const QString& owner_name, const QString &tname, const QString &Vname, const QString addressImg);
 };
 
 #endif // SQLQUERY_H

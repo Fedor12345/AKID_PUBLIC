@@ -2,10 +2,20 @@
 #include <QVariant>
 #include <QMap>
 #include <QDate>
+#include <QVariant>
 
 //#include <QMutex>
 
+#include <QCoreApplication>
+
 #include <QSqlRecord>
+
+#include <QPixmap>
+//#include <QByteArray>
+//#include <QBuffer>
+//#include <QScreen>
+
+#include <QFile>
 
 
 SQLquery::SQLquery(QObject *parent) : QObject(parent)
@@ -116,9 +126,9 @@ void SQLquery::checkNameConnection(QString connectionName) //, bool isNewName
     }
     this->queries.clear();
     this->sender_names.clear();
-    this->numberQuery = 0;
+    this->byteValues.clear();
+    this->numberQuery = -1;
     this->iQuery = 0;
-
 
 
     this->fl_setQuery = false;
@@ -135,75 +145,109 @@ void SQLquery::queryExecute(QString query)
     //qDebug() << "queryExecute";
     QSqlDatabase db = QSqlDatabase::database(this->connectionName, false);
     QSqlQuery querySQL(db);
-    QString str = "";
-    int numberOfRecords = 0;
 
     result_data.clear();
-
-    //qDebug() << " !!!! ПРОВЕРКА " << this->iQuery;
-    //qDebug() << " !!!! ПРОВЕРКА " << sender_names.at(this->iQuery);
     QString sender_name_current = sender_names.at(this->iQuery);
+    QString message = "";
+    QVariant value;
 
-    if(!querySQL.exec(query))
+
+    querySQL.prepare( query );
+
+    /// Проверяем длинну массива this->byteValues,
+    /// если больше нуля, то значит, что в строке запроса имеются не только текстовые данные
+    /// и их необходимо вытащить из this->byteValues
+    if (this->byteValues.size()>0) {
+        QString str = ":byteValue_";
+        //if (this->numberQuery <= this->byteValues.size()) { }
+        for ( int i =  0 ; i < this->byteValues[this->numberQuery].size() ; i ++ ) {
+            querySQL.bindValue( str + QString::number(i), this->byteValues[this->numberQuery][i], QSql::In | QSql::Binary  );
+        }
+    }
+
+    if(!querySQL.exec()) //query
     {
         ///Ошибка при выполнении запроса
-        str = this->connectionName + ": error: " + querySQL.lastError().text();
-
+        QString str = this->connectionName + ": error: " + querySQL.lastError().text();
         qDebug() << " -> SQLquery: queryExecute:  "  << str << query;
-        //result_data.clear();
+
         emit signalSendResult(sender_names.at(this->iQuery), false, NULL, querySQL.lastError().text());
     }
     else
     {
         qDebug() << " -> SQLquery: queryExecute:  "  << "Запрос прошел: " << sender_name_current << ": " << query;
+
+        int numberOfRecords = 0;
+
         query = query.toUpper();
-        if(~query.indexOf("SELECT")) {
+        if(~query.indexOf("SELECT")) {           
             QSqlRecord rec;
-            if (querySQL.first()) {
+            if (querySQL.first()) {                 
                 rec = querySQL.record();
+                /// Если полей много, то посылается объект result_data ( value = result_data ) класса QMap с множеством полей (столбцов)
                 for (int i = 0; i < rec.count(); ++i) {
                     numberOfRecords++;
                     result_data.insert(rec.fieldName(i),querySQL.value(i));
                 }
-                //qDebug() << " ->1 result_data = " << result_data;
+                value = result_data;
             }
             else {
                 emit signalSendResult(sender_name_current, true, NULL, "error: Нет такой записи");
             }
-            /// Если запись только одна (число столбцов в результате запроса),
+
+            /// Если поле только одно (число столбцов в результате запроса),
             /// то посылается строка с результатом запроса
             if ( numberOfRecords <= 1 ) {
                 querySQL.first();
-                //str = querySQL.value(0).toString();
-                emit signalSendResult(sender_name_current, true, querySQL.value(0), "");
-            }
-            /// Если записей много, то посылается объект result_data класса QMap с множеством записей (столбцов)
-            else {
-                emit signalSendResult(sender_name_current, true, result_data, "");
+                value = querySQL.value(0);
+
+                //////////////////////////////////////////////////////////////
+                if ( querySQL.value(0).type() == QVariant::ByteArray) {
+                    qDebug() << " test image!: ";
+
+                    QByteArray outByteArray = querySQL.value(0).toByteArray();
+                    qDebug() << " test image type: " << querySQL.value(0).type() << outByteArray.size();
+                    emit signalSendImageToProvider(outByteArray, "photo_person");
+                    value = "photo_person";
+                    if ( outByteArray.size() == 0) {
+                        value = 0;
+                        message = "Внимание! Тип данных - файл: пустой; размер = " + QString::number(outByteArray.size());
+                    }
+
+                    ///сохранение полученного изображения на диск
+                    QPixmap outPixmap = QPixmap();
+                    outPixmap.loadFromData( outByteArray );
+
+                    QFile file("photo_2.jpg");
+                    file.open(QIODevice::WriteOnly);
+
+                    outPixmap.save(&file, "JPG");
+                    QString path = QCoreApplication::applicationDirPath() + "/photo_2.jpg" ;
+
+//                    value = path;
+                }
+                //////////////////////////////////////////////////////////////
+                //emit signalSendResult(sender_name_current, true, value, message);
             }
 
 
-            /// Если в результате запроса содержится несколько полей (т.е. строк), то необходимо дописать код:
+            /// ИТОГ:
+            /// Если полей (столбцов) много:              value = result_data
+            /// Если поле одно:                           value = querySQL.value(0);
+            /// Если данные в поле имеет тип ByteArray:   value = "photo_person"  ( для изображений)
+            ///                                           value = ( для файлов ?????)
+            ///                                           value = 0 (если запись пуста)
+            emit signalSendResult(sender_name_current, true, value, message);
+
+
+
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// Если в результате запроса содержится несколько записей (т.е. строк), то необходимо дописать код: (ИЛИ НЕ НУЖНО, ПОТОМУ ЧТО ДЛЯ ЭТОГО ЕСТЬ МОДЕЛИ)
             /// в цикле (по rec.count) объект result_data добавлять в дополнительный массив,
             /// т.к result_data - это запись лишь одной строки
-//          bool queryExecuteOK = false;
-//            while (querySQL.next()) {
-//                queryExecuteOK = true;
-//                numberOfRecords = 0;
-//                rec = querySQL.record();
-//                for (int i = 0; i < rec.count(); ++i) {
-//                    numberOfRecords++;
-//                    result_data.insert(rec.fieldName(i),querySQL.value(i));
-//                }
-//            }
-//            /// Если не было обноруженно ниодной записи (queryExecuteOK в цикле не сменился на true),
-//            /// то послыется сообщение
-//            if(!queryExecuteOK) {
-//                qDebug() << " -> SQLquery: queryExecute:  " << str << query;
-//                emit signalSendResult(sender_name, true, NULL, "error: Нет такой записи");
-//            }
 
         }
+        /// Если в SQL запросе не содержалось слова SELECT, то генерируется сигнал с положительным результатом выполнения и пустым значением в праметре результата
         else {
             emit signalSendResult(sender_name_current, true, NULL, "");
         }
@@ -222,12 +266,10 @@ void SQLquery::checkAddRecord(const QString &owner_name, const QString &query)
 }
 
 
-/// функции Дмитрия
-
 /// определеяет максимальное значение ID в таблице
-//tname - имя таблицы
-//fname - имя поля
-//val - значение отбора
+///tname - имя таблицы
+///fname - имя поля
+///val - значение отбора
 void SQLquery::getMaxID(const QString& owner_name, const QString &tname, const QString &fname, const QVariant &val) {
     //sender_name = owner_name;
     this->sender_name = owner_name;
@@ -258,30 +300,52 @@ bool SQLquery::insertRecordIntoTable(const QString& owner_name, const QString &t
     QString tstr1 = "INSERT INTO ", tstr2 = "VALUES (";
     tstr1 = tstr1 + tname + " (";
 
+    int iByteValue = 0;
+    bool isURL = false;
+    QVector<QByteArray> byteValues_0;
+
     //подготовка запроса > INSERT INTO table ([field1], ...) VALUES (:param1, ...)
     foreach (QString key, map.keys()) {
-        tstr1 = tstr1 + key + ",";//tstr1 +"["+ key+"],";
-//        tstr2 = tstr2 +"'"+ map.value(key).toString() + "',";
-
-//        switch (map.value(key).type()) {
-//        case QVariant::Date:
-//            //query.bindValue(":"+key, map.value(key).toDate());
-//            break;
-//        case QVariant::Double:
-//            tstr2 = tstr2 +"'"+  map.value(key).toString() + "',";//map.value(key).toString().replace(".",",")
-//            break;
-//        default:
-//            tstr2 = tstr2 +"'"+ map.value(key).toString() + "',";
-//        }
-
+        tstr1 = tstr1 + key + ",";
 
         if (map.value(key).type() == QVariant::DateTime) {
             tstr2 = tstr2 + "TO_DATE('"+ map.value(key).toDate().toString(Qt::ISODate) + "', 'YYYY-MM-DD'),";
             //TO_DATE('2019-03-01 06:40:00', 'YYYY-MM-DD HH24:MI:SS')
-        } else {
+        }
+        /// Если в данных обнаруживается одна или несолкьо URL ссылок, то в массив this->byteValues отправляюется массив (QVector)
+        /// с побитовыми данными, выгруженные по данному адрессу
+        else if (map.value(key).type() == QVariant::Url) {
+            isURL = true;
+            qDebug() << "ЕСТЬ URL:" << map.value(key); // << map.value(key).toString();
+
+            QString urlFile = map.value(key).toString();
+            if ( ~urlFile.indexOf("file:///") ) urlFile.remove("file:///");
+            QFile file(urlFile);
+            //QFile file("C:/Users/test/Desktop/1530661187194959677.jpg");
+            if (!file.open(QIODevice::ReadOnly))  {
+                qDebug() << "УКАЗАННЫЙ ФАЙЛ (изображение) НЕ БЫЛ НАЙДЕН";
+                //return false;
+            }
+            QByteArray inByteArray = file.readAll();
+            byteValues_0.append(inByteArray);
+            //byteValues[this->numberQuery+1].append(inByteArray);
+            //byteValues[this->numberQuery+1][0] = inByteArray;
+            QString str_byteValue = ":byteValue_" + QString::number(iByteValue) + ",";
+            iByteValue++;
+            file.close();
+
+            tstr2 = tstr2 + str_byteValue;
+            qDebug() << "tstr2 = " << tstr2;
+        }
+
+
+        else {
             tstr2 = tstr2 + "'" +  map.value(key).toString() + "',";
         }
     }
+
+    if (isURL) this->byteValues.append(byteValues_0);
+
     tstr1.remove (tstr1.length()-1, 1);
     tstr2.remove (tstr2.length()-1, 1);
     tstr1 = tstr1+") "+tstr2+")";
@@ -321,3 +385,32 @@ bool SQLquery::updateRecordIntoTable(const QString &owner_name, const QString &t
 
     return true;
 }
+
+//void SQLquery::insertImageIntoTable(const QString &owner_name, const QString &tname,const QString &Vname, const QString addressImg)
+//{
+//    this->sender_name = owner_name;
+//    this->sender_names.append(owner_name);
+
+//    QString tstr1 = "INSERT INTO " + tname + " (";
+//    QString tstr2 = "VALUES (";
+
+
+////    foreach (QString key, map.keys()) {
+////        tstr1 = tstr1 + key + ",";
+////        if (map.value(key).type() == QVariant::DateTime) {
+////            tstr2 = tstr2 + "TO_DATE('"+ map.value(key).toDate().toString(Qt::ISODate) + "', 'YYYY-MM-DD'),";
+////            //TO_DATE('2019-03-01 06:40:00', 'YYYY-MM-DD HH24:MI:SS')
+////        } else {
+////            tstr2 = tstr2 + "'" +  map.value(key).toString() + "',";
+////        }
+////    }
+//    tstr1.remove (tstr1.length()-1, 1);
+//    tstr2.remove (tstr2.length()-1, 1);
+//    tstr1 = tstr1+") "+tstr2+")";
+
+//    qDebug() << " -> SQLquery: insertRecordIntoTable(): query: " << tstr1;
+
+//    setQuery(tstr1);
+
+
+//}

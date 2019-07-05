@@ -14,6 +14,7 @@
 #include <createreport.h>
 
 #include "cursorshapearea.h"
+#include "imageprovider.h"
 
 
 int main(int argc, char *argv[])
@@ -23,6 +24,10 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
+
+//    app.setOrganizationName("Some Organization");
+    app.setOrganizationDomain("someorganization.com");
+//    app.setApplicationName("Application");
 
     qmlRegisterType<CursorShapeArea>("MyTools", 1, 0, "CursorShapeArea");
 
@@ -77,8 +82,14 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("report", report);
 
 
-    /// внесены изменения для проверки ветки
-    /// внесены еще изменения для проверки ветки
+    /// Для предоставления ихображения из C++ в Qml создается объект класса ImageProvider,
+    /// в который через сигнал от query1 посылается побитовые данные фото (загруженные из БД)
+    ImageProvider *imagePovider = new ImageProvider();
+    QObject::connect(query1,       &SQLquery::signalSendImageToProvider,
+                     imagePovider, &ImageProvider::setByteArray);
+    engine.addImageProvider(QLatin1String("images"), imagePovider);
+
+
 
     qDebug() << "\nload qml:";
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));

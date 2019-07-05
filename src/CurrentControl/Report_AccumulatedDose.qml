@@ -16,6 +16,7 @@ Page {
     property string staff_type
     property string sex
     property int age
+    property string imagePath
 
 //    Label {
 //        anchors.centerIn: parent
@@ -85,28 +86,64 @@ Page {
         border.width: (page_main_.id_currentPerson !== "Сотрудник не выбран" ) ? 1 : 2
         color: "transparent"
 
+        Label {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            text: page_main_.imagePath
+        }
+
+
         Column {
             spacing: 20
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
-            anchors.topMargin: 40
+            anchors.topMargin: 40            
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: 150
                 height: 150
-                border.color: "LightGray"
+                //border.color: "LightGray"
                 color: "transparent"
+
+                Image {
+                    id:image_photoPerson
+                    //property bool emptyPhoto: true
+                    cache: false
+                    fillMode: Image.PreserveAspectFit
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+
+//                    anchors.topMargin:    2
+//                    anchors.leftMargin:   2
+//                    anchors.rightMargin:  2
+//                    anchors.bottomMargin: 2
+//                    opacity: 1
+
+                    anchors.topMargin:    (~page_main_.imagePath.indexOf("icons/face.svg")) ? 0 : 2
+                    anchors.leftMargin:   (~page_main_.imagePath.indexOf("icons/face.svg")) ? 0 : 2
+                    anchors.rightMargin:  (~page_main_.imagePath.indexOf("icons/face.svg")) ? 0 : 2
+                    anchors.bottomMargin: (~page_main_.imagePath.indexOf("icons/face.svg")) ? 0 : 2
+                    opacity: (~page_main_.imagePath.indexOf("icons/face.svg")) ? 0.2 : 1
+                    sourceSize.height: 200
+                    sourceSize.width:  200
+                    source: page_main_.imagePath ///"icons/face.svg"
+                }
+
             }
             TextEdit {
                 id: txt_PersonFIO
                 anchors.horizontalCenter: parent.horizontalCenter
-                //Layout.alignment:
+                width: rect_Person.width
                 font.pixelSize: 20 //main_.sizeTxt
                 font.bold: true
                 font.capitalization: Font.AllUppercase // в верхний регистр
                 color: Material.color(Material.Teal)
                 selectByMouse: true
                 selectionColor: Material.color(Material.Red)
+                wrapMode: Text.WordWrap
+                horizontalAlignment: TextEdit.AlignHCenter
 
                 text: page_main_.fio_currentPerson
             }
@@ -512,16 +549,15 @@ Page {
                 date_end_send   = date_end.date_val.toLocaleDateString("ru_RU", "dd.MM.yyyy"); //.toLocaleDateString("ru_RU", date_begin.date_val, "dd.MM.yyyy");
                 //console.log("date_begin_send = ", date_begin_send, " |  date_end_send = ", date_end_send);
             }
-
-
             console.log( "\n", " параметры дат: ",test_var, "; ", date_begin_send, " ", date_end_send, "\n" );
 
 
             /// задается размерность массива данных
             report.setTypeReport(64);
             /// пол и возраст сотрудника и ин-фа за какой период времени передаются в массив с индексом ноль (он не отображается в отчете)
-            var Z = {};
+            var Z = {};            
             Z["Z0"] = page_main_.sex + "|" + page_main_.age + "|" + test_var;
+            Z["Z1"] = "123" //date_begin_send + "-" + date_end_send;
             Z["Z64"] = new Date().toLocaleString("ru_RU");
             report.setZ(Z);
 
@@ -530,7 +566,7 @@ Page {
             /////////////////////////////////////////////////
             /// данные из таблицы EXT_DOSE запроса query2_1
             if (page_main_.staff_type === "Командировачный") {
-                querySql = " SELECT ID_PERSON Z2,  (W_SURNAME || ' ' ||  W_NAME || ' ' || W_PATRONYMIC) Z4, STAFF_TYPE Z5, " + // PHOTO Z3
+                querySql = " SELECT PERSON_NUMBER Z2,  (W_SURNAME || ' ' ||  W_NAME || ' ' || W_PATRONYMIC) Z4, STAFF_TYPE Z5, " + // PHOTO Z3
                            " (ADM_ORGANIZATION.ORGANIZATION_ || ' ' || ADM_DEPARTMENT_OUTER.DEPARTMENT_OUTER) Z6, "  +
                          //" ADM_DEPARTMENT_INNER.DEPARTMENT_INNER Z6, "  +
                            " ADM_ASSIGNEMENT.ASSIGNEMENT Z7, ID_TLD Z8 "  +
@@ -548,7 +584,7 @@ Page {
                 querySql = " SELECT ID_PERSON Z2,  (W_SURNAME || ' ' ||  W_NAME || ' ' || W_PATRONYMIC) Z4, STAFF_TYPE Z5, " + // PHOTO Z3
                          //" (ADM_ORGANIZATION.ORGANIZATION_ || ' ' || ADM_DEPARTMENT_OUTER.DEPARTMENT_OUTER) Z6, "  +
                            " ADM_DEPARTMENT_INNER.DEPARTMENT_INNER Z6, "  +
-                           " ADM_ASSIGNEMENT.ASSIGNEMENT Z7, ID _TLD Z8 "  +
+                           " ADM_ASSIGNEMENT.ASSIGNEMENT Z7, ID_TLD Z8 "  +
                            " FROM EXT_PERSON " +
                          //" LEFT JOIN ADM_ORGANIZATION     ON ext_person.ID_ORGANIZATION     = ADM_ORGANIZATION.ID "      +
                            " LEFT JOIN ADM_DEPARTMENT_INNER ON ext_person.ID_DEPARTMENT_INNER = ADM_DEPARTMENT_INNER.ID "  +
@@ -621,7 +657,6 @@ Page {
             Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_4_1");
 
             /// IN_MEASURE
-            // EXP_EFF_DOSE_M - ???
             querySql = " SELECT " +
                        " SUM(ACTIVITY_MEASURE) Z49 " +
                        " FROM IN_MEASURE WHERE " +
@@ -661,6 +696,17 @@ Page {
                        " DATE_TIME <= TO_DATE('" + date_end_send   + "','DD/MM/YY') ";
 
             Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_4_5");
+
+            /// IN_MEASURE: EXP_EFF_DOSE_M
+            querySql = " SELECT " +
+                       " SUM(EXP_EFF_DOSE_M) Z44 " +
+                       " FROM IN_MEASURE WHERE " +
+                       " ID_PERSON IN (" + page_main_.id_currentPerson  + ") AND " +
+                       " ORGAN = 'Легкие' AND " +
+                       " DATE_TIME >= TO_DATE('" + date_begin_send + "','DD/MM/YY') AND" +
+                       " DATE_TIME <= TO_DATE('" + date_end_send   + "','DD/MM/YY') ";
+
+            Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_4_6");
 
 
 
@@ -732,6 +778,12 @@ Page {
                     /// 46 55
                     report.setZ(var_res);
                     console.log(" var_res2_4_5 ==== ", var_res, " ", var_res["Z46"], var_res["Z55"]);
+                }
+                if (owner_name == "Report_AccumulatedDose_query2_4_6") {
+                    /// 44
+                    Z["Z44"] = var_res;
+                    report.setZ(Z);
+                    console.log(" var_res2_4_6 ==== ", var_res, " ", var_res["Z44"]);
 
                     report.beginCreateReport();
                     report.showZ();

@@ -9,11 +9,12 @@ import QtQuick.Dialogs 1.2
 Page {
     id: main_
     property int space_margin: 15
+    //property bool onOff: (visible) ? true : false
 
     property var id_currentPerson
     property string fio_currentPerson
     property string sex
-
+    property string burn_date_lost
 
     property int sizeHeader: 14
     property int sizeTxt: 14
@@ -52,7 +53,7 @@ Page {
         anchors.bottom: parent.bottom
 
         Frame {
-            id:frame_InsertDoseMenu
+            id:frame_headerNamePerson
 
             height: 50
             anchors.left: parent.left
@@ -62,7 +63,7 @@ Page {
             padding: 1
             topPadding: 1
             bottomPadding: 1
-            leftPadding: 10
+            leftPadding: 20
 
             background: Rectangle {
                 anchors.fill: parent
@@ -72,280 +73,44 @@ Page {
                 //border.width: 1
             }
 
-
-
-            Connections {
-                id: inputDoseTLD_query
-                target: Query1
-
-                //(const QString& owner_name, const bool& res)
-                onSignalSendResult: {
-                    if (owner_name === "InputDoseTLD") {
-                        //console.log(" >>>>>>>>>>>>>>>>>>>>>>>>> InputDoseTLD ", res);
-                        if(!res) {
-                            popup_checkAdd.isAdd = false
-                            popup_checkAdd.messageError = owner_name + ": " + messageError
-                        }
-                        else {
-                            popup_checkAdd.isAdd = true
-                            popup_checkAdd.messageError = ""
-                        }
-                        popup_checkAdd.open()
-                    }
-//                    if (owner_name === "ChekAddDose") {
-//                        console.log(" >>>>>>>>>>>>>>>>>>>>>>>>> ChekAddDose ", main_.id_currentPerson, " ", var_res);
-//                        if(res) {
-//                             if(main_.id_currentPerson == var_res) {
-//                                 popup_checkAdd.isAdd = true
-//                                 popup_checkAdd.messageError = ""
-//                             }
-//                             else {
-//                                popup_checkAdd.isAdd = false
-//                                popup_checkAdd.messageError = owner_name + ": " + "Проверка провалилась " + messageError
-//                             }
-//                        }
-//                        else {
-//                            popup_checkAdd.isAdd = false
-//                            popup_checkAdd.messageError = owner_name + ": " + messageError
-//                        }
-//                        popup_checkAdd.open()
-//                    }
-                }
-            }
-
-
-
             Row {
-                id: row
+                //anchors.fill: parent
                 spacing: 10
-                ToolButton {
-                    text: "Добавить"
+                Image {
+                    id: img_photoPerson
                     anchors.verticalCenter: parent.verticalCenter
-                    font.pixelSize: 14
-                    flat: true
-                    Material.foreground: Material.Blue
-
-                    onClicked: {
-                        var data_arr = {}
-
-                        data_arr["ID_PERSON"]       = parseInt(main_.id_currentPerson,10)
-                        data_arr["TLD_HOLDER"]      = inputDose_tld_holder.currentText
-                        data_arr["DATE_FROM"]       = calendar_date_from.date_val
-                        data_arr["DATE_UNTIL"]      = calendar_date_until.date_val
-                        data_arr["TLD_G_HP10"]      = parseInt(inputDose_tld_g_hp10.text,10)
-                        data_arr["TLD_G_HP10_DOWN"] = parseInt(inputDose_tld_g_hp10_down.text,10)
-                        data_arr["TLD_G_HP3"]       = parseInt(inputDose_tld_g_hp3.text,10)
-                        data_arr["TLD_G_HP007"]     = parseInt(inputDose_tld_g_hp007.text,10)
-                        data_arr["TLD_N_HP10"]      = parseInt(inputDose_tld_n_hp10.text,10)
-                        data_arr["TLD_N_HP10_DOWN"] = parseInt(inputDose_tld_n_hp10_down.text,10)
-                        data_arr["TLD_N_HP3"]       = parseInt(inputDose_tld_n_hp3.text,10)
-                        data_arr["TLD_N_HP007"]     = parseInt(inputDose_tld_n_hp007.text,10)
-                        data_arr["TLD_B_HP3"]       = parseInt(inputDose_tld_b_hp3.text,10)
-                        data_arr["TLD_B_HP007"]     = parseInt(inputDose_tld_b_hp007.text,10)
-                        data_arr["FON_DOSE"]        = parseInt(inputDose_fon_dose.text,10)
-                        data_arr["BURN_DATE"]       = calendar_burn_date.date_val
-
-                        Query1.insertRecordIntoTable("InputDoseTLD", "EXT_DOSE", data_arr)
-
-//                        var query = " SELECT ID_PERSON FROM EXT_DOSE "
-//                                    " WHERE ID_PERSON = "     + data_arr["ID_PERSON"]
-//                                    " WHERE TLD_HOLDER = "    + data_arr["TLD_HOLDER"]
-//                                    " AND DATE_FROM  = "      + data_arr["DATE_FROM"]
-//                                    " AND DATE_UNTIL = "      + data_arr["DATE_UNTIL"]
-//                                    " AND TLD_G_HP10 = "      + data_arr["TLD_G_HP10"]
-//                                    " AND TLD_G_HP10_DOWN = " + data_arr["TLD_G_HP10_DOWN"]
-//                                    " AND TLD_G_HP3 = "       + data_arr["TLD_G_HP3"]
-//                                    " AND TLD_G_HP007 = "     + data_arr["TLD_G_HP007"]
-//                                    " AND TLD_N_HP10 = "      + data_arr["TLD_N_HP10"]
-//                                    " AND TLD_N_HP10_DOWN = " + data_arr["TLD_N_HP10_DOWN"]
-//                                    " AND TLD_B_HP3 = "       + data_arr["TLD_B_HP3"]
-//                                    " AND TLD_B_HP007 = "     + data_arr["TLD_B_HP007"]
-//                                    " AND FON_DOSE = "        + data_arr["FON_DOSE"]
-//                                    " AND BURN_DATE = "       + data_arr["BURN_DATE"]
-//                                    " ) "
-//                         Query1.setQueryWithName("ChekAddDose", query)
-
-
-                    }
+                    width: 40
+                    height: 40
+                    fillMode: Image.PreserveAspectFit
+                    opacity: 0.2
+                    sourceSize.height: 100
+                    sourceSize.width:  100
+                    source: "icons/face.svg"
                 }
                 ToolSeparator {}
-                ToolButton {
-                    text: "Очистить поля"
+                TextEdit {
+                    id: inputDose_FIO_person
                     anchors.verticalCenter: parent.verticalCenter
-                    font.pixelSize: 14
-                    flat: true
-                    Material.foreground: Material.Green
-                    onClicked: {
-                        popup_clearFilds.open()
-                    }
+                    font.pixelSize: 20 //main_.sizeTxt
+                    font.bold: true
+                    font.capitalization: Font.AllUppercase // в верхний регистр
+                    color: ( main_.fio_currentPerson === "Сотрудник не выбран" ) ? "LightGray" : "#474747" // "Black" //Material.color(Material.DeepOrange)
+                    //color: Material.color(Material.Teal)
+                    selectByMouse: true
+                    selectionColor: Material.color(Material.Red)
+                    text: main_.fio_currentPerson //.toUpperCase()
                 }
-                ToolSeparator {}
-                ToolButton {
-                    text: "Обновить (?)"
-                    anchors.verticalCenter: parent.verticalCenter
-                    font.pixelSize: 14
-                    flat: true
-                    enabled: false
-                    onClicked: {
-                        popup_clearFilds.open()
-                    }
-                }
-                ToolSeparator {}
-                ToolButton {
-                    text: "Удалить (?)"
-                    anchors.verticalCenter: parent.verticalCenter
-                    font.pixelSize: 14
-                    flat: true
-                    enabled: false
-                    onClicked: {
-                        popup_clearFilds.open()
-                    }
-                }
-
-
-            }
-        }
-
-        Popup {
-            id: popup_checkAdd
-            property bool isAdd: false
-            property string messageError: ""
-            width: checkAdd.width + padding*2
-            height: checkAdd.height + padding*2
-            modal: true
-            focus: true
-            closePolicy: Popup.NoAutoClose
-            parent: Overlay.overlay
-            x: Math.round((parent.width - width) / 2)
-            y: Math.round((parent.height - height) / 2)
-            padding: 0
-
-
-
-            Item {
-                id: checkAdd
-                height: popup_checkAdd.isAdd ? 120 : 150
-                width:  popup_checkAdd.isAdd ? 300 : 600 //implicitContentWidth
-
-                Rectangle {
-                    anchors.fill: parent
-                    anchors.margins: 10
-                    border.color: popup_checkAdd.isAdd ? "#8BC34A" : "#F44336"
-                }
-
-                Rectangle {
-                    anchors.right: parent.right
+                TextEdit {
+                    id: id_person
                     anchors.top: parent.top
-                    anchors.margins: 20
-                    width: 50
-                    height: 80
-                    border.color: "#F44336"
-                    visible: popup_checkAdd.isAdd ? false : true
-                    Text {
-                        anchors.centerIn: parent
-                        text: qsTr("!")
-                        font.bold: true
-                        color: "#F44336"
-                        font.pixelSize: 50
-                    }
-
-                }
-
-                Text {
-                    //id: txt_checkAdd
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: 20
-                    text: popup_checkAdd.isAdd ? "Данные успешно добавлены" : "Ошибка добавления данных"
-                    color: popup_checkAdd.isAdd ? "#8BC34A" : "#F44336"
-                    font.pixelSize: 15
-                }
-                TextInput {
-                    //id: txt_checkAddERROR
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: 60
-                    //color: popup_checkAdd.isAdd ? "#8BC34A" : "#F44336"
+                    color: ( main_.fio_currentPerson === "Сотрудник не выбран" ) ? "LightGray" : "#474747"
                     font.pixelSize: 12
-                    text: popup_checkAdd.messageError
-                }
-                Button {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 10
-                    width: 100
-                    text: "OK"
-                    onClicked: {
-                        popup_checkAdd.close();
-                    }
-
+                    text: "id =" + main_.id_currentPerson
                 }
 
 
+//                ToolSeparator {}
             }
-
-
-        }
-
-
-        Popup {
-            id: popup_clearFilds
-            width: clearFilds.width + padding*2
-            height: clearFilds.height + padding*2
-            modal: true
-            focus: true
-            closePolicy: Popup.NoAutoClose
-            parent: Overlay.overlay
-            x: Math.round((parent.width - width) / 2)
-            y: Math.round((parent.height - height) / 2)
-            padding: 0
-
-            Item {
-                id: clearFilds
-                height: 100
-                width:  200
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 10
-                    Text {
-                        text: qsTr("Очистить поля?")
-                        font.pixelSize: 15
-                    }
-                    Row {
-                        spacing: 10
-                        Button {
-                            text: "Очистить"
-                            onClicked: {
-                                inputDose_tld_holder.currentIndex = -1
-                                inputDose_fon_dose.text         = 0
-                                inputDose_tld_g_hp10.text       = 0
-                                inputDose_tld_g_hp10_down.text  = 0
-                                inputDose_tld_g_hp3.text        = 0
-                                inputDose_tld_g_hp007.text      = 0
-                                inputDose_tld_n_hp10.text       = 0
-                                inputDose_tld_n_hp10_down.text  = 0
-                                inputDose_tld_n_hp3.text        = 0
-                                inputDose_tld_n_hp007.text      = 0
-                                inputDose_tld_b_hp3.text        = 0
-                                inputDose_tld_b_hp007.text      = 0
-                                calendar_date_from.ready  = false
-                                calendar_date_until.ready = false
-                                calendar_burn_date.ready  = false
-
-                                popup_clearFilds.close();
-                            }
-                        }
-                        Button {
-                            text: "Отмена"
-                            onClicked: {
-                                popup_clearFilds.close();
-                            }
-                        }
-                    }
-                }
-
-            }
-
 
         }
 
@@ -356,7 +121,7 @@ Page {
             height: implicitContentHeight + 30
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top: frame_InsertDoseMenu.bottom
+            anchors.top: frame_headerNamePerson.bottom
             anchors.topMargin: 20
             anchors.margins: space_margin
 
@@ -376,99 +141,42 @@ Page {
             ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 20
-                spacing: 10
+                spacing: 10                
 
+//                Rectangle {
+//                    Layout.fillWidth: true
+//                    height: 1
+//                    color: "LightGray"
+//                }
                 Row {
-                    spacing: 10
-                    TextEdit {
-                        id: inputDose_FIO_person
-                        font.pixelSize: 20 //main_.sizeTxt
-                        font.bold: true
-                        font.capitalization: Font.AllUppercase // в верхний регистр
-                        color: Material.color(Material.Teal)
-                        selectByMouse: true
-                        selectionColor: Material.color(Material.Red)
-                        text: main_.fio_currentPerson //.toUpperCase()
-
-                    }
-
-                    Label {
-                        text: qsTr("id_person:")
-                        font.pixelSize: main_.sizeTxt
-                    }
-                    TextEdit {
-                        id: inputDose_id_person
-                        font.pixelSize: main_.sizeTxt
-                        font.bold: true
-                        color: Material.color(Material.Teal)
-                        selectByMouse: true
-                        selectionColor: Material.color(Material.Red)
-                        text: main_.id_currentPerson
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: 1
-                    color: "LightGray"
-                }
-
-                Row {
-                    spacing: 10
-                    Label {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: qsTr("Идентификатор кассетницы:")
-                        font.pixelSize: main_.sizeTxt
-                    }
-                    ComboBox {
-                        id: inputDose_tld_holder
-                        currentIndex: -1
-                        model: ["0001", "0002", "0003", "0004", "0005"]
-                    }
-//                    TextEdit {
-//                        id: inputDose_tld_holder
-//                        font.pixelSize: main_.sizeTxt
-//                        font.bold: true
-//                        color: Material.color(Material.Teal)
-//                        selectByMouse: true
-//                        selectionColor: Material.color(Material.Red)
-//                        text: main_.id_currentPerson
-//                    }
-                }
-
-
-                Row {
-                    Layout.topMargin: 10
-                    spacing: 40
-                    Column {
+                    spacing: 50
+                    Row {
                         spacing: 10
                         Label {
-                            text: qsTr("Начальная дата отчетного периода")
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: qsTr("Идентификатор кассетницы:")
                             font.pixelSize: main_.sizeTxt
                         }
-                        MyCalendar {
-                            id: calendar_date_from
-                            date_val: new Date()
-                            enabled: true
+                        ComboBox {
+                            id: inputDose_tld_holder
+                            currentIndex: -1
+                            model: ["0001", "0002", "0003", "0004", "0005"]
                         }
+    //                    TextEdit {
+    //                        id: inputDose_tld_holder
+    //                        font.pixelSize: main_.sizeTxt
+    //                        font.bold: true
+    //                        color: Material.color(Material.Teal)
+    //                        selectByMouse: true
+    //                        selectionColor: Material.color(Material.Red)
+    //                        text: main_.id_currentPerson
+    //                    }
                     }
 
-                    Column {
+                    Row {
                         spacing: 10
                         Label {
-                            text: qsTr("Конечная дата отчетного периода")
-                            font.pixelSize: main_.sizeTxt
-                        }
-                        MyCalendar {
-                            id: calendar_date_until
-                            date_val: new Date()
-                            enabled: true
-                        }
-                    }
-
-                    Column {
-                        spacing: 10
-                        Label {
+                            anchors.verticalCenter: parent.verticalCenter
                             text: qsTr("Дата отжига")
                             font.pixelSize: main_.sizeTxt
                         }
@@ -478,36 +186,104 @@ Page {
                             enabled: true
                         }
                     }
-                    Column {
+
+                    Row {
+                        anchors.verticalCenter: parent.verticalCenter
                         spacing: 10
                         Label {
-                            text: qsTr("Фон считывателя")
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: qsTr("Начальная дата отчетного периода") /// значение date_burn из предыдущей записи для выбранного сотрудника (ID_PERSON)
                             font.pixelSize: main_.sizeTxt
                         }
-                        Row {
-                            TextField {
-                                id: inputDose_fon_dose
-                                font.pixelSize: main_.sizeTxt
-                                font.bold: true
+                        Rectangle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 100
+                            height: 40
+                            border.color: "LightGray"
+                            TextEdit {
+                                id: txt_date_from
+                                anchors.centerIn: parent
+                                font.pixelSize: 16
+                                //font.bold: true
                                 color: Material.color(Material.Teal)
                                 selectByMouse: true
                                 selectionColor: Material.color(Material.Red)
-                                horizontalAlignment: Text.AlignHCenter
-                                text: "0"
-                            }
-                            Label {
-                                //leftPadding: 5
-                                text: qsTr("мЗв <i> (???) </i>")
-                                //text: qsTr("мЗв <p style='color:#d60e0e'> (???) </p>")
-                                font.pixelSize: main_.sizeTxt
+                                text: (main_.burn_date_lost === "Сотрудник не выбран") ? qsTr("00.00.00") : main_.burn_date_lost
                             }
                         }
 
-
-
+//                        MyCalendar {
+//                            id: calendar_date_from
+//                            date_val: new Date()
+//                            enabled: true
+//                        }
                     }
 
+
                 }
+
+
+
+//                Row {
+//                    Layout.topMargin: 10
+//                    spacing: 40
+//                    Column {
+//                        spacing: 10
+//                        Label {
+//                            text: qsTr("Начальная дата отчетного периода")
+//                            font.pixelSize: main_.sizeTxt
+//                        }
+//                        MyCalendar {
+//                            id: calendar_date_from
+//                            date_val: new Date()
+//                            enabled: true
+//                        }
+//                    }
+
+//                    Column {
+//                        spacing: 10
+//                        Label {
+//                            text: qsTr("Конечная дата отчетного периода")
+//                            font.pixelSize: main_.sizeTxt
+//                        }
+//                        MyCalendar {
+//                            id: calendar_date_until
+//                            date_val: new Date()
+//                            enabled: true
+//                        }
+//                    }
+
+
+//                    Column {
+//                        spacing: 10
+//                        Label {
+//                            text: qsTr("Фон считывателя")
+//                            font.pixelSize: main_.sizeTxt
+//                        }
+//                        Row {
+//                            TextField {
+//                                id: inputDose_fon_dose
+//                                font.pixelSize: main_.sizeTxt
+//                                font.bold: true
+//                                color: Material.color(Material.Teal)
+//                                selectByMouse: true
+//                                selectionColor: Material.color(Material.Red)
+//                                horizontalAlignment: Text.AlignHCenter
+//                                text: "0"
+//                            }
+//                            Label {
+//                                //leftPadding: 5
+//                                text: qsTr("мЗв <i> (???) </i>")
+//                                //text: qsTr("мЗв <p style='color:#d60e0e'> (???) </p>")
+//                                font.pixelSize: main_.sizeTxt
+//                            }
+//                        }
+
+
+
+//                    }
+
+//                }
 
                 ///////////////////////////////////////////////
                 RowLayout {
@@ -580,12 +356,15 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    text: (main_.sex === "M") ? "" : "0"
-
+                                    text: "0"
+                                    opacity: (main_.sex === "M") ? 0.3 : 1
                                     enabled: (main_.sex === "M") ? false : true
+                                    onEnabledChanged: {
+                                        var str = inputDose_tld_g_hp10_down.text;
+                                        inputDose_tld_g_hp10_down.text = (enabled) ? str : "0"
+                                    }
                                 }
                                 Label {
-                                    //leftPadding: 5
                                     text: qsTr("мЗв")
                                     font.pixelSize: main_.sizeTxt
                                     enabled: (main_.sex === "M") ? false : true
@@ -719,7 +498,8 @@ Page {
                                 text: qsTr("Низ живота женщин (до 45 лет)")
                                 font.pixelSize: main_.sizeTxt
 
-                                //enabled: (main_.sex) ? false : true
+                                enabled: (main_.sex === "M") ? false : true
+                                opacity: (main_.sex === "M") ? 0.4 : 1
                             }
                                 TextField {
                                     id: inputDose_tld_n_hp10_down
@@ -730,13 +510,18 @@ Page {
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
                                     text: "0"
-
-                                    //enabled: (main_.sex) ? false : true
+                                    opacity: (main_.sex === "M") ? 0.3 : 1
+                                    enabled: (main_.sex === "M") ? false : true
+                                    onEnabledChanged: {
+                                        var str = text;
+                                        text = (enabled) ? str : "0"
+                                    }
                                 }
                                 Label {
-                                    //leftPadding: 5
                                     text: qsTr("мЗв")
                                     font.pixelSize: main_.sizeTxt
+                                    enabled: (main_.sex === "M") ? false : true
+                                    opacity: (main_.sex === "M") ? 0.4 : 1
                                 }
                         }
 
@@ -936,19 +721,316 @@ Page {
                         font.pixelSize: main_.sizeTxt
                     }
 
+                }
+
+            }
+
+        }
+
+
+        Frame {
+            id:frame_InsertDoseMenu
+            property int sizeText: 14
+
+            height: 50
+            //width: implicitContentWidth + 40 //300
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: frame_InsertDose.bottom
+            anchors.margins: space_margin
+            padding: 1
+            topPadding: 1
+            bottomPadding: 1
+            rightPadding: 20
+
+            background: Rectangle {
+                anchors.fill: parent
+                color: "#EEEEEE"//"White" Material.color(Material.Grey, Material.Shade200)
+                border.color: "LightGray"
+                radius: 7
+                //border.width: 1
+            }
+
+
+
+            Connections {
+                //id: inputDoseTLD_query
+                target: Query1
+
+                //(const QString& owner_name, const bool& res)
+                onSignalSendResult: {
+                    if ( owner_name === "InputDoseTLD" ) {
+                        //console.log(" >>>>>>>>>>>>>>>>>>>>>>>>> InputDoseTLD ", res);
+                        if(!res) {
+                            popup_checkAdd.isAdd = false
+                            popup_checkAdd.messageError = owner_name + ": " + messageError
+                        }
+                        else {
+                            popup_checkAdd.isAdd = true
+                            popup_checkAdd.messageError = ""
+                        }
+                        popup_checkAdd.open()
+                    }
+
+//                    if (owner_name === "ChekAddDose") {
+//                        console.log(" >>>>>>>>>>>>>>>>>>>>>>>>> ChekAddDose ", main_.id_currentPerson, " ", var_res);
+//                        if(res) {
+//                             if(main_.id_currentPerson == var_res) {
+//                                 popup_checkAdd.isAdd = true
+//                                 popup_checkAdd.messageError = ""
+//                             }
+//                             else {
+//                                popup_checkAdd.isAdd = false
+//                                popup_checkAdd.messageError = owner_name + ": " + "Проверка провалилась " + messageError
+//                             }
+//                        }
+//                        else {
+//                            popup_checkAdd.isAdd = false
+//                            popup_checkAdd.messageError = owner_name + ": " + messageError
+//                        }
+//                        popup_checkAdd.open()
+//                    }
+                }
+            }
+
+
+            Row {
+                anchors.right: parent.right
+                spacing: 10
+                ToolButton {
+                    text: "Добавить"
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.pixelSize: frame_InsertDoseMenu.sizeText
+                    flat: true
+                    Material.foreground: Material.Blue
+
+                    onClicked: {
+                        var data_arr = {}
+
+                        data_arr["ID_PERSON"]       = parseInt(main_.id_currentPerson,10)
+                        data_arr["TLD_HOLDER"]      = inputDose_tld_holder.currentText
+                        //data_arr["DATE_FROM"]       = calendar_date_from.date_val
+                        //data_arr["DATE_UNTIL"]      = calendar_date_until.date_val
+                        data_arr["TLD_G_HP10"]      = parseInt(inputDose_tld_g_hp10.text,10)
+                        data_arr["TLD_G_HP10_DOWN"] = parseInt(inputDose_tld_g_hp10_down.text,10)
+                        data_arr["TLD_G_HP3"]       = parseInt(inputDose_tld_g_hp3.text,10)
+                        data_arr["TLD_G_HP007"]     = parseInt(inputDose_tld_g_hp007.text,10)
+                        data_arr["TLD_N_HP10"]      = parseInt(inputDose_tld_n_hp10.text,10)
+                        data_arr["TLD_N_HP10_DOWN"] = parseInt(inputDose_tld_n_hp10_down.text,10)
+                        data_arr["TLD_N_HP3"]       = parseInt(inputDose_tld_n_hp3.text,10)
+                        data_arr["TLD_N_HP007"]     = parseInt(inputDose_tld_n_hp007.text,10)
+                        data_arr["TLD_B_HP3"]       = parseInt(inputDose_tld_b_hp3.text,10)
+                        data_arr["TLD_B_HP007"]     = parseInt(inputDose_tld_b_hp007.text,10)
+                        //data_arr["FON_DOSE"]        = parseInt(inputDose_fon_dose.text,10)
+                        data_arr["BURN_DATE"]       = calendar_burn_date.date_val
+
+                        Query1.insertRecordIntoTable("InputDoseTLD", "EXT_DOSE", data_arr)
+
+//                        var query = " SELECT ID_PERSON FROM EXT_DOSE "
+//                                    " WHERE ID_PERSON = "     + data_arr["ID_PERSON"]
+//                                    " WHERE TLD_HOLDER = "    + data_arr["TLD_HOLDER"]
+//                                    " AND DATE_FROM  = "      + data_arr["DATE_FROM"]
+//                                    " AND DATE_UNTIL = "      + data_arr["DATE_UNTIL"]
+//                                    " AND TLD_G_HP10 = "      + data_arr["TLD_G_HP10"]
+//                                    " AND TLD_G_HP10_DOWN = " + data_arr["TLD_G_HP10_DOWN"]
+//                                    " AND TLD_G_HP3 = "       + data_arr["TLD_G_HP3"]
+//                                    " AND TLD_G_HP007 = "     + data_arr["TLD_G_HP007"]
+//                                    " AND TLD_N_HP10 = "      + data_arr["TLD_N_HP10"]
+//                                    " AND TLD_N_HP10_DOWN = " + data_arr["TLD_N_HP10_DOWN"]
+//                                    " AND TLD_B_HP3 = "       + data_arr["TLD_B_HP3"]
+//                                    " AND TLD_B_HP007 = "     + data_arr["TLD_B_HP007"]
+//                                    " AND FON_DOSE = "        + data_arr["FON_DOSE"]
+//                                    " AND BURN_DATE = "       + data_arr["BURN_DATE"]
+//                                    " ) "
+//                         Query1.setQueryWithName("ChekAddDose", query)
+
+
+                    }
+                }
+                ToolSeparator {}
+                ToolButton {
+                    text: "Очистить поля"
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.pixelSize: frame_InsertDoseMenu.sizeText
+                    flat: true
+                    Material.foreground: Material.Green
+                    onClicked: {
+                        popup_clearFilds.open()
+                    }
+                }
+//                ToolSeparator {}
+//                ToolButton {
+//                    text: "Обновить (?)"
+//                    anchors.verticalCenter: parent.verticalCenter
+//                    font.pixelSize: frame_InsertDoseMenu.sizeText
+//                    flat: true
+//                    enabled: false
+//                    onClicked: {
+//                        popup_clearFilds.open()
+//                    }
+//                }
+//                ToolSeparator {}
+//                ToolButton {
+//                    text: "Удалить (?)"
+//                    anchors.verticalCenter: parent.verticalCenter
+//                    font.pixelSize: frame_InsertDoseMenu.sizeText
+//                    flat: true
+//                    enabled: false
+//                    onClicked: {
+//                        popup_clearFilds.open()
+//                    }
+//                }
+
+            }
+
+        }
+
+        Popup {
+            id: popup_checkAdd
+            property bool isAdd: false
+            property string messageError: ""
+            width: checkAdd.width + padding*2
+            height: checkAdd.height + padding*2
+            modal: true
+            focus: true
+            closePolicy: Popup.NoAutoClose
+            parent: Overlay.overlay
+            x: Math.round((parent.width - width) / 2)
+            y: Math.round((parent.height - height) / 2)
+            padding: 0
+
+
+
+            Item {
+                id: checkAdd
+                height: popup_checkAdd.isAdd ? 120 : 150
+                width:  popup_checkAdd.isAdd ? 300 : 600 //implicitContentWidth
+
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    border.color: popup_checkAdd.isAdd ? "#8BC34A" : "#F44336"
+                }
+
+                Rectangle {
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 20
+                    width: 50
+                    height: 80
+                    border.color: "#F44336"
+                    visible: popup_checkAdd.isAdd ? false : true
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("!")
+                        font.bold: true
+                        color: "#F44336"
+                        font.pixelSize: 50
+                    }
 
                 }
 
+                Text {
+                    //id: txt_checkAdd
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top
+                    anchors.topMargin: 20
+                    text: popup_checkAdd.isAdd ? "Данные успешно добавлены" : "Ошибка добавления данных"
+                    color: popup_checkAdd.isAdd ? "#8BC34A" : "#F44336"
+                    font.pixelSize: 15
+                }
+                TextInput {
+                    //id: txt_checkAddERROR
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top
+                    anchors.topMargin: 60
+                    //color: popup_checkAdd.isAdd ? "#8BC34A" : "#F44336"
+                    font.pixelSize: 12
+                    text: popup_checkAdd.messageError
+                }
+                Button {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 10
+                    width: 100
+                    text: "OK"
 
+                    onClicked: {
+                        popup_checkAdd.close();
+                    }
 
-
+                }
 
 
             }
 
 
+        }
+
+        Popup {
+            id: popup_clearFilds
+            width: clearFilds.width + padding*2
+            height: clearFilds.height + padding*2
+            modal: true
+            focus: true
+            closePolicy: Popup.NoAutoClose
+            parent: Overlay.overlay
+            x: Math.round((parent.width - width) / 2)
+            y: Math.round((parent.height - height) / 2)
+            padding: 0
+
+            Item {
+                id: clearFilds
+                height: 100
+                width:  200
+                Column {
+                    anchors.centerIn: parent
+                    spacing: 10
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: qsTr("Очистить поля?")
+                        font.pixelSize: 15
+                    }
+                    Row {
+                        spacing: 10
+                        Button {
+                            text: "Очистить"
+                            onClicked: {
+                                inputDose_tld_holder.currentIndex = -1
+                                //inputDose_fon_dose.text         = 0
+                                inputDose_tld_g_hp10.text       = 0
+                                inputDose_tld_g_hp10_down.text  = 0
+                                inputDose_tld_g_hp3.text        = 0
+                                inputDose_tld_g_hp007.text      = 0
+                                inputDose_tld_n_hp10.text       = 0
+                                inputDose_tld_n_hp10_down.text  = 0
+                                inputDose_tld_n_hp3.text        = 0
+                                inputDose_tld_n_hp007.text      = 0
+                                inputDose_tld_b_hp3.text        = 0
+                                inputDose_tld_b_hp007.text      = 0
+                                //calendar_date_from.ready  = false
+                                //calendar_date_until.ready = false
+                                calendar_burn_date.ready  = false
+
+                                popup_clearFilds.close();
+                            }
+                        }
+                        Button {
+                            text: "Отмена"
+                            onClicked: {
+                                popup_clearFilds.close();
+                            }
+                        }
+                    }
+                }
+
+            }
+
 
         }
+
+
+
 
 
         Rectangle {
@@ -956,7 +1038,7 @@ Page {
             //anchors.bottom: parent.bottom
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 350
+            anchors.topMargin: 200
             //anchors.bottomMargin: 5
             anchors.rightMargin: 70
             width: 300

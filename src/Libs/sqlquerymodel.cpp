@@ -166,8 +166,6 @@ QVariantMap SQLQueryModel::get(int row)
 
 
 
-
-
 /// обновление модели
 void SQLQueryModel:: updateModel() {
     qDebug() << " -> SQLmodel: обновление модели... | thread = " << QThread::currentThreadId();

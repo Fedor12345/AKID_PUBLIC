@@ -36,7 +36,8 @@ SOURCES += \
     ../Libs/sqlquerymodel.cpp \
     ../Libs/waitdb_thread.cpp \
     ../Libs/cursorshapearea.cpp \
-    createreport.cpp
+    createreport.cpp \
+    imageprovider.cpp
 
 RESOURCES += qml.qrc
 
@@ -59,7 +60,8 @@ HEADERS += \
     ../Libs/sqlquerymodel.h \
     ../Libs/waitdb_thread.h \
     ../Libs/cursorshapearea.h \
-    createreport.h
+    createreport.h \
+    imageprovider.h
 
 
 DISTFILES +=
