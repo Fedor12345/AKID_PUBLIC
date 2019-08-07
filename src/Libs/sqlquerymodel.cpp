@@ -79,7 +79,8 @@ void SQLQueryModel::updateModel(const QString &str_query) {
         qDebug() << "lastQuery = " << this->querySQL;
     }
 
-    queryExecute();
+    //queryExecute();
+    setQueryDB(this->querySQL);
 
 //    if (this->lastError().isValid()) {
 //        qDebug() << " -> SQLmodel: ОШИБКА ОБНОВЛЕНИЯ МОДЕЛИ : "<<this->lastError();
@@ -88,30 +89,6 @@ void SQLQueryModel::updateModel(const QString &str_query) {
 //    }
 }
 
-//void SQLQueryModel:: updateModel() {
-//    qDebug() << " -> SQLmodel: обновление модели... | thread = " << QThread::currentThreadId();
-//    this->setQuery(this->query().lastQuery());
-
-//    if (this->lastError().isValid()) {
-//        qDebug() << " -> SQLmodel: ОШИБКА ОБНОВЛЕНИЯ МОДЕЛИ : "<<this->lastError();
-//    }
-//    else {
-//        qDebug()<<" -> SQLmodel: обновление модели прошло удачно";
-//    }
-//}
-
-//void SQLQueryModel:: updateModel(QString query) {
-//    qDebug() << " -> SQLmodel: обновление модели... | thread = " << QThread::currentThreadId();
-////    qDebug() << query;
-//    this->setQuery(query);
-//    qDebug() << "lastQuery = " << this->query().lastQuery();
-//    if (this->lastError().isValid()) {
-//        qDebug() << " -> SQLmodel: ОШИБКА ОБНОВЛЕНИЯ МОДЕЛИ : "<<this->lastError();
-//    }
-//    else {
-//        qDebug() << " -> SQLmodel: обновление модели прошло удачно";
-//    }
-//}
 
 // получить данные в первом столбце из запроса (в интежере)
 int SQLQueryModel::getId(int row) {

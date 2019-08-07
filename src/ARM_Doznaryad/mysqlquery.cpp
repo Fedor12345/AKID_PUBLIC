@@ -331,6 +331,22 @@ bool SQLquery::deleteRecord(const QString& owner_name, const QString &tname, con
 
 }
 
+void SQLquery::deleteDose(const int& id_val) {
+    QString tstr1;
+
+    //tstr1 = "EXECUTE PROC_DELETE_DOZNARYAD("+QString::number(id_val) +")";
+    tstr1 = "Begin PROC_DELETE_DOZNARYAD("+QString::number(id_val) +"); End;";
+    qDebug() << "SQL = " << tstr1;
+
+    if (tstr1.length() > 0) {
+        setQuery(tstr1);
+
+        if (!evloop.isRunning())
+            evloop.exec();
+    }
+
+}
+
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 bool SQLquery::setpoint() {
 //    QEventLoop loop;

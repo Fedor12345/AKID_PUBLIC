@@ -7,15 +7,42 @@ import QtQuick.Controls 2.5
 
 
 Item {
-    //id: item3
+    id: msgbox_root
     height: 200//550
     width:  400
 
     signal clickOK()
+    signal clickCancel()
 
     property alias runnig: mbi.running
     property alias btn_enabled:  ok_button.enabled
     property alias msgtext: msg_text.text
+
+    state: "info"
+    states: [
+        State {
+            name: "info"
+            PropertyChanges {
+                target: cancel_button
+                visible: false
+            }
+            PropertyChanges {
+                target: mbi
+                visible: true
+            }
+        },
+        State {
+            name: "question"
+            PropertyChanges {
+                target: cancel_button
+                visible: true
+            }
+            PropertyChanges {
+                target: mbi
+                visible: false
+            }
+        }
+    ]
 
     Rectangle {
         //id: header_rectangle
@@ -62,9 +89,30 @@ Item {
         enabled: false
 
         onClicked: {
-            clickOK()
-        }
+            console.log("msgbox:"+msgbox_root.state)
 
+            if (msgbox_root.state === "info") {
+                clickCancel()
+            } else {
+                clickOK()
+            }
+        }
+    }
+
+    Button {
+        id: cancel_button
+        width: 120
+        //anchors.margins: 10
+        anchors.bottomMargin: 10
+        anchors.leftMargin: 20
+        text: "Отмена"
+        font.pixelSize: 14
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+
+        onClicked: {
+            clickCancel()
+        }
     }
 
 

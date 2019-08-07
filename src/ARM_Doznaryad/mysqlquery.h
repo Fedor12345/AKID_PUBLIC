@@ -26,6 +26,10 @@ public:
                                   const QMap<QString, QVariant> &map,
                                   const bool& flg_async = false);
 
+    Q_INVOKABLE void setQuery(const QString& query);
+
+    Q_INVOKABLE void deleteDose(const int& id_val);
+
     Q_INVOKABLE bool setpoint();
     Q_INVOKABLE bool rollback();
     Q_INVOKABLE bool commit();
@@ -49,7 +53,7 @@ private:
     QEventLoop evloop;
 private:
     void queryExecute();
-    void setQuery(const QString& query);
+
 
 signals:
     void signalCheckConnectionDB();

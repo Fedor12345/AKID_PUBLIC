@@ -185,8 +185,11 @@ Page {
             ToolButton {
                 id: delButton
                 text: "Удалить"
-                enabled: false
-                //font.pointSize: 12
+                //enabled: false
+                onClicked: {
+                    mymsgbox_popup.operation_name = "delete"
+                    mymsgbox_popup.anyquestion("Вы уверены, что хотите удалить запись?")
+                }
             }
 
             ToolSeparator {
@@ -251,22 +254,52 @@ Page {
         y: Math.round((parent.height - height) / 2)
         padding: 0
 
+        property string operation_name: ""
+
         function pleasewait () {
+            mymsgbox.state = "info"
             mymsgbox.runnig = true
             mymsgbox.btn_enabled = false
             mymsgbox.msgtext = ""
-            mymsgbox_popup.open()
+
+            if (!mymsgbox_popup.opened)
+                mymsgbox_popup.open()
         }
 
         function iamready (txt_string) {
+            mymsgbox.state = "info"
             mymsgbox.runnig = false
             mymsgbox.btn_enabled = true
             mymsgbox.msgtext = txt_string
         }
 
+        function anyquestion(txt_string) {
+            mymsgbox.state = "question"
+            mymsgbox.btn_enabled = true
+            mymsgbox.msgtext = txt_string
+            mymsgbox_popup.open()
+        }
+
         MsgBox {
             id: mymsgbox
             onClickOK: {
+                if (mymsgbox_popup.operation_name === "delete") {
+
+                    mymsgbox_popup.operation_name === "info"
+
+                    mymsgbox_popup.pleasewait()
+                    justquery2.deleteDose(dozModel.get(listview.currentIndex)["ID"])
+
+                    dozModel.updateModel()
+                    mymsgbox_popup.iamready("Запись успешно удалена")
+
+                }
+
+                if (mymsgbox_popup.operation_name === "add new") {
+                    mymsgbox_popup.close()
+                }
+            }
+            onClickCancel: {
                 mymsgbox_popup.close()
             }
         }
@@ -300,6 +333,7 @@ Page {
 
             onEdit_confirm: {
                 create_new_popup.close()
+                mymsgbox_popup.operation_name = "add new"
                 mymsgbox_popup.pleasewait()
 
                 data_record["ID"] = dozModel.get(listview.currentIndex)["ID"]
@@ -357,6 +391,7 @@ Page {
 
             onEdit_confirm: {
                 add_task_popup.close()
+                mymsgbox_popup.operation_name = "add new"
                 mymsgbox_popup.pleasewait()
 
                 var tmap = {}, i = 0, j=0, res;
@@ -446,6 +481,7 @@ Page {
             //нажатие кнопки "Next/Сохранить"
             onWizard_next: {
                 add_worker_popup.close()
+                mymsgbox_popup.operation_name = "add new"
                 mymsgbox_popup.pleasewait()
 
                 wizard_doznaryad["DOZ_WORKERS"] = data_record //["workers", "siz", "rb", "comment"]

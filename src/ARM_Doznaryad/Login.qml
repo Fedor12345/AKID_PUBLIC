@@ -94,7 +94,7 @@ Item {
                             ON t1.doz_status = s1.ID)
                             ORDER BY t1.ID"
                 } else {
-                    err_label.text = "Ошибка: невозможно авторизоваться"
+                    err_label.text = message //"Ошибка: невозможно авторизоваться"
                 }
             }
         }
