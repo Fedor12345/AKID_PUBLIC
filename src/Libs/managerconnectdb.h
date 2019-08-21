@@ -10,15 +10,18 @@
 //#include <modeldb_thread.h>
 
 
+/// ноутбуки:
+/// "ARM_AKID_1"
+/// "ARM_AKID_2"
 
-#define DATABASE_NAME_0  "ORCLPDB_net(1.5)"
-#define DATABASE_NAME_1  "ORCLPDB_net(1.197)"
+#define DATABASE_NAME_0 "ORCLPDB_net(1)" // "ARM_AKID_1" //"ORCLPDB_net(1)" //"ORCLPDB_net(1.5)"
+#define DATABASE_NAME_1 "ORCLPDB_net(2)" // "ARM_AKID_2"//"ORCLPDB_net(2)" //"ORCLPDB_net(1.197)"
 
 #define HOST_NAME_0 ""
 #define HOST_NAME_1 ""
 
-#define USER_NAME_0  "ARM_CONTROL"
-#define USER_NAME_1  "ARM_CONTROL"
+#define USER_NAME_0  "ARM_AKID_TEST_1"
+#define USER_NAME_1  "ARM_AKID_TEST_2"
 
 #define PASSWORD_0  "alpha1"
 #define PASSWORD_1  "alpha1"

@@ -22,9 +22,13 @@ public:
 private:
     QString query;
     QStringList queries; /// список SQL запросов, поступивших во время ожидания ответа от системы подключения к БД
-    //QVector<QByteArray> byteValues;
+
+    QVector<QByteArray> byteValues_tmp;
     QVector<QVector<QByteArray>> byteValues; /// двумерный массив для хранения данных не являющихся строко или числом (например побитовое представление файлов с фото)
-    QStringList types;  /// типы запросов, если пусто, то реузльтат - обычные текстовые данные, помимо них могут быть файлы .jpg, .bmp, .txt, .docm, .docx
+
+   // QStringList types;  /// типы запросов, если "usual", то реузльтат - обычные текстовые данные, помимо них могут быть файлы .jpg, .bmp, .txt, .docm, .docx
+   // QString type;       /// тип берется из параметров функций c SQL запросами,и далее записывается в types при каждом вызове setQuery и там же обнуляется
+                        ///
     int numberQuery = -1;
     int iQuery = 0;
     QStringList queriesGroup; /// список SQL запросов (в случае групповых запросов)

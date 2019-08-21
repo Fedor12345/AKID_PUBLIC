@@ -16,6 +16,10 @@
 #include "cursorshapearea.h"
 #include "imageprovider.h"
 
+#include "filemanager.h"
+#include "ClipboardProxy.h"
+
+
 
 int main(int argc, char *argv[])
 {
@@ -72,22 +76,30 @@ int main(int argc, char *argv[])
     //CreateReport_test *report = new CreateReport_test();
     CreateReport *report = new CreateReport();
 
-//    /// соединение объекта "создание отчета" с объектом SQL запроса
-//    QObject::connect(query1, &SQLquery::signalSendResult,
-//                     report, &CreateReport::resultQueryOnly);
-
-//    QObject::connect(report,  &CreateReport::signalSetQueryOnly,
-//                     query1,  &SQLquery::setQueryWithName);
-
     engine.rootContext()->setContextProperty("report", report);
 
 
     /// Для предоставления ихображения из C++ в Qml создается объект класса ImageProvider,
-    /// в который через сигнал от query1 посылается побитовые данные фото (загруженные из БД)
+    /// в который через сигнал от fileManager посылается побитовые данные фото (загруженные из БД))
+    /// старый вариант: (в который через сигнал от query1 посылается побитовые данные фото (загруженные из БД))
     ImageProvider *imagePovider = new ImageProvider();
-    QObject::connect(query1,       &SQLquery::signalSendImageToProvider,
+
+    /// Отрпаляем в qml объект файлового манаджера
+    FileManager *fileManager = new FileManager();
+    QObject::connect(fileManager,  &FileManager::signalSendImageToProvider,
                      imagePovider, &ImageProvider::setByteArray);
+
+//    /// соединение объекта CreateReport с объектом FileManager
+//    QObject::connect(report, &CreateReport::signalSendResult,
+//                     report, &CreateReport::resultQueryOnly);
+
+    engine.rootContext()->setContextProperty("FileManager", fileManager);
     engine.addImageProvider(QLatin1String("images"), imagePovider);
+
+
+    /// Объект для буфера обмена
+    engine.rootContext()->setContextProperty("clipboard",
+    new ClipboardProxy(QGuiApplication::clipboard()));
 
 
 

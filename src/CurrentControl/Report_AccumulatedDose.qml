@@ -18,42 +18,63 @@ Page {
     property int age
     property string imagePath
 
-//    Label {
-//        anchors.centerIn: parent
-//        text:"report_ESKID_&"
-//    }
 
 
-//    Item {
-//        id: z_massiv
-//        //property list<Item> z: []
-//    }
+    Frame {
+        id: frame_header
 
-    Rectangle {
-        id: rect_header
         height: 50
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.margins: space_margin
+        padding: 1
+        topPadding: 1
+        bottomPadding: 1
+        leftPadding: 30
 
-        color: "#EEEEEE"//"White" Material.color(Material.Grey, Material.Shade200)
-        border.color: "LightGray"
-        radius: 7
-
-        Label {
-            anchors.centerIn: parent
-            text: "ОТЧЕТ НАКОПЛЕННЫЕ ДОЗЫ"
-            font.pixelSize: 14
-            font.bold: true
+        background: Rectangle {
+            anchors.fill: parent
+            color: "#EEEEEE"//"White" Material.color(Material.Grey, Material.Shade200)
+            border.color: "LightGray"
+            radius: 7
+            //border.width: 1
         }
+
+        Row {
+            id: row
+            spacing: 10
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                font.pixelSize: 20 //main_.sizeTxt
+                font.bold: true
+                color: "#808080"
+                text: "ОТЧЕТЫ"
+            }
+            ToolSeparator {}
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                font.pixelSize: 20 //main_.sizeTxt
+                font.bold: true
+                color: "#808080"
+                text: "ОТЧЕТ НАКОПЛЕННЫЕ ДОЗЫ"
+            }
+        }
+
+
+//        Label {
+//            anchors.centerIn: parent
+//            text: "ОТЧЕТЫ"
+//            font.pixelSize: 14
+//            font.bold: true
+//        }
 
     }
 
 
     Rectangle {
         id: rect_header_Person
-        anchors.top: rect_header.bottom
+        anchors.top: frame_header.bottom
         anchors.topMargin: 20 // 100
         anchors.left: parent.left
         anchors.leftMargin: 30
@@ -156,7 +177,7 @@ Page {
 
     Rectangle {
         id: rect_header_choiceDate
-        anchors.top: rect_header.bottom
+        anchors.top: frame_header.bottom
         anchors.topMargin: 20
         anchors.horizontalCenter: parent.horizontalCenter
 
@@ -557,14 +578,14 @@ Page {
             /// пол и возраст сотрудника и ин-фа за какой период времени передаются в массив с индексом ноль (он не отображается в отчете)
             var Z = {};            
             Z["Z0"] = page_main_.sex + "|" + page_main_.age + "|" + test_var;
-            Z["Z1"] = "123" //date_begin_send + "-" + date_end_send;
+            Z["Z1"] = date_begin_send + " - " + date_end_send;
             Z["Z64"] = new Date().toLocaleString("ru_RU");
             report.setZ(Z);
 
             var querySql;
 
             /////////////////////////////////////////////////
-            /// данные из таблицы EXT_DOSE запроса query2_1
+            /// данные из таблицы EXT_PERSON запроса query2_1
             if (page_main_.staff_type === "Командировачный") {
                 querySql = " SELECT PERSON_NUMBER Z2,  (W_SURNAME || ' ' ||  W_NAME || ' ' || W_PATRONYMIC) Z4, STAFF_TYPE Z5, " + // PHOTO Z3
                            " (ADM_ORGANIZATION.ORGANIZATION_ || ' ' || ADM_DEPARTMENT_OUTER.DEPARTMENT_OUTER) Z6, "  +
@@ -599,7 +620,7 @@ Page {
 
 
             /////////////////////////////////////////////////
-            /// данные из таблицы EXT_DOSE запроса query2_2
+            /// данные запроса query2_2
             querySql = " SELECT " +
                        " SUM(TLD_G_HP10) Z21, SUM(TLD_N_HP10)  Z22, SUM(TLD_G_HP3)   Z25, SUM(TLD_N_HP3)   Z26, " +
                        " SUM(TLD_B_HP3)  Z27, SUM(TLD_G_HP007) Z31, SUM(TLD_N_HP007) Z32, SUM(TLD_B_HP007) Z33 "  +
@@ -622,7 +643,7 @@ Page {
             Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_2_2");
 
             /////////////////////////////////////////////////
-            /// данные из таблицы OP_DOSE запроса query2_3
+            /// данные запроса query2_3
 
             querySql = " SELECT " +
                        " SUM(TLD_G_HP10_DOWN) Z37, SUM(TLD_N_HP10_DOWN) Z38 " +
@@ -644,7 +665,7 @@ Page {
 
 
             /////////////////////////////////////////////////
-            /// данные из таблицы OP_DOSE запроса query2_4
+            /// данные запроса query2_4
 
             /// IN_CONTROL
             querySql = " SELECT " +
@@ -720,7 +741,6 @@ Page {
 
         onSignalSendResult: {
             if (res) {
-                var Z = {};
                 //completedZ = 0;
                 if (owner_name == "Report_AccumulatedDose_query2_1") {
                     /// 2 4 5 6 7 8
@@ -758,18 +778,23 @@ Page {
                 }
                 if (owner_name == "Report_AccumulatedDose_query2_4_2") {
                     /// 49
+                    var Z = {};
                     Z["Z49"] = var_res;
                     report.setZ(Z);
                     console.log(" var_res2_4_2 ==== ", var_res);
+                    Z = 0;
                 }
                 if (owner_name == "Report_AccumulatedDose_query2_4_3") {
                     /// 54
+                    var Z = {};
                     Z["Z54"] = var_res;
                     report.setZ(Z);
                     console.log(" var_res2_4_3 ==== ", var_res);
+                    Z = 0;
                 }
                 if (owner_name == "Report_AccumulatedDose_query2_4_4") {
                     /// 59
+                    var Z = {};
                     Z["Z59"] = var_res;
                     report.setZ(Z);
                     console.log(" var_res2_4_4 ==== ", var_res);
@@ -781,15 +806,18 @@ Page {
                 }
                 if (owner_name == "Report_AccumulatedDose_query2_4_6") {
                     /// 44
+                    var Z = {};
                     Z["Z44"] = var_res;
                     report.setZ(Z);
                     console.log(" var_res2_4_6 ==== ", var_res, " ", var_res["Z44"]);
+                    Z = 0;
 
-                    report.beginCreateReport();
+                    report.beginCreateReport_AccumulatedDose();
                     report.showZ();
+                    report.clearZ();
                 }
 
-                Z = 0;
+                //Z = 0;
             }
 
 

@@ -23,26 +23,6 @@ Page {
 
     Component.onCompleted: console.log("InputDoseTLD    completed")
 
-//    TextField {
-//        id:txt_startInputDoseTLD
-//        anchors.centerIn: parent
-//        text: "_TLD dose input_"
-//    }
-
-
-//    Button {
-//        anchors.bottom: parent.bottom
-//        anchors.horizontalCenter: parent.horizontalCenter
-
-//        text: "testVar_"
-
-//        onClicked: {
-//            //txt_startInputDoseTLD.text =  main_.id_currentPerson;
-//            console.log("id_currentPerson = ", main_.id_currentPerson);
-//            //console.log("model_adm_status: ", model_adm_status.get(0)["STATUS"]);
-//        }
-
-//    }
 
     Item {
         id: main_2
@@ -156,21 +136,14 @@ Page {
                             anchors.verticalCenter: parent.verticalCenter
                             text: qsTr("Идентификатор кассетницы:")
                             font.pixelSize: main_.sizeTxt
+                            color: (inputDose_tld_holder.currentIndex < 0) ? "#ff0000" : "#444444"
                         }
                         ComboBox {
                             id: inputDose_tld_holder
+                            property bool isOk: (inputDose_tld_holder.currentIndex < 0) ? false : true
                             currentIndex: -1
                             model: ["0001", "0002", "0003", "0004", "0005"]
                         }
-    //                    TextEdit {
-    //                        id: inputDose_tld_holder
-    //                        font.pixelSize: main_.sizeTxt
-    //                        font.bold: true
-    //                        color: Material.color(Material.Teal)
-    //                        selectByMouse: true
-    //                        selectionColor: Material.color(Material.Red)
-    //                        text: main_.id_currentPerson
-    //                    }
                     }
 
                     Row {
@@ -179,6 +152,7 @@ Page {
                             anchors.verticalCenter: parent.verticalCenter
                             text: qsTr("Дата отжига")
                             font.pixelSize: main_.sizeTxt
+                            color: (!calendar_burn_date.ready) ? "#ff0000" : "#444444"
                         }
                         MyCalendar {
                             id: calendar_burn_date
@@ -327,7 +301,7 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    text: "0"
+                                    placeholderText: qsTr("0")
                                 }
 
                                 Label {
@@ -356,7 +330,7 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    text: "0"
+                                    placeholderText: qsTr("0")
                                     opacity: (main_.sex === "M") ? 0.3 : 1
                                     enabled: (main_.sex === "M") ? false : true
                                     onEnabledChanged: {
@@ -398,8 +372,7 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    text: "0"
-
+                                    placeholderText: qsTr("0")
                                 }
                                 Label {
                                     //leftPadding: 5
@@ -424,7 +397,7 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    text: "0"
+                                    placeholderText: qsTr("0")
                                 }
                                 Label {
                                     //leftPadding: 5
@@ -480,7 +453,7 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    text: "0"
+                                    placeholderText: qsTr("0")
                                 }
 
                                 Label {
@@ -509,7 +482,7 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    text: "0"
+                                    placeholderText: qsTr("0")
                                     opacity: (main_.sex === "M") ? 0.3 : 1
                                     enabled: (main_.sex === "M") ? false : true
                                     onEnabledChanged: {
@@ -551,7 +524,7 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    text: "0"
+                                    placeholderText: qsTr("0")
 
                                 }
                                 Label {
@@ -577,7 +550,7 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    text: "0"
+                                    placeholderText: qsTr("0")
                                 }
                                 Label {
                                     //leftPadding: 5
@@ -686,7 +659,7 @@ Page {
                         selectByMouse: true
                         selectionColor: Material.color(Material.Red)
                         horizontalAlignment: Text.AlignHCenter
-                        text: "0"
+                        placeholderText: qsTr("0")
 
                     }
                     Label {
@@ -712,7 +685,7 @@ Page {
                         selectByMouse: true
                         selectionColor: Material.color(Material.Red)
                         horizontalAlignment: Text.AlignHCenter
-                        text: "0"
+                        placeholderText: qsTr("0")
 
                     }
                     Label {
@@ -804,28 +777,48 @@ Page {
                     flat: true
                     Material.foreground: Material.Blue
 
+                    enabled:
+                    {
+                        var isOk
+
+                        if (inputDose_tld_holder.isOk) { isOk = true                }
+                        else                           { isOk = false; return isOk; }
+
+                        if (calendar_burn_date.ready) { isOk = true                }
+                        else                          { isOk = false; return isOk; }
+
+                        return isOk;
+                    }
+
+
                     onClicked: {
                         var data_arr = {}
 
-                        data_arr["ID_PERSON"]       = parseInt(main_.id_currentPerson,10)
+
+                        data_arr["ID_PERSON"]       = parseFloat(main_.id_currentPerson)
                         data_arr["TLD_HOLDER"]      = inputDose_tld_holder.currentText
                         //data_arr["DATE_FROM"]       = calendar_date_from.date_val
                         //data_arr["DATE_UNTIL"]      = calendar_date_until.date_val
-                        data_arr["TLD_G_HP10"]      = parseInt(inputDose_tld_g_hp10.text,10)
-                        data_arr["TLD_G_HP10_DOWN"] = parseInt(inputDose_tld_g_hp10_down.text,10)
-                        data_arr["TLD_G_HP3"]       = parseInt(inputDose_tld_g_hp3.text,10)
-                        data_arr["TLD_G_HP007"]     = parseInt(inputDose_tld_g_hp007.text,10)
-                        data_arr["TLD_N_HP10"]      = parseInt(inputDose_tld_n_hp10.text,10)
-                        data_arr["TLD_N_HP10_DOWN"] = parseInt(inputDose_tld_n_hp10_down.text,10)
-                        data_arr["TLD_N_HP3"]       = parseInt(inputDose_tld_n_hp3.text,10)
-                        data_arr["TLD_N_HP007"]     = parseInt(inputDose_tld_n_hp007.text,10)
-                        data_arr["TLD_B_HP3"]       = parseInt(inputDose_tld_b_hp3.text,10)
-                        data_arr["TLD_B_HP007"]     = parseInt(inputDose_tld_b_hp007.text,10)
-                        //data_arr["FON_DOSE"]        = parseInt(inputDose_fon_dose.text,10)
-                        data_arr["BURN_DATE"]       = calendar_burn_date.date_val
+                        data_arr["TLD_G_HP10"]      = (inputDose_tld_g_hp10.text.length > 0)      ? parseFloat(inputDose_tld_g_hp10.text)       : parseFloat(0)
+                        data_arr["TLD_G_HP10_DOWN"] = (inputDose_tld_g_hp10_down.text.length > 0) ? parseFloat(inputDose_tld_g_hp10_down.text)  : parseFloat(0)
+                        data_arr["TLD_G_HP3"]       = (inputDose_tld_g_hp3.text.length > 0)       ? parseFloat(inputDose_tld_g_hp3.text)        : parseFloat(0)
+                        data_arr["TLD_G_HP007"]     = (inputDose_tld_g_hp007.text.length > 0)     ? parseFloat(inputDose_tld_g_hp007.text)      : parseFloat(0)
+                        data_arr["TLD_N_HP10"]      = (inputDose_tld_n_hp10.text.length > 0)      ? parseFloat(inputDose_tld_n_hp10.text)       : parseFloat(0)
+                        data_arr["TLD_N_HP10_DOWN"] = (inputDose_tld_n_hp10_down.text.length > 0) ? parseFloat(inputDose_tld_n_hp10_down.text)  : parseFloat(0)
+                        data_arr["TLD_N_HP3"]       = (inputDose_tld_n_hp3.text.length > 0)       ? parseFloat(inputDose_tld_n_hp3.text)        : parseFloat(0)
+                        data_arr["TLD_N_HP007"]     = (inputDose_tld_n_hp007.text.length > 0)     ? parseFloat(inputDose_tld_n_hp007.text)      : parseFloat(0)
+                        data_arr["TLD_B_HP3"]       = (inputDose_tld_b_hp3.text.length > 0)       ? parseFloat(inputDose_tld_b_hp3.text)        : parseFloat(0)
+                        data_arr["TLD_B_HP007"]     = (inputDose_tld_b_hp007.text.length > 0)     ? parseFloat(inputDose_tld_b_hp007.text)      : parseFloat(0)
+                        //data_arr["FON_DOSE"]        = parseFloat(inputDose_fon_dose.text)
+                        if (calendar_burn_date.ready) data_arr["BURN_DATE"] = calendar_burn_date.date_val
+
+                        console.log(" (!) ready: ", calendar_burn_date.ready)
+                        console.log(" (!) date_val: ", calendar_burn_date.date_val)
 
                         Query1.insertRecordIntoTable("InputDoseTLD", "EXT_DOSE", data_arr)
 
+
+                        /// проверка
 //                        var query = " SELECT ID_PERSON FROM EXT_DOSE "
 //                                    " WHERE ID_PERSON = "     + data_arr["ID_PERSON"]
 //                                    " WHERE TLD_HOLDER = "    + data_arr["TLD_HOLDER"]
@@ -1010,7 +1003,8 @@ Page {
                                 inputDose_tld_b_hp007.text      = 0
                                 //calendar_date_from.ready  = false
                                 //calendar_date_until.ready = false
-                                calendar_burn_date.ready  = false
+                                calendar_burn_date.ready    = false
+                                calendar_burn_date.txtEmpty = true
 
                                 popup_clearFilds.close();
                             }

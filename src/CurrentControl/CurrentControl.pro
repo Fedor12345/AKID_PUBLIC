@@ -37,7 +37,9 @@ SOURCES += \
     ../Libs/waitdb_thread.cpp \
     ../Libs/cursorshapearea.cpp \
     createreport.cpp \
-    imageprovider.cpp
+    imageprovider.cpp \
+    filemanager.cpp \
+    ClipboardProxy.cpp
 
 RESOURCES += qml.qrc
 
@@ -61,7 +63,9 @@ HEADERS += \
     ../Libs/waitdb_thread.h \
     ../Libs/cursorshapearea.h \
     createreport.h \
-    imageprovider.h
+    imageprovider.h \
+    filemanager.h \
+    ClipboardProxy.h
 
 
 DISTFILES +=

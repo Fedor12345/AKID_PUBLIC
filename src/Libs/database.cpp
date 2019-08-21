@@ -38,9 +38,15 @@ void Database::connectionDB(const QString &userName, const QString &password) //
     qDebug() << "\n -> Database: connectionDB: ("<<this->databaseName << ") |  thread =" << QThread::currentThreadId() << "\n";
 
     this->userName = userName;
+    /// если подключаемся ко второй машине, то редактируем в имени подключения _1 на _2
+    /// (!) убрать это если имена пользователей БД на обеих машинах одинаковые
     if(this->connectionName == "machine 1") {
-        this->userName = userName + "_2";
+        if ( this->userName.endsWith("_1") ) {
+            this->userName = this->userName.remove( this->userName.length()-2, 2 );
+        }
+         this->userName =  this->userName + "_2";
     }
+
     this->password = password;
     db.setUserName(this->userName);
     db.setPassword(this->password);
@@ -129,6 +135,7 @@ void Database::setQueryModelDB()
     for (int i; i<19; i++) {
         qDebug()<<"modelDB : record: "<<modelDB->record(i).value(0).toString()<<"|"; //.value(1).toString()
     }
+    delete modelDB;
 
 }
 ////////////////////////////////////////////////////////////////////////

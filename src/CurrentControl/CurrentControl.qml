@@ -15,7 +15,7 @@ Page {
     Pane {
         id: frame1
         //wheelEnabled: true
-        width: 350
+        width: 300
         anchors.margins: 0//8
         anchors.left: parent.left
         anchors.top: parent.top
@@ -36,10 +36,11 @@ Page {
 
                 /// header: "имя заголовка not fold"  - блокирует сворачивание списка для данного заголовка
 
-                ListElement { image:"icons/face.svg"; name: "Выбор сотрудника";   header: "" } ///Карточка работника
+                //ListElement { image:"icons/face.svg"; name: "Выбор сотрудника 2";   header: "" } ///Карточка работника
+                ListElement { image:"icons/face.svg"; name: "Выбор сотрудника";   header: "" }
                 ListElement { image:"";               name: "Ввод доз ТЛД";       header: "" }
 
-                ListElement { image:""; name: "Новый сотрудник";    header: "" }
+                //ListElement { image:""; name: "Новый сотрудник";    header: "" }
 
 
                 ListElement { image:""; name: "SQL запросы";        header: "Отчеты not fold" }
@@ -63,29 +64,7 @@ Page {
 
             onCurrentName: {
                 changePage(name)
-
-//                var namePage
-//                switch(name) {
-//                case "Карточка работника":
-//                    namePage = "WorkersCard.qml";
-//                    break;
-
-//                case "Ввод доз ТЛД":
-//                    namePage = "InputDoseTLD.qml";
-//                    break;
-
-//                case "Отчеты":
-//                    namePage = "Report_1DOZ.qml";
-//                    break;
-
-//                default:
-//                    namePage = "TestPage.qml"
-//                    break;
-//                }
-                //stackview_mainwindow.replace(namePage)
-                //if(name === "Касетница") { stackview_mainwindow.replace(".qml") }
             }
-
         }
 
     }
@@ -94,10 +73,24 @@ Page {
         //var namePage
         pageNotVisible();
         switch(name) {
+//        case "Выбор сотрудника": //Карточка работника
+//            console.log("name = ", name);
+//            //namePage = "WorkersCard.qml";
+//            workerCard.visible = true;
+//            break;
+
         case "Выбор сотрудника": //Карточка работника
             console.log("name = ", name);
-            //namePage = "WorkersCard.qml";
-            workerCard.visible = true;
+            persons.visible = true;
+
+            /// обновление моделей
+            pages_main.model_ext_person_list.updateModel()
+            pages_main.model_adm_status.updateModel()
+            pages_main.model_adm_assignment.updateModel()
+            pages_main.model_adm_organisation.updateModel()
+            pages_main.model_adm_department_outer.updateModel()
+            pages_main.model_adm_department_inner.updateModel()
+
             break;
 
         case "Ввод доз ТЛД":
@@ -108,19 +101,21 @@ Page {
 
         case "SQL запросы":
             console.log("name = ", name);
-            //namePage = "Report_1DOZ.qml";
-            reports.visible = true;
+            reports.visible = true; //namePage = "Report_1DOZ.qml";
+
+            /// обновление моделей
+            pages_main.model_SQLQiueries.updateModel()
+            pages_main.model_tableReports.updateModel()
+
             break;
 
         case "Накопленные дозы":
-            console.log("name = ", name);
-            //namePage = "Report_AccumulatedDose.qml";
-            report_AccumulatedDose.visible = true;
+            console.log("name = ", name);            
+            report_AccumulatedDose.visible = true; //namePage = "Report_AccumulatedDose.qml";
             break;
         case "Отчет № 1-ДОЗ":
-            console.log("name = ", name);
-            //namePage = "Report_1DOZ.qml";
-            report_1DOZ.visible = true;
+            console.log("name = ", name);            
+            report_1DOZ.visible = true; //namePage = "Report_1DOZ.qml";
             break;
 
         case "Тесты":
@@ -135,7 +130,8 @@ Page {
         }
     }
     function pageNotVisible(){
-        workerCard.visible             = false
+        //workerCard.visible             = false
+        persons.visible                = false
         inputDoseTLD.visible           = false
         report_AccumulatedDose.visible = false
         report_1DOZ.visible            = false
@@ -148,6 +144,7 @@ Page {
 
     Item {
         id: pages_main //stackview_mainwindow
+
         anchors.left: frame1.right
         anchors.right: parent.right
         //anchors.rightMargin: 250
@@ -155,12 +152,21 @@ Page {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 70
 
+        //signal signalUpdateModel()
 
+        /// модели
+        property var model_ext_person_list:      managerDB.createModel(" SELECT ID_PERSON, W_NAME, W_SURNAME, W_PATRONYMIC, PERSON_NUMBER, ID_TLD FROM EXT_PERSON ORDER BY W_SURNAME", "ext_person" )
         property var model_adm_status:           managerDB.createModel(" SELECT STATUS_CODE, STATUS  FROM ADM_STATUS ",                    "adm_status_update")
         property var model_adm_assignment:       managerDB.createModel(" SELECT ID, ASSIGNEMENT      FROM ADM_ASSIGNEMENT ",               "adm_department_nnp_update")
         property var model_adm_organisation:     managerDB.createModel(" SELECT ID, ORGANIZATION_    FROM ADM_ORGANIZATION ",                 "adm_organisation")
         property var model_adm_department_outer: managerDB.createModel(" SELECT ID, DEPARTMENT_OUTER FROM ADM_DEPARTMENT_OUTER WHERE ID = 0", "adm_department_outer")
         property var model_adm_department_inner: managerDB.createModel(" SELECT ID, DEPARTMENT_INNER FROM ADM_DEPARTMENT_INNER ",             "adm_department_inner")
+
+        property var model_SQLQiueries:  managerDB.createModel(" SELECT ID, DOCX, DOCM, REPORTNAME, SQL, DESCRIPTION FROM REPORTS ", "rep_sqlqueries") //" SELECT ID, SQLQUERY, DESCRIPTION FROM REP_SQLQUERIES ", "rep_sqlqueries"
+        property var model_tableReports: managerDB.createModel("", "tableReports")
+
+
+
 
         property string id_currentPerson: "Сотрудник не выбран"
         property string fio_currentPerson: "Сотрудник не выбран"
@@ -169,18 +175,53 @@ Page {
         property int age: 0
         property string imagePath: "icons/face.svg"
         property string burn_date_lost: "Сотрудник не выбран"
- //
-
-        property var model_SQLQiueries:  managerDB.createModel(" SELECT ID, SQLQUERY, DESCRIPTION FROM REP_SQLQUERIES ", "rep_sqlqueries")
-        property var model_tableReports: managerDB.createModel("", "tableReports")
 
 
+        /// обновить все модели
+        function updateAllModels() {
+            model_ext_person_list.updateModel();
+            model_adm_status.updateModel();
+            model_adm_assignment.updateModel();
+            model_adm_organisation.updateModel();
+            model_adm_department_outer.updateModel();
+            model_adm_department_inner.updateModel();
 
-        WorkersCard {
-            id: workerCard
+            model_SQLQiueries.updateModel();
+            model_tableReports.updateModel();
+        }
+
+//        WorkersCard {
+//            id: workerCard
+//            anchors.fill: parent
+//            visible: false
+
+//            model_adm_status:           pages_main.model_adm_status
+//            model_adm_assignment:       pages_main.model_adm_assignment
+//            model_adm_organisation:     pages_main.model_adm_organisation
+//            model_adm_department_outer: pages_main.model_adm_department_outer
+//            model_adm_department_inner: pages_main.model_adm_department_inner
+
+////            onCurrentPersonChange: {
+////                pages_main.id_currentPerson  = id_currentPerson
+////                pages_main.fio_currentPerson = fio_currentPerson
+////                pages_main.sex = sex
+////                pages_main.staff_type = staff_type
+////                pages_main.age = age
+////            }
+////            onCurrentPersonChange_photo: {
+////                pages_main.imagePath = imagePath
+////            }
+////            onCurrentPersonChange_date_burn: {
+////                pages_main.burn_date_lost = burn_date_lost
+////            }
+//        }
+
+        Persons {
+            id: persons
             anchors.fill: parent
             visible: true
 
+            model_ext_person_list:      pages_main.model_ext_person_list
             model_adm_status:           pages_main.model_adm_status
             model_adm_assignment:       pages_main.model_adm_assignment
             model_adm_organisation:     pages_main.model_adm_organisation
@@ -201,6 +242,7 @@ Page {
                 pages_main.burn_date_lost = burn_date_lost
             }
         }
+
         InputDoseTLD {
             id: inputDoseTLD
             anchors.fill: parent
@@ -224,6 +266,7 @@ Page {
             id: report_1DOZ
             anchors.fill: parent
             visible: false
+            id_currentPerson: pages_main.id_currentPerson
         }
         Report_AccumulatedDose {
             id: report_AccumulatedDose
@@ -456,7 +499,9 @@ Page {
                         popup_wait_2.open();
 
                         //managerDB.connectionDB(0);
-                        managerDB.checkConnectionDB(0)
+                        managerDB.checkConnectionDB(0);
+
+                        pages_main.updateAllModels();
                     }
                     onEntered: {
                         parent.color = "#dbdbdb" // "LightGray"
@@ -490,7 +535,9 @@ Page {
                         popup_wait_2.open();
                         txt_statusConnection.append("<p style='color:#9cc17f'> Переключение БД </p>")
                         //managerDB.connectionDB(1);
-                        managerDB.checkConnectionDB(1)
+                        managerDB.checkConnectionDB(1);
+
+                        pages_main.updateAllModels();
                     }
                     onEntered: {
                         parent.color = "#dbdbdb" //"LightGray"
@@ -533,6 +580,14 @@ Page {
                     wrapMode: TextArea.Wrap
                     color: Material.color(Material.Grey)
                     font.family: "Calibri"
+                    onLengthChanged: {
+                        //console.log(" (!) Length = ", length)
+                        if(length >= 5000) {
+                            console.log(" (!) Length = ", length, " | clear txt_statusConnection ...")
+                            clear();
+
+                        }
+                    }
                 }
 
                 ScrollBar.vertical: ScrollBar { }

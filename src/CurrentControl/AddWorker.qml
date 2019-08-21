@@ -25,6 +25,13 @@ Item {
     signal create_cancel()
 
     function clearfields() {
+
+
+        item_Photo.source = "icons/face.svg";
+        item_Photo.emptyPhoto = true;
+        openFileDialog.isNew = true;
+        //openFileDialog.fileUrl = "";
+
         nw_name.text = ""
         nw_surname.text = ""
         nw_patronymic.text = ""
@@ -64,8 +71,8 @@ Item {
         nw_iku_month.text = "0"
         nw_Au.text = "0"
         nw_Iu.text = "0"
-        nw_emergency_dose.currentIndex = -1
-        nw_disable_radiation.currentIndex = -1
+        nw_emergency_dose.currentIndex = 0
+        nw_disable_radiation.currentIndex = 0
     }
 
 
@@ -125,7 +132,7 @@ Item {
 
     Rectangle {
         id: header_rectangle
-        color: "indianred"
+        color: ok_button.enabled ? "#4CAF50" : "indianred"
         width: parent.width
         height: 40
         Label {
@@ -166,10 +173,7 @@ Item {
             font.pixelSize: 14
             background: Rectangle { color: "#eeeeee" }
             property int tbwidth: 300
-//            TabButton {
-//                text: "Общая информация"
-//                width: implicitWidth
-//            }
+
             TabButton {
                 text: "Персональная информация"
                 width: implicitWidth
@@ -284,18 +288,18 @@ Item {
 
                                 FileDialog {
                                     id: openFileDialog
+                                    property bool isNew: false
                                     title: "Выбирите фото"
                                     folder: shortcuts.home
                                     selectExisting: true
                                     nameFilters: [ "Image files (*.jpg *.png)", "All files (*)" ]
                                     onAccepted: {
-                                        console.log("You chose: " + openFileDialog.fileUrls)
-                                        var str = openFileDialog.fileUrl;
-                                        console.log("str: " + str)
+                                        console.log("You chose: " + openFileDialog.fileUrls, " | ", openFileDialog.fileUrl)
                                         item_Photo.emptyPhoto = false;
                                         item_Photo.source = openFileDialog.fileUrl;
-                                        console.log(item_Photo.sourceSize.height + " " + item_Photo.sourceSize.width)
-                                        //Qt.quit()
+                                        isNew = false;
+
+                                        //console.log(item_Photo.sourceSize.height + " " + item_Photo.sourceSize.width)
                                     }
                                     onRejected: {
                                         console.log("Canceled")
@@ -335,9 +339,11 @@ Item {
                                             Text {
                                                 text: "Фамилия"
                                                 font.pixelSize: 14
+                                                color: nw_surname.isOk ? "black" : "red"
                                             }
                                             TextField {
                                                 id: nw_surname
+                                                property bool isOk: (text.length == 0) ? false : true
                                                 font.pixelSize: 16
                                                 width: 150
                                                 horizontalAlignment: Text.AlignHCenter
@@ -352,9 +358,11 @@ Item {
                                             Text {
                                                 text: "Имя"
                                                 font.pixelSize: 14
+                                                color: nw_name.isOk ? "black" : "red"
                                             }
                                             TextField {
                                                 id: nw_name
+                                                property bool isOk: (text.length == 0) ? false : true
                                                 font.pixelSize: 16
                                                 width: 150
                                                 horizontalAlignment: Text.AlignHCenter
@@ -369,9 +377,11 @@ Item {
                                             Text {
                                                 text: "Отчество"
                                                 font.pixelSize: 14
+                                                color: nw_patronymic.isOk ? "black" : "red"
                                             }
                                             TextField {
                                                 id: nw_patronymic
+                                                property bool isOk: (text.length == 0) ? false : true
                                                 font.pixelSize: 16
                                                 width: 150
                                                 horizontalAlignment: Text.AlignHCenter
@@ -542,6 +552,11 @@ Item {
                                             interval: 500
                                             repeat: false
                                             onTriggered: {
+//                                                for (var i = 0; i<20; i++) {
+//                                                    console.log("timer_personalNumber...")
+//                                                    console.log("123...")
+//                                                    console.log("...")
+//                                                }
                                                  if (nw_personalNumber.text.length > 0)
                                                  { Query1.setQueryAndName(" Select PERSON_NUMBER FROM EXT_PERSON WHERE PERSON_NUMBER = " + nw_personalNumber.text, "isPersonalNumber"); }
 
@@ -626,7 +641,7 @@ Item {
                                             font.pixelSize: 16
                                             //property var model_:
 
-                                            model: ["Персонал АЭС", "Командировачный"]
+                                            model: ["Персонал АЭС", "Командировочный"]
                                         }
                                     }
 
@@ -677,6 +692,7 @@ Item {
                                                 //font.bold: true
                                                 font.pixelSize: 40
                                                 onClicked: {popup_addOrganisation.open()}
+                                                enabled: false
 
                                                 Popup {
                                                     id: popup_addOrganisation
@@ -961,12 +977,6 @@ Item {
                         }
 
                     }
-
-
-
-
-
-
 
 
 
@@ -1457,6 +1467,17 @@ Item {
                 if (nw_tld.isOk) { isOk = true                }
                 else             { isOk = false; return isOk; }
 
+                if (nw_surname.isOk) { isOk = true            }
+                else             { isOk = false; return isOk; }
+
+                if (nw_name.isOk) { isOk = true               }
+                else             { isOk = false; return isOk; }
+
+                if (nw_patronymic.isOk) { isOk = true         }
+                else             { isOk = false; return isOk; }
+
+
+
                 return isOk;
             }
 
@@ -1472,7 +1493,16 @@ Item {
                 data_arr["W_SURNAME"]    = nw_surname.text
                 data_arr["W_PATRONYMIC"] = nw_patronymic.text
 
-                data_arr["PHOTO"] = item_Photo.source
+                /// проверка на то занова ли открыли форму добавления нового сорудника
+                if ( !openFileDialog.isNew ) {
+                    console.log("openFileDialog.fileUrl = ", openFileDialog.fileUrl);
+                    FileManager.pathFile = openFileDialog.fileUrl;
+                    data_arr["PHOTO"] = FileManager.qByteArray_file; //item_Photo.source
+                }
+                else {
+                    data_arr["PHOTO"] = null;
+                }
+
 
                 if (nw_birthday.ready) data_arr["BIRTH_DATE"] = nw_birthday.date_val
 

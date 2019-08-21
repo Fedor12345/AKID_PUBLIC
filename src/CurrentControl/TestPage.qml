@@ -34,9 +34,25 @@ Page {
 
 
 
+    Connections {
+        target: Query1
+        onSignalSendResult: {
+            if (owner_name === "testQueryFile") {
+                 console.log(" testQueryFile: ", res, var_res, " type: ", typeof var_res, var_res.length );
+                FileManager.sendToCpp(var_res);
+                FileManager.safeFile(var_res, "", "img_file", "jpg" )
+
+            }
+        }
+    }
+
+
     Rectangle {
+        id: main_1
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
+        //anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 40
         width: 700
         height: 300
         color: "transparent" // "#EEEEEE"
@@ -223,9 +239,117 @@ Page {
         }
 
 
-
     }
 
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+
+    Rectangle {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: main_1.bottom
+        anchors.topMargin: 20
+        width: 700
+        height: 300
+        color: "transparent" // "#EEEEEE"
+        border.color: "LightGray"
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.top:parent.top
+            anchors.bottom: parent.bottom
+            anchors.margins: 20
+            width: 400
+            color: "transparent"
+            border.color: "LightGray"
+            Column {
+                anchors.fill:parent
+                spacing: 20
+
+                Row {
+                    anchors.left: parent.left
+                    spacing: 10
+
+                    Button {
+                        text: "Load File"
+                        onClicked: {
+                            openFileDialog2.open();
+                        }
+                    }
+
+                    TextEdit {
+                        id: txt_fileName
+                        anchors.verticalCenter: parent.verticalCenter
+                        selectionColor: Material.color(Material.Red)
+                        selectByMouse: true
+                    }
+                }
+
+
+                Row {
+                    anchors.left: parent.left
+                    spacing: 10
+
+                    Button {
+                        text: "out DB"
+                        onClicked: {
+                            var query = " SELECT PHOTO from EXT_PERSON where ID_PERSON = 39 "
+                            //Query1.setQueryAndName(query, "testQueryFile")
+                            //FileManager.test = " макрос Q_PROPERTY работает! или нет, сейчас увидим ";
+                            FileManager.pathFile = openFileDialog2.fileUrl;
+                            var fileBA = FileManager.qByteArray_file;
+                            console.log(" typeof (fileBA): ", typeof (FileManager.qByteArray_file)," ", FileManager.qByteArray_file);
+
+
+                            var data_arr = {}
+                            data_arr["FILE_"] = FileManager.qByteArray_file;
+                            data_arr["DESCRIPTION"] = (txt_fileNameInDB.text.length > 0) ? txt_fileNameInDB.text : txt_fileName.text;
+
+                            Query1.insertRecordIntoTable("insertFileTest","FILES_TEST", data_arr);
+                        }
+                    }
+                    TextField {
+                        id: txt_fileNameInDB
+                        anchors.verticalCenter: parent.verticalCenter
+                        selectByMouse: true
+                        //text: qsTr(FileManager.test) //qsTr(FileManager.qByteArray_file)
+                    }
+                }
+
+
+            }
+        }
+
+
+        FileDialog {
+            id: openFileDialog2
+            //property var fileUrl
+            title: "Выбирите фото"
+            folder: shortcuts.desktop //shortcuts.home
+            selectExisting: true
+            nameFilters: [ "Image files (*.jpg *.png)", "Report files (*.txt *.docm *.docx *.bat)", "All files (*)" ]
+            onAccepted: {
+                console.log("You chose: " + openFileDialog2.fileUrls)
+                var str = openFileDialog2.fileUrl;
+                console.log("str: " + str)
+                txt_fileName.text = fileUrl.toString().replace('file:///','')
+            }
+            onRejected: {
+                console.log("Canceled")
+                //Qt.quit()
+            }
+        }
+
+
+
+
+
+
+
+    }
 
 
 

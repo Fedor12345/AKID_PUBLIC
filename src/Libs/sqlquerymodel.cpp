@@ -76,17 +76,21 @@ QHash<int, QByteArray> SQLQueryModel::roleNames() const {
 
 // получить данные в первом столбце из запроса (в интежере)
 int SQLQueryModel::getFirstColumnInt(int row) {
-    int id_=0;
-    id_ = this->data( this->index(row, 0), this->i_ID ).toInt(); /// this->i_ID = Qt::UserRole + 1
-    //qDebug() << " -> SQLmodel(" << this->nameModel << "):" << "id_ = " << id_;
+    int id_ = 0;
+    if (row >= 0) {
+        id_ = this->data( this->index(row, 0), this->i_ID ).toInt(); /// this->i_ID = Qt::UserRole + 1
+        //qDebug() << " -> SQLmodel(" << this->nameModel << "):" << "id_ = " << id_;
+    }
     return id_;
 }
 
 // получить данные в первом столбце из запроса
 QString SQLQueryModel::getFirstColumn(int row) {
     QString str="";
-    str = this->data( this->index(row, 0), this->i_ID ).toString();  /// this->i_ID = Qt::UserRole + 1
-    //qDebug() << " -> SQLmodel(" << this->nameModel << "):" << "id_ = " << id_;
+    if (row >= 0) {
+        str = this->data( this->index(row, 0), this->i_ID ).toString();  /// this->i_ID = Qt::UserRole + 1
+        //qDebug() << " -> SQLmodel(" << this->nameModel << "):" << "id_ = " << id_;
+    }
     return str;
 }
 

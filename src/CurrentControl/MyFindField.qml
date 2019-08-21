@@ -121,8 +121,6 @@ Item {
                                   WHERE (LOWER(W_SURNAME) LIKE '"+ findtext.toLowerCase() +"%')
                                   ORDER BY w_surname "
 
-                    //tek_person
-                    //ext_person
 
 //                    popup_listview.model.query = " SELECT (w_surname || ' ' || SUBSTR(w_name, 1, 1) || '. ' || SUBSTR(w_patronymic, 1, 1) || '.') fname,
 //                                  tld_number tld, PERSON_NUMBER PN, ID
@@ -204,7 +202,7 @@ Item {
                 property int rowIdx: index
 
                 onClicked: {
-                    findtext = SURNAME + " " + NAME.charAt(0) + "." + PATRONYMIC.charAt(0)+ "." //FNAME// + " ("+tld+")"
+                    //findtext = SURNAME + " " + NAME.charAt(0) + "." + PATRONYMIC.charAt(0)+ "." //FNAME// + " ("+tld+")"
 //                    placeholdertext = fname + " ("+tld+")"
                     id_rec = ID
 //                    console.log("id_rec = ", id_rec, "ID = ", ID)

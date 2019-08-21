@@ -10,39 +10,63 @@ import QtQuick.Dialogs 1.2
 Page {
     id: page_report_ESKID
     property int space_margin: 15
+    property var id_currentPerson
 
 //    Label {
 //        anchors.centerIn: parent
 //        text:"report_ESKID_&"
 //    }
+    Frame {
+        id: frame_header
 
-    Rectangle {
-        id: rect_header
         height: 50
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.margins: space_margin
+        padding: 1
+        topPadding: 1
+        bottomPadding: 1
+        leftPadding: 30
 
-        color: "#EEEEEE"//"White" Material.color(Material.Grey, Material.Shade200)
-        border.color: "LightGray"
-        radius: 7
-
-        Label {
-            anchors.centerIn: parent
-            text: "ОТЧЕТ № 1-ДОЗ"
-            font.pixelSize: 14
-            font.bold: true
+        background: Rectangle {
+            anchors.fill: parent
+            color: "#EEEEEE"//"White" Material.color(Material.Grey, Material.Shade200)
+            border.color: "LightGray"
+            radius: 7
+            //border.width: 1
         }
 
+        Row {
+            id: row
+            spacing: 10
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                font.pixelSize: 20 //main_.sizeTxt
+                font.bold: true
+                color: "#808080"
+                text: "ОТЧЕТЫ"
+            }
+            ToolSeparator {}
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                font.pixelSize: 20 //main_.sizeTxt
+                font.bold: true
+                color: "#808080"
+                text: "№ 1-ДОЗ"
+            }
+        }
     }
+
+
+
 
     Rectangle {
         id: rect_WORKERorWORKERS
         width: 300
         height: 210
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: rect_header.bottom
+        anchors.top: frame_header.bottom
         anchors.topMargin: space_margin
 
         property string state: "one"
@@ -397,16 +421,31 @@ Page {
 
                     }
                 }
-
-
         }
-
-
-
-
 
     }
 
+
+
+
+    Connections {
+        id: report_query
+        target: Query1
+
+        onSignalSendResult: {
+            if (res) {
+                //completedZ = 0;
+                if (owner_name == "Report_1DOZ") {
+                    console.log("Генерируем отчет...");
+                    console.log(" var_res ==== ", var_res, " ", var_res["Z1"], var_res["Z2"], var_res["Z3"], var_res["Z4"]);
+                    report.setZ(var_res);
+                    report.beginCreateReport1DOZ();
+                    report.showZ();
+                    report.clearZ();
+                }
+            }
+        }
+    }
     Button {
         id: button_CREATEREPORT
         anchors.horizontalCenter: parent.horizontalCenter
@@ -417,13 +456,31 @@ Page {
         font.pointSize: 16
         text: "СОЗДАТЬ ОТЧЕТ"
         onClicked: {
-            report.createReport(idWorker.text)}
-//        Material.accent: Material.Orange
-//        Material.foreground: "White"
-//        Material.background: Material.Orange
+            //report.createReport(idWorker.text)
+            report.setTypeReport(12);
+            var querySQL =
+                    " SELECT SNILS Z1, BIRTH_DATE Z2, " +
+                    " ADM_ASSIGNEMENT.ASSIGNEMENT_CODE Z3, ADM_ASSIGNEMENT.ASSIGNEMENT Z4," +
+                    " STATUS_CODE Z5, SEX Z6, "  +
+                    " ( COALESCE(EXT_DOSE.TLD_B_HP3,0) + COALESCE(EXT_DOSE.TLD_B_HP007,0) + COALESCE(OP_DOSE.EPD_B_HP3,0) + COALESCE(OP_DOSE.EPD_B_HP007,0) ) Z7, " +
+                    " ( COALESCE(EXT_DOSE.TLD_G_HP10,0) + COALESCE(OP_DOSE.EPD_G_HP10,0) ) Z8, "  +
+                    " ( COALESCE(EXT_DOSE.TLD_N_HP10,0) + COALESCE(OP_DOSE.EPD_N_HP10,0) ) Z9, "  +
+                    " ( COALESCE(IN_CONTROL.EXP_EFF_DOSE_C,0) + COALESCE(IN_MEASURE.EXP_EFF_DOSE_M,0) + COALESCE(IN_IODINE.EXP_EFF_DOSE_I,0) ) Z10 " +
+                    " ( COALESCE(EXT_DOSE.TLD_G_HP007,0) + COALESCE(EXT_DOSE.TLD_N_HP007,0) + COALESCE(EXT_DOSE.TLD_B_HP007,0) + COALESCE(OP_DOSE.EPD_G_HP007,0) + COALESCE(OP_DOSE.EPD_N_HP007,0)  + COALESCE(OP_DOSE.EPD_B_HP007,0) ) Z11 " +
 
-//        ToolTip.visible: hovered
-//        ToolTip.text: qsTr("Напечатать отчет с заданными параметрами")
+                    " FROM EXT_PERSON "  +
+                    " LEFT JOIN EXT_DOSE ON EXT_PERSON.ID_PERSON = EXT_DOSE.ID_PERSON "               +
+                    " LEFT JOIN ADM_ASSIGNEMENT ON EXT_PERSON.ID_ASSIGNEMENT = ADM_ASSIGNEMENT.ID "   +
+                    " LEFT JOIN OP_DOSE ON EXT_PERSON.ID_PERSON = OP_DOSE.ID_PERSON "                 +
+                    " LEFT JOIN IN_CONTROL ON EXT_PERSON.ID_PERSON = IN_CONTROL.ID_PERSON "           +
+                    " LEFT JOIN IN_MEASURE ON EXT_PERSON.ID_PERSON = IN_MEASURE.ID_PERSON "           +
+                    " LEFT JOIN IN_IODINE ON EXT_PERSON.ID_PERSON = IN_IODINE.ID_PERSON "             +
+
+                    " WHERE EXT_PERSON.ID_PERSON IN (" + page_report_ESKID.id_currentPerson + ") ";
+            Query1.setQueryAndName(querySQL, "Report_1DOZ");
+
+        }
+
         //всплывающая подсказка
         ToolTip {
             id: toolTip_CRETEREPORT

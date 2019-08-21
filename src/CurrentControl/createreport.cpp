@@ -10,12 +10,13 @@ CreateReport::CreateReport(QObject *parent) : QObject(parent)
 
 }
 
+
 void CreateReport::startScript(QString path)
 {
     //system("taskkill /F /IM имя")
     QProcess p;
-    qDebug() << "path = " << path;
-    path = path + "/report_2.bat";  //path + "/run_1.1.bat"  // path = path + "/report_test.bat";
+    //qDebug() << "path = " << path;
+    //path = path + "/report_2.bat";  //path + "/run_1.1.bat"  // path = path + "/report_test.bat";
     qDebug() << "path = " << path;
     p.startDetached("cmd.exe", QStringList() << "/c" << path);
     //p.startDetached("cmd.exe", QStringList() << "/c" << "taskkill /F /IM IM ARM_CurrentControl2.exe");
@@ -54,10 +55,17 @@ void CreateReport::setZ(const QMap<QString, QVariant> &mapZ)
     foreach (QString key, mapZ.keys()) {
         key_ = key;
         key_.remove("Z");
-        qDebug() << " key_ = " << key_ << mapZ.values(key); //mapZ.value(key);
+        //qDebug() << " key_ = " << key_ << mapZ.values(key); //mapZ.value(key);
         this->Z[key_.toInt()] = mapZ.value(key).toString();
     }
 }
+
+void CreateReport::clearZ()
+{
+    this->Z = nullptr;
+}
+
+
 /// отобразить содержимое массива Z
 void CreateReport::showZ() {
     if (this->lengthZ <= 0) return;
@@ -70,8 +78,113 @@ void CreateReport::showZ() {
     qDebug() << " ---------------------- ";
 }
 
-/// начало создания отчета
 void CreateReport::beginCreateReport()
+{
+    //QString data0 = Z[0];
+
+    QString data_str = "";
+    for ( int i = 1; i <= this->lengthZ; i++ ) {
+        if (i == this->lengthZ) {
+            data_str = data_str + Z[i];
+        }
+        else {
+            data_str = data_str + Z[i] + ";";
+        }
+
+    }
+    qDebug() << "data_str ==" << data_str;
+
+
+    QString path = qApp->applicationDirPath();
+
+    QString nameFile = path + "/query1.txt"; //+ "/DataForReport.txt";  // //"/report_test.txt";
+    QFile file(nameFile);
+    if (!file.open(QIODevice::WriteOnly)) {
+        // error message0
+        qDebug()<<"File " + nameFile + " not open";
+    } else {
+        qDebug()<<"File " + nameFile + " open";
+
+        QTextStream stream(&file);
+        stream.setCodec("UTF-8"); //"UTF-8")
+        stream << trUtf8("\n");
+        QString txt = data_str;
+        //QString txt_h = column_str;
+        //stream « tr(txt_h.toUtf8().data())«tr("\n");
+//        stream << tr(txt.toUtf8().data());
+        stream << trUtf8(txt.toUtf8().data());
+        stream.flush();
+
+        emit sendToQml(data_str);
+
+        file.close();
+    }
+
+
+
+    /// создаем файд .bat со скриптами уничтожения процессов офиса (WINWORD.EXE) и запуск скрипта генерации отчета
+    QString batFileName = path + "/start_DOCM.bat";
+    QFile fileBAT(batFileName);
+    if (!fileBAT.open(QIODevice::WriteOnly)) {
+        // error message0
+        qDebug()<<"File " + batFileName + " not open";
+    } else {
+        qDebug()<<"File " + batFileName + " open";
+
+        QTextStream stream(&fileBAT);
+        stream.setCodec("UTF-8"); //"UTF-8")
+        QString txt;
+        txt.append("taskkill /F /IM WINWORD.EXE \n");
+        txt.append("set /a var_I = 0 \n");
+        txt.append(":LOOP \n");
+        txt.append("tasklist /FI 'IMAGENAME eq WINWORD.EXE' 2>NUL | find /I /N 'WINWORD.EXE'>NUL \n");
+        txt.append("if '%ERRORLEVEL%'=='0' ( \n");
+        txt.append("  set /a var_I += 1 \n");
+        txt.append("  echo  Program is running \n");
+        txt.append("  ECHO WINWORD.EXE is still running \n");
+        txt.append("  Timeout /T 5 /Nobreak \n");
+        txt.append("  if '%var_I%'=='1' ( GOTO CONTINUE2 ) \n");
+        txt.append("  GOTO LOOP \n");
+        txt.append(") \n");
+        txt.append("ELSE (GOTO CONTINUE) \n");
+        txt.append(":CONTINUE \n");
+        txt.append("start .\\macro_1.docm \n");
+        txt.append(":CONTINUE2 \n");
+
+//        txt.append("taskkill /F /IM WINWORD.EXE \n");
+//        txt.append(":LOOP \n");
+//        txt.append("tasklist | find /i 'WINWORD.EXE' >nul 2>&1 \n");
+//        txt.append("IF ERRORLEVEL 1 ( GOTO CONTINUE )\n");
+//        txt.append("ELSE ( \n");
+//        txt.append("  ECHO Wordpad is still running \n");
+//        txt.append("  Timeout /T 5 /Nobreak \n");
+//        txt.append("  GOTO LOOP \n");
+//        txt.append(") \n");
+//        txt.append(":CONTINUE \n");
+//        txt.append("start .\\macro_1.docm \n");
+
+        stream << trUtf8(txt.toUtf8().data());
+        //stream << trUtf8("\n");
+        stream.flush();
+
+        fileBAT.close();
+    }
+
+
+//    /// удаление файла отчета с таким же именем
+//    QString nameDeleteFile = path + "/" + Z[1] + ".docx";
+//    qDebug() << " (!) nameDeleteFile = " << nameDeleteFile;
+//    QFile reportFile_old (nameDeleteFile);
+//    reportFile_old.remove();
+
+    //killProcess("WINWORD.EXE");
+    //QThread::msleep(2000); /// условное ожидание пока процесс WINWORD.EXE завершится
+    startScript(batFileName); ///запускаем скрипт запуска создания отчета
+
+}
+
+/// начало создания отчета
+void CreateReport::beginCreateReport_AccumulatedDose()
 {
     /// разбор информации из нулевого элемента массива Z
     QString data0 = Z[0];
@@ -285,10 +398,49 @@ void CreateReport::beginCreateReport()
     }
 
     killProcess("WINWORD.EXE");
-    startScript(path); ///запускаем скрипт создания отчета
+    startScript(path + "/report_2.bat"); ///запускаем скрипт создания отчета
 
 
+}
 
+
+void CreateReport::beginCreateReport1DOZ() {
+    //QString data0 = Z[0];
+
+    QString data_str = "";
+    for ( int i = 1; i <= this->lengthZ; i++ ) {
+        data_str = data_str + Z[i] + "; ";
+    }
+    qDebug() << "data_str ==" << data_str;
+
+
+    QString path = qApp->applicationDirPath();
+
+    QString nameFile = path + "/query_1.1.txt"; //"/report_test.txt";
+    QFile file(nameFile);
+    if (!file.open(QIODevice::WriteOnly)) {
+        // error message0
+        qDebug()<<"File " + nameFile + " not open";
+    } else {
+        qDebug()<<"File " + nameFile + " open";
+
+        QTextStream stream(&file);
+        stream.setCodec("UTF-8"); //"UTF-8")
+        stream << trUtf8("\n");
+        QString txt = data_str;
+        //QString txt_h = column_str;
+        //stream « tr(txt_h.toUtf8().data())«tr("\n");
+//        stream << tr(txt.toUtf8().data());
+        stream << trUtf8(txt.toUtf8().data());
+        stream.flush();
+
+        emit sendToQml(data_str);
+
+        file.close();
+    }
+
+    killProcess("WINWORD.EXE");
+    startScript(path + "/run_1.1.bat"); ///запускаем скрипт создания отчета
 
 }
 
@@ -298,6 +450,7 @@ void CreateReport::beginCreateReport()
 
 
 
+/////////////////////////////////////УДАЛИТь
 void CreateReport::createReport_AccumulatedDose(const int &id, const QDateTime &data_begin, const QDateTime &data_end) {
     Z = new QString[64];
 
@@ -458,10 +611,13 @@ void CreateReport::createReport_AccumulatedDose(const int &id, const QDateTime &
     }
 
     killProcess("WINWORD.EXE");
-    startScript(path); ///запускаем скрипт создания отчета
+    startScript(path + "/report_2.bat"); ///запускаем скрипт создания отчета
 
 
 }
+/////////////////////////////////////УДАЛИТь
+
+
 
 
 void CreateReport::resultQueryOnly(const QString &owner_name, const bool &res, const QVariant &var_res, const QString &messageError)

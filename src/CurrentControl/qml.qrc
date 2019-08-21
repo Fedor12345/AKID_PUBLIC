@@ -34,5 +34,6 @@
         <file>MyListViewUnfolding_v2.qml</file>
         <file>Report_AccumulatedDose.qml</file>
         <file>EmptyPage.qml</file>
+        <file>Persons.qml</file>
     </qresource>
 </RCC>

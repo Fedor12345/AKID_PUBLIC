@@ -29,7 +29,12 @@ void SQLquery::setQuery(const QString &query)
     this->fl_setQuery = true;
     this->query = query;
     this->queries.append(query);    
+    this->byteValues.append(this->byteValues_tmp);
     this->numberQuery++;
+
+
+    //this->type = "usual"; // если тип запроса usual, то он никак специально не обрабатывается
+    this->byteValues_tmp.clear();
 
     clearqueriesGroup();
 
@@ -108,6 +113,31 @@ void SQLquery::checkNameConnection(QString connectionName) //, bool isNewName
 
     this->connectionName = connectionName;
 
+
+    /// !!!!!!!!! ПЕРЕПРОВЕРИТЬ !!!!!!!!!!!!!!!!!!
+
+//    query = this->queries.at(this->iQuery);
+//    //this->queries.removeAt(this->iQuery);
+
+//    if ( connectionName != "0" )
+//    {
+//        queryExecute(query);
+//    }
+//    else
+//    {
+//        emit signalSendResult(sender_name, false, NULL, "Соединение с БД отстутсвует");
+//        /// ВЫПОЛНЯТЬ В СЛУЧАЕ ЕСЛИ ИМЯ СОЕДИНЕНИЯ 0
+//    }
+
+//    this->iQuery++;
+//    if (this->iQuery < this->queries.length()-1) {
+//        emit signalCheckConnectionDB();   /// отправляем менеджеру сигнал начать попытки подключения
+//        return;
+//    }
+
+    /// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
     for ( int i = 0; i < this->queries.length(); i++ )
     {
         this->iQuery = i;
@@ -124,6 +154,8 @@ void SQLquery::checkNameConnection(QString connectionName) //, bool isNewName
             /// ВЫПОЛНЯТЬ В СЛУЧАЕ ЕСЛИ ИМЯ СОЕДИНЕНИЯ 0
         }
     }
+
+
     this->queries.clear();
     this->sender_names.clear();
     this->byteValues.clear();
@@ -133,9 +165,9 @@ void SQLquery::checkNameConnection(QString connectionName) //, bool isNewName
 
     this->fl_setQuery = false;
 
-    if(this->isNewName){
-        emit signalCheckConnectionDB();
-    }
+//    if(this->isNewName){
+//        emit signalCheckConnectionDB();
+//    }
 
 
 }
@@ -148,6 +180,7 @@ void SQLquery::queryExecute(QString query)
 
     result_data.clear();
     QString sender_name_current = sender_names.at(this->iQuery);
+    //QString type = this->types.at(this->iQuery);
     QString message = "";
     QVariant value;
 
@@ -160,8 +193,8 @@ void SQLquery::queryExecute(QString query)
     if (this->byteValues.size()>0) {
         QString str = ":byteValue_";
         //if (this->numberQuery <= this->byteValues.size()) { }
-        for ( int i =  0 ; i < this->byteValues[this->numberQuery].size() ; i ++ ) {
-            querySQL.bindValue( str + QString::number(i), this->byteValues[this->numberQuery][i], QSql::In | QSql::Binary  );
+        for ( int i =  0 ; i < this->byteValues[this->iQuery].size() ; i ++ ) {
+            querySQL.bindValue( str + QString::number(i), this->byteValues[this->iQuery][i], QSql::In | QSql::Binary  );
         }
     }
 
@@ -187,7 +220,17 @@ void SQLquery::queryExecute(QString query)
                 /// Если полей много, то посылается объект result_data ( value = result_data ) класса QMap с множеством полей (столбцов)
                 for (int i = 0; i < rec.count(); ++i) {
                     numberOfRecords++;
-                    result_data.insert(rec.fieldName(i),querySQL.value(i));
+
+                    if ( querySQL.value(i).type() == QVariant::ByteArray) {
+                        QByteArray outByteArray = querySQL.value(i).toByteArray();
+                        if ( outByteArray.size() == 0) {
+                            message = "Внимание! Тип данных - файл: пустой; размер = " + QString::number(outByteArray.size());
+                        }
+                        result_data.insert(rec.fieldName(i),outByteArray);
+                    }
+                    else {
+                        result_data.insert(rec.fieldName(i),querySQL.value(i));
+                    }
                 }
                 value = result_data;
             }
@@ -206,6 +249,13 @@ void SQLquery::queryExecute(QString query)
                     qDebug() << " test image!: ";
 
                     QByteArray outByteArray = querySQL.value(0).toByteArray();
+                    value = outByteArray;
+                    if ( outByteArray.size() == 0) {
+                        value = 0;
+                        message = "Внимание! Тип данных - файл: пустой; размер = " + QString::number(outByteArray.size());
+                    }
+
+                    /*
                     qDebug() << " test image type: " << querySQL.value(0).type() << outByteArray.size();
                     emit signalSendImageToProvider(outByteArray, "photo_person");
                     value = "photo_person";
@@ -225,6 +275,8 @@ void SQLquery::queryExecute(QString query)
                     QString path = QCoreApplication::applicationDirPath() + "/photo_2.jpg" ;
 
 //                    value = path;
+                    */
+
                 }
                 //////////////////////////////////////////////////////////////
                 //emit signalSendResult(sender_name_current, true, value, message);
@@ -234,8 +286,6 @@ void SQLquery::queryExecute(QString query)
             /// ИТОГ:
             /// Если полей (столбцов) много:              value = result_data
             /// Если поле одно:                           value = querySQL.value(0);
-            /// Если данные в поле имеет тип ByteArray:   value = "photo_person"  ( для изображений)
-            ///                                           value = ( для файлов ?????)
             ///                                           value = 0 (если запись пуста)
             emit signalSendResult(sender_name_current, true, value, message);
 
@@ -296,6 +346,8 @@ bool SQLquery::insertRecordIntoTable(const QString& owner_name, const QString &t
     //sender_name = owner_name;
     this->sender_name = owner_name;
     this->sender_names.append(owner_name);
+//    if ( type != "img" || type != "file" ) {}
+//    this->type = type;
 
     QString tstr1 = "INSERT INTO ", tstr2 = "VALUES (";
     tstr1 = tstr1 + tname + " (";
@@ -312,31 +364,44 @@ bool SQLquery::insertRecordIntoTable(const QString& owner_name, const QString &t
             tstr2 = tstr2 + "TO_DATE('"+ map.value(key).toDate().toString(Qt::ISODate) + "', 'YYYY-MM-DD'),";
             //TO_DATE('2019-03-01 06:40:00', 'YYYY-MM-DD HH24:MI:SS')
         }
-        /// Если в данных обнаруживается одна или несолкьо URL ссылок, то в массив this->byteValues отправляюется массив (QVector)
-        /// с побитовыми данными, выгруженные по данному адрессу
-        else if (map.value(key).type() == QVariant::Url) {
-            isURL = true;
-            qDebug() << "ЕСТЬ URL:" << map.value(key); // << map.value(key).toString();
-
-            QString urlFile = map.value(key).toString();
-            if ( ~urlFile.indexOf("file:///") ) urlFile.remove("file:///");
-            QFile file(urlFile);
-            //QFile file("C:/Users/test/Desktop/1530661187194959677.jpg");
-            if (!file.open(QIODevice::ReadOnly))  {
-                qDebug() << "УКАЗАННЫЙ ФАЙЛ (изображение) НЕ БЫЛ НАЙДЕН";
-                //return false;
-            }
-            QByteArray inByteArray = file.readAll();
-            byteValues_0.append(inByteArray);
-            //byteValues[this->numberQuery+1].append(inByteArray);
-            //byteValues[this->numberQuery+1][0] = inByteArray;
+        /// Если в данных присутсвует двоичные данные, то заносим их в массив byteValues_tmp
+        else if (map.value(key).type() == QVariant::ByteArray) {
+            qDebug() << " в апросе присутствует QVariant::ByteArray ";
+            QByteArray inByteArray = map.value(key).toByteArray();
+            //byteValues_0.append(inByteArray);
+            byteValues_tmp.append(inByteArray);
             QString str_byteValue = ":byteValue_" + QString::number(iByteValue) + ",";
             iByteValue++;
-            file.close();
 
             tstr2 = tstr2 + str_byteValue;
-            qDebug() << "tstr2 = " << tstr2;
+            //qDebug() << "tstr2 = " << tstr2;
         }
+        /// УДАЛИТЬ
+        /// Если в данных обнаруживается одна или несолкьо URL ссылок, то в массив this->byteValues отправляюется массив (QVector)
+        /// с побитовыми данными, выгруженные по данному адрессу
+//        else if (map.value(key).type() == QVariant::Url) {
+//            isURL = true;
+//            qDebug() << "ЕСТЬ URL:" << map.value(key); // << map.value(key).toString();
+
+//            QString urlFile = map.value(key).toString();
+//            if ( ~urlFile.indexOf("file:///") ) urlFile.remove("file:///");
+//            QFile file(urlFile);
+//            //QFile file("C:/Users/test/Desktop/1530661187194959677.jpg");
+//            if (!file.open(QIODevice::ReadOnly))  {
+//                qDebug() << "УКАЗАННЫЙ ФАЙЛ (изображение) НЕ БЫЛ НАЙДЕН";
+//                //return false;
+//            }
+//            QByteArray inByteArray = file.readAll();
+//            byteValues_0.append(inByteArray);
+//            //byteValues[this->numberQuery+1].append(inByteArray);
+//            //byteValues[this->numberQuery+1][0] = inByteArray;
+//            QString str_byteValue = ":byteValue_" + QString::number(iByteValue) + ",";
+//            iByteValue++;
+//            file.close();
+
+//            tstr2 = tstr2 + str_byteValue;
+//            qDebug() << "tstr2 = " << tstr2;
+//        }
 
 
         else {
@@ -344,7 +409,7 @@ bool SQLquery::insertRecordIntoTable(const QString& owner_name, const QString &t
         }
     }
 
-    if (isURL) this->byteValues.append(byteValues_0);
+    //if (isURL) this->byteValues.append(byteValues_0);
 
     tstr1.remove (tstr1.length()-1, 1);
     tstr2.remove (tstr2.length()-1, 1);
@@ -359,10 +424,10 @@ bool SQLquery::insertRecordIntoTable(const QString& owner_name, const QString &t
 
 bool SQLquery::updateRecordIntoTable(const QString &owner_name, const QString &tname, const QMap<QString, QVariant> &map, const QString &idWhere, const int &id)
 {
-   // return NULL;
-    //sender_name = owner_name;
     this->sender_name = owner_name;
     this->sender_names.append(owner_name);
+
+    int iByteValue = 0;
 
     QString tstr = " UPDATE " + tname + " SET ";
 
@@ -372,7 +437,22 @@ bool SQLquery::updateRecordIntoTable(const QString &owner_name, const QString &t
         if (map.value(key).type() == QVariant::DateTime) {
             tstr = tstr + " TO_DATE('"+ map.value(key).toDate().toString(Qt::ISODate) + "', 'YYYY-MM-DD'), ";
             //TO_DATE('2019-03-01 06:40:00', 'YYYY-MM-DD HH24:MI:SS')
-        } else {
+        }
+        /// Если в данных присутсвует двоичные данные, то заносим их в массив byteValues_tmp
+        else if (map.value(key).type() == QVariant::ByteArray) {
+            qDebug() << " в апросе присутствует QVariant::ByteArray ";
+            QByteArray inByteArray = map.value(key).toByteArray();
+            //byteValues_0.append(inByteArray);
+            byteValues_tmp.append(inByteArray);
+            QString str_byteValue = ":byteValue_" + QString::number(iByteValue) + ",";
+            iByteValue++;
+
+            tstr = tstr + str_byteValue;
+            //qDebug() << "tstr = " << tstr;
+        }
+
+
+        else {
             tstr = tstr + " '" +  map.value(key).toString() + "',";
         }
     }
