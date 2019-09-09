@@ -134,6 +134,8 @@ void CreateReport::beginCreateReport()
         QTextStream stream(&fileBAT);
         stream.setCodec("UTF-8"); //"UTF-8")
         QString txt;
+        //txt.append("start .\\macro_1.docm \n");
+
         txt.append("taskkill /F /IM WINWORD.EXE \n");
         txt.append("set /a var_I = 0 \n");
         txt.append(":LOOP \n");

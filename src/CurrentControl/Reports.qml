@@ -6,6 +6,8 @@ import QtQuick.Controls.Material 2.3
 
 import QtQuick.Dialogs 1.2
 
+import MyTools 1.0
+
 
 Page {
     id: page_reports
@@ -128,6 +130,45 @@ Page {
 
     }
 
+    /// линия между списком запросов и таблицей для их растягивания и масштабирования
+    Rectangle {
+        id: rect_ScaleLine
+        anchors.top: frame_page_header.bottom
+        anchors.topMargin: 20
+        anchors.bottom: parent.bottom
+
+        x: 380
+
+        width: 20
+        color: "transparent" // "Green"
+
+        MouseArea {
+            anchors.fill: parent
+
+
+            drag.target: parent
+            drag.axis: Drag.XAxis
+            drag.minimumX: 200
+            drag.maximumX: 600 //repeter_headers.itemAt(index).width //1000
+
+            hoverEnabled: true
+            onEntered:  {}
+            onExited:   {}
+            onPressed:  {}
+            onReleased: {}
+            onClicked:  {}
+
+            CursorShapeArea {
+                anchors.fill: parent
+                cursorShape: Qt.SplitHCursor // Qt.OpenHandCursor //Qt.PointingHandCursor
+            }
+
+
+        }
+
+    }
+
+
     Rectangle {
         id: rectMain_SQLQueries
         anchors.top: frame_page_header.bottom
@@ -135,7 +176,10 @@ Page {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.leftMargin: 20
-        width: 350
+
+        anchors.right: rect_ScaleLine.left
+        //width: 350
+
 
         //border.color: "LightGray"
         color: "transparent"
@@ -190,7 +234,12 @@ Page {
 
             Popup {
                 id: popup_addQuery
-                property var type
+                property string type /// при вызове окна необходимо указать тип: add или update
+                property bool scripNew: false    /// при выборе файла из диалогового файлового окна меняется на true
+                property bool patternNew: false  /// при выборе файла из диалогового файлового окна меняется на true
+
+
+
                 width: addQuery.width// + padding*2
                 height: addQuery.height// + padding*2
                 modal: true
@@ -202,7 +251,7 @@ Page {
                 padding: 0
 
                 onClosed: { clearFilds() }
-
+                onOpened: { scripNew = false; patternNew = false }
 
                 background:
                     Rectangle {
@@ -644,10 +693,13 @@ Page {
                         //nameFilters: [ "Script file (*.docm)", "Pattern file (*.docx)", "All files (*)" ]
                         onAccepted: {
 
+                            if ( fileUrl.toString().length <= 0 ) return;
+
+
                             //console.log("You chose: " + openFileDialog2.fileUrls)
                             //var str = openFileDialog2.fileUrl;
                             //console.log("str: " + str)
-                            //txt_fileName.text = fileUrl.toString().replace('file:///','')
+                            //txt_fileName.text = fileUrl.toString().replace('file:///','')                            
 
 
                             var str = fileUrl.toString().replace('file:///','')
@@ -661,11 +713,14 @@ Page {
                             fileName = str[str.length-1];
 
                             if ( typeFile == "docm" ) {
+                                popup_addQuery.scripNew = true;
                                 txt_ScriptFileName.text = fileName; // + " (" + fileUrl.toString().replace('file:///','') + ")"
                                 txt_ScriptFileName.fileUrl = fileUrl;
+                                popup_addQuery
                             }
                             else if ( typeFile == "docx" )
                             {
+                                popup_addQuery.patternNew = true;
                                 txt_PatternFileName.text = fileName; // + " (" + fileUrl.toString().replace('file:///','') + ")"
                                 txt_PatternFileName.fileUrl = fileUrl;
                             }
@@ -687,6 +742,8 @@ Page {
                     Popup {
                         id: popup_infoAddDB
                         property alias textInfo: txt_infoAddDB.text
+
+
 
                         width: item_infoAddDB.width
                         height: item_infoAddDB.height
@@ -781,33 +838,43 @@ Page {
                             var data_arr = {}
 
                             FileManager.pathFile = txt_PatternFileName.fileUrl;
-                            if (FileManager.fileLenght <= 0)
-                            {
-                                //console.log("Данные не были добавленны в БД: выбранный файл ШАБЛОНА имеет нулевой размер, был удален или переименован");
-                                popup_infoAddDB.textInfo = "Данные не были добавленны в БД: выбранный файл ШАБЛОНА имеет нулевой размер, был удален или переименован";
-                                popup_infoAddDB.open();
-                                txt_PatternFileName.fileUrl = "";
-                                return;
+                            /// проверка выбран ли новый файл шаблона в диалоговом меню ( при открытии окна "редактровать запись", сменяется на false )
+                            /// если true, то, добавляем файл (проверив его размер) в набор данных для запроса
+                            if (popup_addQuery.patternNew) {
+                                if (FileManager.fileLenght <= 0)
+                                {
+                                    //console.log("Данные не были добавленны в БД: выбранный файл ШАБЛОНА имеет нулевой размер, был удален или переименован");
+                                    popup_infoAddDB.textInfo = "Данные не были добавленны в БД: выбранный файл ШАБЛОНА имеет нулевой размер, был удален или переименован";
+                                    popup_infoAddDB.open();
+                                    txt_PatternFileName.fileUrl = "";
+                                    return;
+                                }
+                                else
+                                {
+                                    data_arr["DOCX"] = FileManager.qByteArray_file;
+                                }
                             }
-                            else
-                            {
-                                data_arr["DOCX"] = FileManager.qByteArray_file;
+
+                            /// проверка выбран ли новый файл скрипта в диалоговом меню (при редкатировании записи он становится false, считается выбранным )
+                            /// если true, то, проверив размер файла, добавляем его в набор данных для запроса
+                            if (popup_addQuery.scripNew) {
+                                FileManager.pathFile = txt_ScriptFileName.fileUrl;
+                                if (FileManager.fileLenght <= 0)
+                                {
+                                    //console.log("Данные не были добавленны в БД: выбранный файл СКРИПТА имеет нулевой размер, был удален или переименован");
+                                    popup_infoAddDB.textInfo = "Данные не были добавленны в БД: выбранный файл СКРИПТА имеет нулевой размер, был удален или переименован";
+                                    popup_infoAddDB.open();
+                                    txt_ScriptFileName.fileUrl = "";
+                                    return;
+                                }
+                                else
+                                {
+                                    data_arr["DOCM"] = FileManager.qByteArray_file;
+                                }
                             }
 
 
-                            FileManager.pathFile = txt_ScriptFileName.fileUrl;
-                            if (FileManager.fileLenght <= 0)
-                            {
-                                //console.log("Данные не были добавленны в БД: выбранный файл СКРИПТА имеет нулевой размер, был удален или переименован");
-                                popup_infoAddDB.textInfo = "Данные не были добавленны в БД: выбранный файл СКРИПТА имеет нулевой размер, был удален или переименован";
-                                popup_infoAddDB.open();
-                                txt_ScriptFileName.fileUrl = "";
-                                return;
-                            }
-                            else
-                            {
-                                data_arr["DOCM"] = FileManager.qByteArray_file;
-                            }
+
 
                             data_arr["REPORTNAME"] = txt_ReportName.text
                             data_arr["SQL"] = txt_FieldQuerySQL.text
@@ -1273,8 +1340,8 @@ Page {
         anchors.top: frame_page_header.bottom
         anchors.topMargin: 20
         anchors.bottom: parent.bottom
-        anchors.left: rectMain_SQLQueries.right
-        anchors.leftMargin: 20
+        anchors.left: rect_ScaleLine.right //rectMain_SQLQueries.right
+        //anchors.leftMargin: 20
         anchors.right: parent.right
         anchors.rightMargin: 20
 

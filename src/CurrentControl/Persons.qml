@@ -676,11 +676,11 @@ Item {
                     width: 40
                     Text {
                         id: txt_button_update
-                        //anchors.centerIn: parent
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        anchors.rightMargin: 2
-                        anchors.topMargin: -10
+                        anchors.centerIn: parent
+//                        anchors.right: parent.right
+//                        anchors.top: parent.top
+//                        anchors.rightMargin: 2
+//                        anchors.topMargin: -10
                         font.pixelSize: 35
                         color: "LightGray"
                         text: qsTr("⟳") //✓ ⟳ ☺ 😐
@@ -758,13 +758,14 @@ Item {
         //            }
 
                     ScrollBar.vertical: ScrollBar {
-                        policy: "AlwaysOn"
+                        policy: "AsNeeded" //"AlwaysOn"
                     }
 
                     clip: true
                     delegate:
                         ItemDelegate {
-                        width: 325; height: 60
+                        width: 340 //325
+                        height: 60
                         Row {
                             spacing: 5
                             Rectangle {
@@ -916,20 +917,42 @@ Item {
                 height: 50
                 radius: 50
                 color: mainColor
-                opacity: 0.7
+                //opacity: 0.7
 
                 Rectangle {
                     id: txt_AddINFO
-                    visible: false
+                    property bool open: false
+                    property var width_: width
+                    //visible: false
                     anchors.bottom: parent.bottom
                     anchors.top: parent.top
                     anchors.right: parent.right
+                    anchors.rightMargin: 20
                     property string mainColor: "#8BC34A" // "white" //"transparent"
-                    width: 300
+                    //width: 300
                     radius: parent.radius
                     color: mainColor
                     opacity: 0.9
+                    onWidthChanged: {
+                        if ( txt_AddINFO.width >= 260 ) { txt_txt_AddINFO.visible = true;  }
+                        else                            { txt_txt_AddINFO.visible = false; }
+
+//                        if ( txt_AddINFO.width == 0 )  { button_Add.opacity = 0.7 }
+//                        else                           { button_Add.opacity = 1.0 }
+
+                    }
+
+                    onOpenChanged: {
+                        console.log("onVisibleChanged:", visible, " ", width_)
+                        animation_txt_AddINFO.stop();
+                        //animation_txt_AddINFO.running = false;
+                        animation_txt_AddINFO.startValue = txt_AddINFO.open ? 0   : width_
+                        animation_txt_AddINFO.endValue   = txt_AddINFO.open ? 280 : 0
+                        animation_txt_AddINFO.running = true;
+                    }
+
                     Text {
+                        id: txt_txt_AddINFO
                        // anchors.centerIn: parent
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left: parent.left
@@ -938,7 +961,23 @@ Item {
                         font.pixelSize: 18
                         font.bold: true
                         color: "white" //"LightGray"
+                        //visible: (txt_AddINFO.width >= 260) ? true : false
                     }
+
+                    NumberAnimation {
+                        id: animation_txt_AddINFO
+                        property int startValue
+                        property int endValue
+                        easing.type: Easing.OutCirc
+                        target: txt_AddINFO
+                        running: false//txt_AddINFO.visible
+                        properties: "width"
+                        //easing.type: Easing.InOutElastic
+                        from: startValue
+                        to:   endValue
+                        duration: 500
+                    }
+
                 }
 
                 Rectangle {
@@ -954,7 +993,6 @@ Item {
                     visible: false
                 }
 
-
                 Text {
                     id: txt_button_Add
                     //anchors.centerIn: parent
@@ -966,13 +1004,14 @@ Item {
                     color: "white" //"LightGray"
                     text: qsTr("+") //✓ ⟳ ☺ 😐
                 }
+
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
                     onEntered:  {
                         var rightMargin  = parent.anchors.rightMargin
                         var bottomMargin = parent.anchors.bottomMargin
-                        parent.opacity = 1
+                        //parent.opacity = 1
                         parent.width = 52; parent.height = 52;
                         parent.anchors.bottomMargin = bottomMargin - 1
                         parent.anchors.rightMargin  = rightMargin - 1
@@ -980,13 +1019,13 @@ Item {
 //                        txt_button_Add.text = qsTr("☺")
                         txt_button_Add.font.pixelSize = 46
                         txt_button_Add.anchors.topMargin = -5
-                        txt_AddINFO.visible = true
+                        txt_AddINFO.open = true
                         button_Add_bord.visible = true
                     }
                     onExited:   {
                         var rightMargin  = parent.anchors.rightMargin
                         var bottomMargin = parent.anchors.bottomMargin
-                        parent.opacity = 0.7
+                        //parent.opacity = 0.7
                         parent.width = 50; parent.height = 50
                         parent.anchors.bottomMargin = bottomMargin + 1
                         parent.anchors.rightMargin  = rightMargin + 1
@@ -995,7 +1034,7 @@ Item {
 //                        txt_button_Add.anchors.rightMargin = 10
                         txt_button_Add.font.pixelSize = 42
                         txt_button_Add.anchors.topMargin = -4
-                        txt_AddINFO.visible = false
+                        txt_AddINFO.open = false
                         button_Add_bord.visible = false
                     }
                     onPressed:  { parent.color = "#cbf797" }
@@ -1005,6 +1044,8 @@ Item {
                         popup_AddWorker.open()
                     }
                 }
+
+
 
             }
 
@@ -1227,32 +1268,37 @@ Item {
     }
 
     /// СОТРУДНИК
-    Frame {
+    Pane {
         id: frame_who
         anchors.left: frame_listAllPersons.right
         //anchors.leftMargin: frame_listAllPersons.isOpen ? 250 : space_margin
-        anchors.right: frame_listAllPersons.isOpen ? undefined : parent.right
+        //anchors.right: frame_listAllPersons.isOpen ? undefined : parent.right
         anchors.top: frame_headerPersons.bottom
         anchors.margins: space_margin
 
 
 //        width: (txt_fio.width > 300) ? (frame_listAllPersons.isOpen ? (txt_fio.width + 250) : false) : 550
-        width: frame_listAllPersons.isOpen ? ( (txt_fio.width > 300) ? (txt_fio.width + 250) : 550 ) : false
+
+
+        width: (txt_fio.width > 300) ? (txt_fio.width + 250) : 550
+        //width: frame_listAllPersons.isOpen ? ( (txt_fio.width > 300) ? (txt_fio.width + 250) : 550 ) : false
+
+        Material.elevation: 4
 
         padding: 1
         topPadding: 1
         bottomPadding: 1
 
-        height: 200 //150 //implicitContentHeight
+        height: 160 //implicitContentHeight
         //width: 670
 
 
-        background: Rectangle {
-            anchors.fill: parent
-            color: "White" // "#eaeaea" //"#d6d6d6"//"White"
-            border.color: "#9E9E9E" //"LightGray"
-            radius: 7
-        }
+//        background: Rectangle {
+//            anchors.fill: parent
+//            color: "White" // "#eaeaea" //"#d6d6d6"//"White"
+//            border.color: "#9E9E9E" //"LightGray"
+//            radius: 7
+//        }
 
         Item {
             anchors.fill: parent
@@ -1297,7 +1343,7 @@ Item {
 
                     Rectangle {
                         width: 1
-                        height: 180
+                        height: 130
                         color: "LightGray"
                     }
 

@@ -117,7 +117,8 @@ Item {
                 bottomPadding: 16
                 topPadding: 8
                 leftPadding: 8
-                text: "ARM_AKID_TEST_1" //"ARM_AKID_TEST_1" //"ARM_AKID_1"
+                text:  "ARM_AKID_TEST_1" //"user_replicat_0"  //"ARM_AKID_TEST_1"
+                     //"ARM_AKID_TEST_1" //"ARM_AKID_1"
                     //"ARM_AKID_C"
                     //"ARM_AKID_A" //"ARM_AKID_J" // "ARM_AKID_I" // "ARM_CONTROL" //"DOZ1" //C##CDBUSER1
                 placeholderText: qsTr("введите имя пользователя")

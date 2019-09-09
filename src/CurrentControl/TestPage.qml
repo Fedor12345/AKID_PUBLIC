@@ -324,6 +324,72 @@ Page {
         }
 
 
+        Pane {
+            id: test_elevation
+            property double elevation_: 1.0
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: 10
+            width: 120
+            height: 120
+
+            Material.elevation: elevation_
+
+
+            Rectangle {
+                anchors.fill:  parent
+                border.width: 1
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                anchors.margins: -10
+                hoverEnabled: true
+                onEntered:  { test_elevation.animationStart(1.0, 6.0,"elevation_" ) }
+                onExited:   { test_elevation.animationStart(6.0, 1.0,"elevation_" ) }
+                onPressed:  {  }
+                onReleased: {  }
+                onClicked:  {
+                    console.log(" (!) CLICK! ")
+                }
+            }
+
+            function animationStart (startValue, endValue, properties) {
+                animation_1.startValue = startValue;
+                animation_1.endValue = endValue;
+                animation_1.properties = properties;
+                animation_1.stop();
+                animation_1.running = true;
+            }
+            NumberAnimation {
+                id: animation_1
+                property double startValue
+                property double endValue
+                target: test_elevation
+                //properties: "elevation_"
+                //easing.type: Easing.InOutElastic
+                from:
+                {
+                    return startValue
+                }
+                to:
+                {
+                    return endValue
+                }
+                duration: 200
+                running: false
+            }
+
+
+
+            Label {
+                text: qsTr("I'm a card!")
+                anchors.centerIn: parent
+            }
+        }
+
+
+
         FileDialog {
             id: openFileDialog2
             //property var fileUrl

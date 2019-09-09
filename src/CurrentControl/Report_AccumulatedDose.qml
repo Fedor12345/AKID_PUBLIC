@@ -93,7 +93,7 @@ Page {
         }
     }
 
-    Rectangle {
+    Pane {
         id: rect_Person
         anchors.top: rect_header_Person.bottom
         anchors.topMargin: 20
@@ -103,9 +103,11 @@ Page {
         height: 300
         width:  300
 
-        border.color: (page_main_.id_currentPerson !== "Сотрудник не выбран" ) ? "LightGray" : Material.color(Material.Teal)
-        border.width: (page_main_.id_currentPerson !== "Сотрудник не выбран" ) ? 1 : 2
-        color: "transparent"
+        Material.elevation: 6
+
+        //border.color: (page_main_.id_currentPerson !== "Сотрудник не выбран" ) ? "LightGray" : Material.color(Material.Teal)
+        //border.width: (page_main_.id_currentPerson !== "Сотрудник не выбран" ) ? 1 : 2
+        //color: "transparent"
 
         Label {
             anchors.top: parent.top

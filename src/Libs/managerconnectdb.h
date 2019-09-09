@@ -14,8 +14,8 @@
 /// "ARM_AKID_1"
 /// "ARM_AKID_2"
 
-#define DATABASE_NAME_0 "ORCLPDB_net(1)" // "ARM_AKID_1" //"ORCLPDB_net(1)" //"ORCLPDB_net(1.5)"
-#define DATABASE_NAME_1 "ORCLPDB_net(2)" // "ARM_AKID_2"//"ORCLPDB_net(2)" //"ORCLPDB_net(1.197)"
+#define DATABASE_NAME_0 "ORCLPDB_net(0)" // "ARM_AKID_1" //"ORCLPDB_net(1)" //"ORCLPDB_net(1.5)"
+#define DATABASE_NAME_1 "ORCLPDB_net(1)" // "ARM_AKID_2"//"ORCLPDB_net(2)" //"ORCLPDB_net(1.197)"
 
 #define HOST_NAME_0 ""
 #define HOST_NAME_1 ""
