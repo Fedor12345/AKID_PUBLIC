@@ -127,7 +127,7 @@ Item {
                 bottomPadding: 16
                 topPadding: 8
                 leftPadding: 8
-                text: "DOZNARYAD"//"DOSE1"//"C##CDBUSER1"
+                text: "DOSE1"//"DOZNARYAD"
                 placeholderText: qsTr("введите имя пользователя")
                 verticalAlignment: Text.AlignVCenter
                 clip: false

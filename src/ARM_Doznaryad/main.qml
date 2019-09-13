@@ -7,7 +7,7 @@ ApplicationWindow {
     visible: true
     width: 1200
     height: 900
-    title: qsTr(".: АРМ Электронный дознаряд")
+    title: qsTr(".: АРМ Оперативный контроль")
 
     Connections {
             target: managerDB

@@ -661,7 +661,7 @@ Item {
             color: "white"//Material.color(Material.Blue, Material.Shade50)//"whitesmoke"
             radius: 2
         }
-        ColumnLayout{
+        ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 1

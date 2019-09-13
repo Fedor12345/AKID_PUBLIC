@@ -293,6 +293,10 @@ Page {
                     dozModel.updateModel()
                     mymsgbox_popup.iamready("Запись успешно удалена")
 
+                    //--
+
+                    //--
+
                 }
 
                 if (mymsgbox_popup.operation_name === "add new") {
@@ -552,6 +556,34 @@ Page {
                 dozModel.updateModel() //.update_data()
 
                 mymsgbox_popup.iamready("Запись успешно обновлена")
+            }
+        }
+    }
+
+    //Оперативная доза
+    Popup {
+        id: op_dose_popup
+
+        width: addtask.width + padding*2
+        height: addtask.height + padding*2
+
+        modal: true
+        focus: true
+        closePolicy: Popup.NoAutoClose
+        parent: Overlay.overlay
+        x: Math.round((parent.width - width) / 2)
+        y: Math.round((parent.height - height) / 2)
+        padding: 0
+
+        Add_oper_dose {
+            id: addopdose
+
+            onSet_OK: {
+                op_dose_popup.close()
+            }
+
+            onSet_Cancel: {
+                op_dose_popup.close()
             }
         }
     }
@@ -1501,6 +1533,12 @@ Page {
 //                        id: mod_workers_table
 //                        query: ""
 //                    }
+
+
+                    onDblclickeditem: {
+                        console.log("Dbl clicked: ", indx);
+                        op_dose_popup.open()
+                    }
 
                     function update_model(doz_id_value) {
                         listview_model.query = "SELECT t1.ID_PERSON, t1.ID_TLD, t1.PERSON_NUMBER,

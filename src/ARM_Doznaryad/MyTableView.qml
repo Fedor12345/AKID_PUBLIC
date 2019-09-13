@@ -10,7 +10,9 @@ Item {
     property ListModel listview_header
     property alias listview_model: listview.model
     property alias currentIndex: listview.currentIndex
+
     signal changeitem(var indx)
+    signal dblclickeditem(var indx)
 
     property bool horizontal_scrollbar_on_off: true
 //    !!!
@@ -101,6 +103,10 @@ Item {
                     onClicked: {
                         listview.currentIndex = index
                         root.changeitem(index)
+                    }
+
+                    onDoubleClicked: {
+                        root.dblclickeditem(index)
                     }
 
                     Column {
