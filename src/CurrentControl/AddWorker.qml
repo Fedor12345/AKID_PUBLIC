@@ -43,7 +43,9 @@ Item {
         nw_hieght.text = "0"
 
         nw_personalNumber.text = ""
+        //nw_personalNumber.color = "#ff0000"
         nw_tld.text = ""
+        //nw_tld.color = "#ff0000"
 
 //        nw_iku_year.text = "0,0"
 //        nw_iku_month.text = "0,0"
@@ -536,7 +538,7 @@ Item {
                                         }
                                         TextField {
                                             id: nw_personalNumber
-                                            property bool isOk: (color == "#008000") ? true : false
+                                            property bool isOk: (color == "#008000" && text.length > 0) ? true : false
                                             width: 100
                                             font.pixelSize: 16
                                             horizontalAlignment: Text.AlignHCenter
@@ -577,7 +579,7 @@ Item {
                                         }
                                         TextField {
                                             id: nw_tld
-                                            property bool isOk: (color == "#008000") ? true : false
+                                            property bool isOk: (color == "#008000"  && text.length > 0) ? true : false
                                             width: 100
                                             font.pixelSize: 16
                                             horizontalAlignment: Text.AlignHCenter
@@ -1451,11 +1453,36 @@ Item {
         }
 
         Button {
+            anchors.bottom: parent.bottom
+            anchors.right: ok_button.left
+            anchors.rightMargin: 20
+            text: "info"
+            font.pixelSize: 14
+
+            onClicked: {
+                console.log("");
+                console.log("");
+                console.log("nw_personalNumber:", nw_personalNumber.isOk);
+                console.log("nw_tld:", nw_tld.isOk);
+                console.log("nw_surname:", nw_surname.isOk);
+                console.log("nw_name:", nw_name.isOk);
+                console.log("nw_patronymic:", nw_patronymic.isOk);
+
+            }
+        }
+
+        Button {
             id: ok_button
             width: 120
             //anchors.margins: 10
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
             anchors.bottomMargin: 10
             anchors.rightMargin: 20
+            //enabled: false
+
+            text: "Сохранить"
+            font.pixelSize: 14
 
             enabled:
             {
@@ -1480,12 +1507,6 @@ Item {
 
                 return isOk;
             }
-
-            text: "Сохранить"
-            font.pixelSize: 14
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            //enabled: false
 
             onClicked: {
                 var data_arr = {}
