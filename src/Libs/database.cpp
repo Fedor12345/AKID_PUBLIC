@@ -38,14 +38,26 @@ void Database::connectionDB(const QString &userName, const QString &password) //
     qDebug() << "\n -> Database: connectionDB: ("<<this->databaseName << ") |  thread =" << QThread::currentThreadId() << "\n";
 
     this->userName = userName;
+    this->password = password;
+    db.setUserName(this->userName);
+    db.setPassword(this->password);
+
     /// если подключаемся ко второй машине, то редактируем в имени подключения _0 на _1
     /// (!) убрать это если имена пользователей БД на обеих машинах одинаковые
-    if(this->connectionName == "machine 1") {
-        if ( this->userName.endsWith("_0") ) {
-            this->userName = this->userName.remove( this->userName.length()-2, 2 );
-        }
-         this->userName =  this->userName + "_1";
-    }
+//    if(this->connectionName == "machine 1") {
+//        if ( this->userName.endsWith("_0") || this->userName.endsWith("_1")) {
+//            this->userName = this->userName.remove( this->userName.length()-2, 2 );
+//        }
+//         this->userName =  this->userName + "_1";
+//    }
+
+
+//    if(this->connectionName == "machine 1") {
+//        if ( this->userName.endsWith("_0") ) {
+//            this->userName = this->userName.remove( this->userName.length()-2, 2 );
+//        }
+//         this->userName =  this->userName + "_1";
+//    }
 
 // этот код для демонстрации на серверах
 //    if(this->connectionName == "machine 1") {
@@ -58,9 +70,7 @@ void Database::connectionDB(const QString &userName, const QString &password) //
 
 
 
-    this->password = password;
-    db.setUserName(this->userName);
-    db.setPassword(this->password);
+
     ///////////////////////////////////////////////////////////////////////////
     //db.setDatabaseName("DRIVER={SQL Server};SERVER=HOME-PC;DATABASE=ARM;");
     ///////////////////////////////////////////////////////////////////////////

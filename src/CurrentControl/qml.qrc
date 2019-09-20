@@ -35,5 +35,6 @@
         <file>Report_AccumulatedDose.qml</file>
         <file>EmptyPage.qml</file>
         <file>Persons.qml</file>
+        <file>MyFindField2.qml</file>
     </qresource>
 </RCC>

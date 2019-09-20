@@ -8,9 +8,13 @@ import QtQuick.Dialogs 1.2
 
 Page {
     id: main_
-    property string textData_color: "#6b6b6b" // Material.color(Material.Teal)
-    property int space_margin: 15
 
+    clip: true
+
+    property string textData_color: "#6b6b6b" // Material.color(Material.Teal)
+    property int space_margin: 15    
+
+    property var model_perosn
     property var model_ext_person_list
     property var model_adm_status //:           stackview_mainwindow.model_adm_status
     property var model_adm_assignment //:       stackview_mainwindow.model_adm_assignment
@@ -26,7 +30,8 @@ Page {
     /// ЗАПРОС В МОДЕЛЬ НА ДАННЫЕ О СОТРУДНИКЕ ПО ЕГО ID_PERSON
     function workerModelQuery(id_person){
         //setQueryDB()
-        workersModel.query = " SELECT
+        //workersModel.query  =
+        model_perosn.query = " SELECT
                                ID_PERSON, W_SURNAME, W_NAME, W_PATRONYMIC, PERSON_NUMBER,
                                SEX, BIRTH_DATE, DOSE_BEFORE_NPP,DOSE_CHNPP, IKU_YEAR, IKU_MONTH,
                                WEIGHT, HEIGHT, DATE_ON, DATE_OFF, EMERGENCY_DOSE,DISABLE_RADIATION,
@@ -121,7 +126,7 @@ Page {
             if (owner_name == "getMainPersonParam2") {
                 /// 23 24 28 29 30 34 35 36 40 41
                 if (res) {
-                    //console.log(" getMainPersonParam2 ==== ", var_res, " ",var_res["Z23"], var_res["Z24"], var_res["Z28"], var_res["Z29"]);
+                    console.log(" getMainPersonParam2 ==== ", var_res, " ",var_res["Z23"], var_res["Z24"], var_res["Z28"], var_res["Z29"]);
                     //console.log("1: Number(txt_mainParams2.text) = ",Number(txt_mainParams2.text));
 
                     ///parseFloat(text).toFixed(4)
@@ -142,63 +147,63 @@ Page {
 
     /// ПОЛУЧЕНИЕ ОТВЕТА ОТ МОДЕЛИ
     Connections {
-        target: workersModel
+        target: model_perosn
         onSignalUpdateDone: {
-            if(nameModel=="model_PERSON")
+            if(nameModel=="select_person")
             {
-                if (workersModel.rowCount() > 0) {
+                if (model_perosn.rowCount() > 0) {
                     // информация о работе
-                    //doznarad_position.text = workersModel.get(0)["doznarad_position"]
-                    txt_organization.text = workersModel.get(0)["ORGANIZATION_"]
-                    if( workersModel.get(0)["STAFF_TYPE"]==="Командировачный" )
-                    { txt_department.text   = workersModel.get(0)["DEPARTMENT_OUTER"] }
-                    else if ( workersModel.get(0)["STAFF_TYPE"]==="Персонал АЭС" )
-                    { txt_department.text   = workersModel.get(0)["DEPARTMENT_INNER"] }
-                    txt_assignement.text  = workersModel.get(0)["ASSIGNEMENT"]
+                    //doznarad_position.text = model_perosn.get(0)["doznarad_position"]
+                    txt_organization.text = model_perosn.get(0)["ORGANIZATION_"]
+                    if( model_perosn.get(0)["STAFF_TYPE"]==="Командировачный" )
+                    { txt_department.text   = model_perosn.get(0)["DEPARTMENT_OUTER"] }
+                    else if ( model_perosn.get(0)["STAFF_TYPE"]==="Персонал АЭС" )
+                    { txt_department.text   = model_perosn.get(0)["DEPARTMENT_INNER"] }
+                    txt_assignement.text  = model_perosn.get(0)["ASSIGNEMENT"]
 
 
                     var str = "";
 
                     // персональная информация
-                    //txt_fio.text        = workersModel.get(0)["W_NAME"] + " " + workersModel.get(0)["W_SURNAME"] + " " + workersModel.get(0)["W_PATRONYMIC"]
-                    txt_fio.text        = workersModel.get(0)["W_SURNAME"] + "\n"
-                            + workersModel.get(0)["W_NAME"] + " "
-                            + workersModel.get(0)["W_PATRONYMIC"]
-                    txt_pn.text         = workersModel.get(0)["PERSON_NUMBER"]
-                    txt_staff_type.text = workersModel.get(0)["STAFF_TYPE"]
-                    txt_tld.text        = workersModel.get(0)["ID_TLD"]
-                    txt_status.text     = workersModel.get(0)["STATUS"]
+                    //txt_fio.text        = model_perosn.get(0)["W_NAME"] + " " + model_perosn.get(0)["W_SURNAME"] + " " + model_perosn.get(0)["W_PATRONYMIC"]
+                    txt_fio.text        = model_perosn.get(0)["W_SURNAME"] + "\n"
+                            + model_perosn.get(0)["W_NAME"] + " "
+                            + model_perosn.get(0)["W_PATRONYMIC"]
+                    txt_pn.text         = model_perosn.get(0)["PERSON_NUMBER"]
+                    txt_staff_type.text = model_perosn.get(0)["STAFF_TYPE"]
+                    txt_tld.text        = model_perosn.get(0)["ID_TLD"]
+                    txt_status.text     = model_perosn.get(0)["STATUS"]
 
-//                    txt_iku_month.text = workersModel.get(0)["IKU_MONTH"]
-//                    txt_iku_year.text  = workersModel.get(0)["IKU_YEAR"]
+//                    txt_iku_month.text = model_perosn.get(0)["IKU_MONTH"]
+//                    txt_iku_year.text  = model_perosn.get(0)["IKU_YEAR"]
 
-//                    txt_dose_before_npp.text = workersModel.get(0)["DOSE_BEFORE_NPP"]
-//                    txt_dose_chnpp.text      = workersModel.get(0)["DOSE_CHNPP"]
+//                    txt_dose_before_npp.text = model_perosn.get(0)["DOSE_BEFORE_NPP"]
+//                    txt_dose_chnpp.text      = model_perosn.get(0)["DOSE_CHNPP"]
 
-//                    str = workersModel.get(0)["DATE_ON"]
+//                    str = model_perosn.get(0)["DATE_ON"]
 //                     var options = {
 //                       year: 'numeric',
 //                       month: 'long',
 //                       day: 'numeric'
 //                     };
 //                     str.toLocaleString("ru", options)
-//                    txt_date_on.text  = str.getDate() + "." + (str.getMonth()+1)  + "." + str.getFullYear()   //String(workersModel.get(0)["DATE_ON"]).substring(0,20)
-//                    str = workersModel.get(0)["DATE_OFF"]
+//                    txt_date_on.text  = str.getDate() + "." + (str.getMonth()+1)  + "." + str.getFullYear()   //String(model_perosn.get(0)["DATE_ON"]).substring(0,20)
+//                    str = model_perosn.get(0)["DATE_OFF"]
 //                    txt_date_off.text = str.getDate() + "." + (str.getMonth()+1)  + "." + str.getFullYear()
 
 
-                    if( workersModel.get(0)["EMERGENCY_DOSE"] === "1" ) {
+                    if( model_perosn.get(0)["EMERGENCY_DOSE"] === "1" ) {
                         txt_emergency_dose.is = true;
                     }
-                    else if( workersModel.get(0)["EMERGENCY_DOSE"] === "0" )
+                    else if( model_perosn.get(0)["EMERGENCY_DOSE"] === "0" )
                     {
                         txt_emergency_dose.is = false;
                     }
 
-                    if(workersModel.get(0)["DISABLE_RADIATION"] === "1") {
+                    if(model_perosn.get(0)["DISABLE_RADIATION"] === "1") {
                         nw_disable_radiation.is = true;
                     }
-                    else if( workersModel.get(0)["DISABLE_RADIATION"] === "0" )
+                    else if( model_perosn.get(0)["DISABLE_RADIATION"] === "0" )
                     {
                         nw_disable_radiation.is = false;
                     }
@@ -207,37 +212,40 @@ Page {
 
 
                     //3
-                    txt_gender.text   = (workersModel.get(0)["SEX"] === "M") ? "М" : "Ж"
-                    str = workersModel.get(0)["BIRTH_DATE"]
+                    txt_gender.text   = (model_perosn.get(0)["SEX"] === "M") ? "М" : "Ж"
+                    str = model_perosn.get(0)["BIRTH_DATE"]
                     txt_birthday.text = str.getDate() + "." + (str.getMonth()+1) + "." + str.getFullYear()
-                    txt_weight.text   = workersModel.get(0)["WEIGHT"]
-                    txt_height.text   = workersModel.get(0)["HEIGHT"]
+                    txt_weight.text   = model_perosn.get(0)["WEIGHT"]
+                    txt_height.text   = model_perosn.get(0)["HEIGHT"]
 
-                    //txt_pass_serial.text  = workersModel.get(0)["passport_series"]
-                    txt_pass_number.text  = workersModel.get(0)["PASSPORT_NUMBER"]
-                    txt_pass_whoget.text  = workersModel.get(0)["PASSPORT_GIVE"]
-                    str = workersModel.get(0)["PASSPORT_DATE"]
+                    //txt_pass_serial.text  = model_perosn.get(0)["passport_series"]
+                    txt_pass_number.text  = model_perosn.get(0)["PASSPORT_NUMBER"]
+                    txt_pass_whoget.text  = model_perosn.get(0)["PASSPORT_GIVE"]
+                    str = model_perosn.get(0)["PASSPORT_DATE"]
                     txt_pass_dateget.text = str.getDate() + "." +(str.getMonth()+1)  + "." + str.getFullYear()
 
-//                    txt_medical_number.text = workersModel.get(0)["POLICY_NUMBER"]
-//                    txt_medical_series.text = workersModel.get(0)["SNILS"]
+//                    txt_medical_number.text = model_perosn.get(0)["POLICY_NUMBER"]
+//                    txt_medical_series.text = model_perosn.get(0)["SNILS"]
 
-                    txt_snils.text = workersModel.get(0)["SNILS"]
+                    txt_snils.text = model_perosn.get(0)["SNILS"]
 
-                    txt_mobile_phone.text = workersModel.get(0)["MOBILE_TEL"]
-                    txt_home_address.text = workersModel.get(0)["HOME_ADDRESS"]
-                    txt_home_phone.text = workersModel.get(0)["HOME_TEL"]
+                    txt_mobile_phone.text = model_perosn.get(0)["MOBILE_TEL"]
+                    txt_home_address.text = model_perosn.get(0)["HOME_ADDRESS"]
+                    txt_home_phone.text = model_perosn.get(0)["HOME_TEL"]
 
-                    txt_work_phone.text = workersModel.get(0)["WORK_TEL"]
-                    txt_work_address.text = workersModel.get(0)["WORK_ADDRESS"]
-                    txt_work_email.text = workersModel.get(0)["E_MAIL"]
+                    txt_work_phone.text = model_perosn.get(0)["WORK_TEL"]
+                    txt_work_address.text = model_perosn.get(0)["WORK_ADDRESS"]
+                    txt_work_email.text = model_perosn.get(0)["E_MAIL"]
 
 
                     ////////////////////////////////////////////////////////////////////////////////
                     /// генерируется сигнал о изменении выбранного сотрудника из спсика
                     var sex = (txt_gender.text === "М") ? "M" : "F"  /// txt_gender.text === "М", тут М на кириллице
                     var age = 25; /// ДОДЕЛАТЬ ОПРЕДЕЛЕНИЕ ВОЗРАСТА ВЫБРАННОГО СОТРУДНИКА
-                    currentPersonChange(list_Persons.id_currentPerson, list_Persons.fio_currentPerson, sex, txt_staff_type.text, age)
+                    var fio_currentPerson = model_perosn.get(0)["W_SURNAME"] + "\n"
+                                          + model_perosn.get(0)["W_NAME"] + " "
+                                          + model_perosn.get(0)["W_PATRONYMIC"]
+                    currentPersonChange(model_perosn.get(0)["ID_PERSON"], fio_currentPerson, sex, model_perosn.get(0)["STAFF_TYPE"], age)
                     ////////////////////////////////////////////////////////////////////////////////
 
                 }
@@ -337,7 +345,7 @@ Page {
 
         UpdateWorker {
             id: updateWorker
-            model_worker: workersModel
+            model_worker: model_perosn
             model_adm_status:           main_.model_adm_status
             model_adm_organisation:     main_.model_adm_organisation
             model_adm_department_outer: main_.model_adm_department_outer
@@ -880,9 +888,12 @@ Item {
                                 " SUM(TLD_B_HP3)  Z27, SUM(TLD_G_HP007) Z31, SUM(TLD_N_HP007) Z32, SUM(TLD_B_HP007) Z33, "  +
                                 " SUM(TLD_G_HP10_DOWN) Z37, SUM(TLD_N_HP10_DOWN) Z38 "  + //, SUM(TLD_B_HP10_DOWN) Z39
                                 " FROM EXT_DOSE WHERE " +
-                                " ID_PERSON IN (" + list_Persons.id_currentPerson  + ") AND " +
-                                " BURN_DATE >= TO_DATE('" + date_begin + "','DD/MM/YY') AND"  +
-                                " BURN_DATE <= TO_DATE('" + date_end   + "','DD/MM/YY') ";
+
+                                " ID_PERSON IN (" + list_Persons.id_currentPerson  + ")"
+                                /// если отбор по датам то последнюю строку заменить на:
+//                                " ID_PERSON IN (" + list_Persons.id_currentPerson  + ") AND " +
+//                                " BURN_DATE >= TO_DATE('" + date_begin + "','DD/MM/YY') AND"  +
+//                                " BURN_DATE <= TO_DATE('" + date_end   + "','DD/MM/YY') ";
                         Query1.setQueryAndName(query, "getMainPersonParam1");
 
 
@@ -891,9 +902,12 @@ Item {
                                 " SUM(EPD_B_HP3)  Z30, SUM(EPD_G_HP007) Z34, SUM(EPD_N_HP007) Z35, SUM(EPD_B_HP007) Z36, "  +
                                 " SUM(EPD_G_HP10_DOWN) Z40, SUM(EPD_N_HP10_DOWN) Z41 " +
                                 " FROM OP_DOSE WHERE " +
-                                " ID_PERSON IN (" + list_Persons.id_currentPerson  + ") AND "  +
-                                " TIME_OUT >= TO_DATE('" + date_begin + "','DD/MM/YY')  AND "  +
-                                " TIME_OUT <= TO_DATE('" + date_end   + "','DD/MM/YY') ";
+
+                                " ID_PERSON IN (" + list_Persons.id_currentPerson  + ") "
+                                /// если отбор по датам то последнюю строку заменить на:
+//                                " ID_PERSON IN (" + list_Persons.id_currentPerson  + ") AND "  +
+//                                " TIME_OUT >= TO_DATE('" + date_begin + "','DD/MM/YY')  AND "  +
+//                                " TIME_OUT <= TO_DATE('" + date_end   + "','DD/MM/YY') ";
                         Query1.setQueryAndName(query, "getMainPersonParam2");
 
 
@@ -2066,7 +2080,7 @@ Item {
                         rowSpacing: 1
                         clip: true
 
-                        model: workersModel
+                        model: model_perosn
 
 //                        topMargin: header.implicitHeight
 //                        Text {

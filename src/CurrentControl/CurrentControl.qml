@@ -12,13 +12,14 @@ Page {
 
     Component.onCompleted: console.log("CurrentControl  completed")
 
+    /// панель навигации (боковая слева)
     Pane {
         id: frame1
         //wheelEnabled: true
         width: 300
         anchors.margins: 0//8
         anchors.left: parent.left
-        anchors.top: parent.top
+        anchors.top: top_panel.bottom
         anchors.bottom: parent.bottom
         padding: 0
 
@@ -37,15 +38,17 @@ Page {
                 /// header: "имя заголовка not fold"  - блокирует сворачивание списка для данного заголовка
 
                 //ListElement { image:"icons/face.svg"; name: "Выбор сотрудника 2";   header: "" } ///Карточка работника
-                ListElement { image:"icons/face.svg"; name: "Выбор сотрудника";   header: "" }
-                ListElement { image:"";               name: "Ввод доз ТЛД";       header: "" }
+//                ListElement { image:"icons/face.svg"; name: "Выбор сотрудника";   header: "" }
+                ListElement { image:"icons/face.svg"; name: "Данные";           header: "Сотрудники" }
+                ListElement { image:"";               name: "Ввод доз ТЛД";     header: "Сотрудники" }
+                ListElement { image:"";               name: "СИЧ";              header: "Сотрудники" }
 
                 //ListElement { image:""; name: "Новый сотрудник";    header: "" }
 
 
-                ListElement { image:""; name: "SQL запросы";        header: "Отчеты not fold" }
-                ListElement { image:""; name: "Накопленные дозы";   header: "Отчеты not fold" }
-                ListElement { image:""; name: "Отчет № 1-ДОЗ";      header: "Отчеты not fold" }
+                ListElement { image:""; name: "SQL запросы";        header: "Отчеты" } //Отчеты not fold
+                ListElement { image:""; name: "Накопленные дозы";   header: "Отчеты" }
+                ListElement { image:""; name: "Отчет № 1-ДОЗ";      header: "Отчеты" }
 
                 ListElement { image:""; name: "Типы дозиметров";    header: "Справочник" } //Справочная информация
                 ListElement { image:""; name: "Дозиметры";          header: "Справочник" }
@@ -69,6 +72,7 @@ Page {
 
     }
 
+    /// функция смены страницы
     function changePage(name) {
         //var namePage
         pageNotVisible();
@@ -84,12 +88,12 @@ Page {
             persons.visible = true;
 
             /// обновление моделей
-            pages_main.model_ext_person_list.updateModel()
-            pages_main.model_adm_status.updateModel()
-            pages_main.model_adm_assignment.updateModel()
-            pages_main.model_adm_organisation.updateModel()
-            pages_main.model_adm_department_outer.updateModel()
-            pages_main.model_adm_department_inner.updateModel()
+            //models.model_ext_person_list.updateModel()
+            models.model_adm_status.updateModel()
+            models.model_adm_assignment.updateModel()
+            models.model_adm_organisation.updateModel()
+            models.model_adm_department_outer.updateModel()
+            models.model_adm_department_inner.updateModel()
 
             break;
 
@@ -99,13 +103,18 @@ Page {
             inputDoseTLD.visible = true;
             break;
 
+        case "СИЧ":
+            console.log("name = ", name);
+            //sich.visible = true;
+            break;
+
         case "SQL запросы":
             console.log("name = ", name);
             reports.visible = true; //namePage = "Report_1DOZ.qml";
 
             /// обновление моделей
-            pages_main.model_SQLQiueries.updateModel()
-            pages_main.model_tableReports.updateModel()
+            models.model_SQLQiueries.updateModel()
+            models.model_tableReports.updateModel()
 
             break;
 
@@ -129,10 +138,12 @@ Page {
             break;
         }
     }
+    /// функция скрывания страниц
     function pageNotVisible(){
         //workerCard.visible             = false
         persons.visible                = false
         inputDoseTLD.visible           = false
+        //sich.visible                   = fasle
         report_AccumulatedDose.visible = false
         report_1DOZ.visible            = false
         reports.visible                = false
@@ -141,20 +152,12 @@ Page {
         emptyPage.visible              = false
     }
 
-
+    /// модели
     Item {
-        id: pages_main //stackview_mainwindow
+        id: models
 
-        anchors.left: frame1.right
-        anchors.right: parent.right
-        //anchors.rightMargin: 250
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 70
+        property var  model_perosn:  managerDB.createModel("", "select_person")
 
-        //signal signalUpdateModel()
-
-        /// модели
         property var model_ext_person_list:      managerDB.createModel(" SELECT ID_PERSON, W_NAME, W_SURNAME, W_PATRONYMIC, PERSON_NUMBER, ID_TLD FROM EXT_PERSON ORDER BY W_SURNAME", "ext_person" )
         property var model_adm_status:           managerDB.createModel(" SELECT STATUS_CODE, STATUS  FROM ADM_STATUS ",                    "adm_status_update")
         property var model_adm_assignment:       managerDB.createModel(" SELECT ID, ASSIGNEMENT      FROM ADM_ASSIGNEMENT ",               "adm_department_nnp_update")
@@ -164,17 +167,6 @@ Page {
 
         property var model_SQLQiueries:  managerDB.createModel(" SELECT ID, DOCX, DOCM, REPORTNAME, SQL, DESCRIPTION FROM REPORTS ", "rep_sqlqueries") //" SELECT ID, SQLQUERY, DESCRIPTION FROM REP_SQLQUERIES ", "rep_sqlqueries"
         property var model_tableReports: managerDB.createModel("", "tableReports")
-
-
-
-
-        property string id_currentPerson: "Сотрудник не выбран"
-        property string fio_currentPerson: "Сотрудник не выбран"
-        property string sex: "Сотрудник не выбран"
-        property string staff_type: "Сотрудник не выбран"
-        property int age: 0
-        property string imagePath: "icons/face.svg"
-        property string burn_date_lost: "Сотрудник не выбран"
 
 
         /// обновить все модели
@@ -190,50 +182,200 @@ Page {
             model_tableReports.updateModel();
         }
 
-//        WorkersCard {
-//            id: workerCard
-//            anchors.fill: parent
-//            visible: false
+    }
 
-//            model_adm_status:           pages_main.model_adm_status
-//            model_adm_assignment:       pages_main.model_adm_assignment
-//            model_adm_organisation:     pages_main.model_adm_organisation
-//            model_adm_department_outer: pages_main.model_adm_department_outer
-//            model_adm_department_inner: pages_main.model_adm_department_inner
 
-////            onCurrentPersonChange: {
-////                pages_main.id_currentPerson  = id_currentPerson
-////                pages_main.fio_currentPerson = fio_currentPerson
-////                pages_main.sex = sex
-////                pages_main.staff_type = staff_type
-////                pages_main.age = age
-////            }
-////            onCurrentPersonChange_photo: {
-////                pages_main.imagePath = imagePath
-////            }
-////            onCurrentPersonChange_date_burn: {
-////                pages_main.burn_date_lost = burn_date_lost
-////            }
-//        }
+    /// разворачивающийся список сотрудников
+    Rectangle {
+        id: rect_allPersons
+        anchors.top: top_panel.bottom
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 70
+        anchors.right: parent.right
 
+        color: "transparent"
+
+        clip: true
+
+        /// линия слева
+        Rectangle {
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            width: 1
+            color: "#7c7c7c"
+        }
+
+        /// открыть панель
+        function openPanel(width) {
+            rect_allPersons.visible = true;
+
+            rect_allPersons_animation.from = 0;
+            rect_allPersons_animation.to   = width;
+
+            rect_allPersons_animation.stop();
+            rect_allPersons_animation.running = true;
+        }
+        /// закрыть панель
+        function closePanel(width) {
+            rect_allPersons.visible = false;
+
+            rect_allPersons_animation.from = rect_allPersons.width;
+            rect_allPersons_animation.to   = 0;
+
+            rect_allPersons_animation.stop();
+            rect_allPersons_animation.running = true;
+        }
+
+        NumberAnimation {
+            id: rect_allPersons_animation
+            target: rect_allPersons
+            properties: "width"
+
+            easing.type: Easing.OutQuad
+            duration: 200
+            running: false
+        }
+
+        /// список сотрудников
+        ListView {
+            id: list_Persons
+            anchors.fill: parent
+            anchors.leftMargin: 5
+            currentIndex: -1
+            property string id_currentPerson: models.model_ext_person_list.getFirstColumnInt(currentIndex)
+            property string pn_currentPerson
+            property string tld_currentPerson
+            property string fio_currentPerson
+
+
+            highlightFollowsCurrentItem: true
+            model: models.model_ext_person_list //model_ext_person_list
+
+
+            ScrollBar.vertical: ScrollBar {
+                policy: "AsNeeded" //"AlwaysOn"
+            }
+
+            clip: true
+            delegate:
+                ItemDelegate {
+                width: rect_allPersons.width - 10 //340 //325
+                height: 60
+                Row {
+                    spacing: 5
+                    Rectangle {
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        width: 15
+                        color: "transparent"
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.right: parent.right
+                            //anchors.rightMargin: 5
+                            text: index
+                            font.pixelSize: 15
+                            color: "#999999"
+                        }
+                    }
+
+                    Rectangle {
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        width: 1
+                        color: "Lightgray"
+                    }
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: 5
+                    Column {
+                        Text {
+                            text: W_SURNAME + " " + W_NAME + " " + W_PATRONYMIC
+                            font.pixelSize: 14
+                            color: {
+                             if (list_Persons.currentIndex == index) { "#FF5722" }
+                             else { "#4c4c4c" }
+                            }
+                            //font.bold: true
+                        }
+                        Text {
+                            text: "Таб. № " + PERSON_NUMBER
+                            font.pixelSize: 10
+                            color: "#777777"
+                        }
+                        Text {
+                            text: "ТЛД № " + ID_TLD
+                            font.pixelSize: 10
+                            color: "#777777"
+                        }
+                    }
+
+                }
+
+                onClicked: {
+                    if (list_Persons.currentIndex !== index) {
+                        list_Persons.currentIndex = index
+                    }
+                    list_Persons.id_currentPerson = models.model_ext_person_list.getFirstColumnInt(index)
+                    list_Persons.fio_currentPerson = W_SURNAME + "\n" + W_NAME + " " + W_PATRONYMIC
+                    //timer_persons.restart()
+                    findFieldPerson_panel.searchPerson(list_Persons.id_currentPerson);
+                }
+            }
+
+            highlight: Rectangle {
+                color: "transparent" // "#FF5722" //"#c9c9c9" // "#B0BEC5" //Material.color(Material.Grey, Material.Shade700)
+                border.color: "#FF5722"
+
+            }
+            highlightMoveDuration: 400
+        }
+
+
+
+    }
+
+    /// панель с основными страницами
+    Item {
+        id: pages_main //stackview_mainwindow
+
+        anchors.left: frame1.right
+        anchors.right: rect_allPersons.left //parent.right
+        //anchors.rightMargin: 250
+        anchors.top: top_panel.bottom
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 70
+
+        property string id_currentPerson: "Сотрудник не выбран"
+        property string fio_currentPerson: "Сотрудник не выбран"
+        property string sex: "Сотрудник не выбран"
+        property string staff_type: "Сотрудник не выбран"
+        property int age: 0
+        property string imagePath: "icons/face.svg"
+        property string burn_date_lost: "Сотрудник не выбран"
+
+        /// СТРАНИЦЫ
         Persons {
             id: persons
             anchors.fill: parent
             visible: true
 
-            model_ext_person_list:      pages_main.model_ext_person_list
-            model_adm_status:           pages_main.model_adm_status
-            model_adm_assignment:       pages_main.model_adm_assignment
-            model_adm_organisation:     pages_main.model_adm_organisation
-            model_adm_department_outer: pages_main.model_adm_department_outer
-            model_adm_department_inner: pages_main.model_adm_department_inner
 
-            onCurrentPersonChange: {
+            model_perosn:               models.model_perosn
+            model_ext_person_list:      models.model_ext_person_list
+            model_adm_status:           models.model_adm_status
+            model_adm_assignment:       models.model_adm_assignment
+            model_adm_organisation:     models.model_adm_organisation
+            model_adm_department_outer: models.model_adm_department_outer
+            model_adm_department_inner: models.model_adm_department_inner
+
+            onCurrentPersonChange: {               
                 pages_main.id_currentPerson  = id_currentPerson
                 pages_main.fio_currentPerson = fio_currentPerson
                 pages_main.sex = sex
                 pages_main.staff_type = staff_type
                 pages_main.age = age
+                console.log(" (!) onCurrentPersonChange: ", pages_main.id_currentPerson);
             }
             onCurrentPersonChange_photo: {
                 pages_main.imagePath = imagePath
@@ -242,7 +384,6 @@ Page {
                 pages_main.burn_date_lost = burn_date_lost
             }
         }
-
         InputDoseTLD {
             id: inputDoseTLD
             anchors.fill: parent
@@ -253,13 +394,18 @@ Page {
             burn_date_lost: pages_main.burn_date_lost
 
         }
+//        SICH {
+//            id: sich
+//            anchors.fill: parent
+//            visible: false
+//        }
         Reports {
             id: reports
             anchors.fill: parent
             visible: false
 
-            model_SQLQiueries: pages_main.model_SQLQiueries
-            model_tableReports: pages_main.model_tableReports
+            model_SQLQiueries: models.model_SQLQiueries
+            model_tableReports: models.model_tableReports
 
         }
         Report_1DOZ {
@@ -293,6 +439,49 @@ Page {
 
     }
 
+    /// верхняя панель, в которой выводится заголовок или меню, например меню поиска сотрудника
+    Item {
+        id: top_panel
+        height: 70
+        anchors.left:  parent.left //frame1.right
+        anchors.right: parent.right
+
+
+        Rectangle {
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 1
+            color: "#7c7c7c"
+            //opacity: 0.3
+        }
+
+        MyFindField2 {
+            id: findFieldPerson_panel
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.right: parent.right
+            open: true
+
+            model_ext_person_list: models.model_ext_person_list
+            model_adm_assignment: models.model_adm_assignment
+
+            onSendIDPerson: {
+                persons.workerModelQuery(id_currentPerson);
+            }
+            onOpenListPerson: {
+                if ( isOpen ) {
+                    //rect_allPersons.width = findFieldPerson_panel.widthListPersonsPanel
+                    rect_allPersons.openPanel(findFieldPerson_panel.widthListPersonsPanel);
+                }
+                else {
+                    //rect_allPersons.width = 0;
+                    rect_allPersons.closePanel(0);
+                }
+            }
+
+        }
+    }
 
 //    StackView {
 //        id: stackview_mainwindow
@@ -501,7 +690,7 @@ Page {
                         //managerDB.connectionDB(0);
                         managerDB.checkConnectionDB(0);
 
-                        pages_main.updateAllModels();
+                        models.updateAllModels();
                     }
                     onEntered: {
                         parent.color = "#dbdbdb" // "LightGray"
@@ -537,7 +726,7 @@ Page {
                         //managerDB.connectionDB(1);
                         managerDB.checkConnectionDB(1);
 
-                        pages_main.updateAllModels();
+                        models.updateAllModels();
                     }
                     onEntered: {
                         parent.color = "#dbdbdb" //"LightGray"

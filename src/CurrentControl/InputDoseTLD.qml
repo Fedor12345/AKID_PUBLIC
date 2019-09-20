@@ -32,67 +32,67 @@ Page {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 
-        Frame {
-            id:frame_headerNamePerson
+//        Frame {
+//            id:frame_headerNamePerson
 
-            height: 50
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.margins: space_margin
-            padding: 1
-            topPadding: 1
-            bottomPadding: 1
-            leftPadding: 20
+//            height: 50
+//            anchors.left: parent.left
+//            anchors.right: parent.right
+//            anchors.top: parent.top
+//            anchors.margins: space_margin
+//            padding: 1
+//            topPadding: 1
+//            bottomPadding: 1
+//            leftPadding: 20
 
-            background: Rectangle {
-                anchors.fill: parent
-                color: "#EEEEEE"//"White" Material.color(Material.Grey, Material.Shade200)
-                border.color: "LightGray"
-                radius: 7
-                //border.width: 1
-            }
+//            background: Rectangle {
+//                anchors.fill: parent
+//                color: "#EEEEEE"//"White" Material.color(Material.Grey, Material.Shade200)
+//                border.color: "LightGray"
+//                radius: 7
+//                //border.width: 1
+//            }
 
-            Row {
-                //anchors.fill: parent
-                spacing: 10
-                Image {
-                    id: img_photoPerson
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 40
-                    height: 40
-                    fillMode: Image.PreserveAspectFit
-                    opacity: 0.2
-                    sourceSize.height: 100
-                    sourceSize.width:  100
-                    source: "icons/face.svg"
-                }
-                ToolSeparator {}
-                TextEdit {
-                    id: inputDose_FIO_person
-                    anchors.verticalCenter: parent.verticalCenter
-                    font.pixelSize: 20 //main_.sizeTxt
-                    font.bold: true
-                    font.capitalization: Font.AllUppercase // в верхний регистр
-                    color: ( main_.fio_currentPerson === "Сотрудник не выбран" ) ? "LightGray" : "#474747" // "Black" //Material.color(Material.DeepOrange)
-                    //color: Material.color(Material.Teal)
-                    selectByMouse: true
-                    selectionColor: Material.color(Material.Red)
-                    text: main_.fio_currentPerson //.toUpperCase()
-                }
-                TextEdit {
-                    id: id_person
-                    anchors.top: parent.top
-                    color: ( main_.fio_currentPerson === "Сотрудник не выбран" ) ? "LightGray" : "#474747"
-                    font.pixelSize: 12
-                    text: "id =" + main_.id_currentPerson
-                }
-
-
+//            Row {
+//                //anchors.fill: parent
+//                spacing: 10
+//                Image {
+//                    id: img_photoPerson
+//                    anchors.verticalCenter: parent.verticalCenter
+//                    width: 40
+//                    height: 40
+//                    fillMode: Image.PreserveAspectFit
+//                    opacity: 0.2
+//                    sourceSize.height: 100
+//                    sourceSize.width:  100
+//                    source: "icons/face.svg"
+//                }
 //                ToolSeparator {}
-            }
+//                TextEdit {
+//                    id: inputDose_FIO_person
+//                    anchors.verticalCenter: parent.verticalCenter
+//                    font.pixelSize: 20 //main_.sizeTxt
+//                    font.bold: true
+//                    font.capitalization: Font.AllUppercase // в верхний регистр
+//                    color: ( main_.fio_currentPerson === "Сотрудник не выбран" ) ? "LightGray" : "#474747" // "Black" //Material.color(Material.DeepOrange)
+//                    //color: Material.color(Material.Teal)
+//                    selectByMouse: true
+//                    selectionColor: Material.color(Material.Red)
+//                    text: main_.fio_currentPerson //.toUpperCase()
+//                }
+//                TextEdit {
+//                    id: id_person
+//                    anchors.top: parent.top
+//                    color: ( main_.fio_currentPerson === "Сотрудник не выбран" ) ? "LightGray" : "#474747"
+//                    font.pixelSize: 12
+//                    text: "id =" + main_.id_currentPerson
+//                }
 
-        }
+
+////                ToolSeparator {}
+//            }
+
+//        }
 
         Frame {
             id:frame_InsertDose
@@ -101,7 +101,7 @@ Page {
             height: implicitContentHeight + 30
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top: frame_headerNamePerson.bottom
+            anchors.top: parent.top //frame_headerNamePerson.bottom
             anchors.topMargin: 20
             anchors.margins: space_margin
 

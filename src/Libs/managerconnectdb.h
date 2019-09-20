@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QThread>
+#include <QSettings>
 
 #include <../Libs/waitdb_thread.h>
 #include <../Libs/database.h>
@@ -34,6 +35,7 @@
 class ManagerConnectDB: public QObject
 {
     Q_OBJECT
+
 
     // потоки ------------
     QThread waitDBThread;

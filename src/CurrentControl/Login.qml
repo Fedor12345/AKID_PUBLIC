@@ -117,7 +117,7 @@ Item {
                 bottomPadding: 16
                 topPadding: 8
                 leftPadding: 8
-                text:  "ARM_AKID_TEST_1" //"user_replicat_0"  //"ARM_AKID_TEST_1"
+                text: "user" // "ARM_AKID_TEST_1" //"user_replicat_0"  //"ARM_AKID_TEST_1"
                      //"ARM_AKID_TEST_1" //"ARM_AKID_1"
                     //"ARM_AKID_C"
                     //"ARM_AKID_A" //"ARM_AKID_J" // "ARM_AKID_I" // "ARM_CONTROL" //"DOZ1" //C##CDBUSER1
@@ -181,10 +181,11 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             font.pointSize: 16
             onClicked: {
-
-                flg_active_state = true
-                managerDB.setLoginPwd(uname_field.text, pass_field.text)
-                managerDB.checkAllConnectionDB()
+                //managerDB.setLoginPwd(uname_field.text, pass_field.text)
+                if (uname_field.text == "user" && pass_field.text == "alpha1"){
+                    flg_active_state = true;
+                    managerDB.checkAllConnectionDB();
+                }
 
 //                if (database.connectToDataBase() === true) {
 //                    //myModel.updateModel()

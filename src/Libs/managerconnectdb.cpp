@@ -9,29 +9,60 @@ ManagerConnectDB::ManagerConnectDB()
     qDebug() << "ManagerConnectDB:  start";
 
     /// задаются настройки подлючения к различным БД и заносятся в массивы
-    //this->hostName       = new QString[NUMBER_OF_DB];
-    this->databaseName   = new QString[NUMBER_OF_DB];
-    this->userName       = new QString[NUMBER_OF_DB];
-    this->password       = new QString[NUMBER_OF_DB];
-    this->connectionName = new QString[NUMBER_OF_DB];
+//    //this->hostName       = new QString[NUMBER_OF_DB];
+//    this->databaseName   = new QString[NUMBER_OF_DB];
+//    this->userName       = new QString[NUMBER_OF_DB];
+//    this->password       = new QString[NUMBER_OF_DB];
+//    this->connectionName = new QString[NUMBER_OF_DB];
 
 
-    this->databaseName[0] = DATABASE_NAME_0; //"ORCLPDB_net(1.5)"; //"ORCLPDB";
-    this->databaseName[1] = DATABASE_NAME_1; //"ORCLPDB_net(1.197)"; //"ORCLPDB_net";
+//    this->databaseName[0] = DATABASE_NAME_0; //"ORCLPDB_net(1.5)"; //"ORCLPDB";
+//    this->databaseName[1] = DATABASE_NAME_1; //"ORCLPDB_net(1.197)"; //"ORCLPDB_net";
 
-    this->userName[0] = USER_NAME_0; //"user_replication_1";
-    this->userName[1] = USER_NAME_1; // "user_replication_1";
+//    this->userName[0] = USER_NAME_0; //"user_replication_1";
+//    this->userName[1] = USER_NAME_1; // "user_replication_1";
 
-    this->password[0] = PASSWORD_0; // "alpha1";
-    this->password[1] =  PASSWORD_1; // "alpha1";
+//    this->password[0] = PASSWORD_0; // "alpha1";
+//    this->password[1] =  PASSWORD_1; // "alpha1";
 
-    this->connectionName[0] = CONNECTION_NAME_0;
-    this->connectionName[1] = CONNECTION_NAME_1;
+//    this->connectionName[0] = CONNECTION_NAME_0;
+//    this->connectionName[1] = CONNECTION_NAME_1;
 
 
+//    db0 = new Database(CONNECTION_NAME_0,HOST_NAME_0,DATABASE_NAME_0); /// в параметрах задается имя соединения
+//    db1 = new Database(CONNECTION_NAME_1,HOST_NAME_1,DATABASE_NAME_1);
 
-    db0 = new Database(CONNECTION_NAME_0,HOST_NAME_0,DATABASE_NAME_0); /// в параметрах задается имя соединения
-    db1 = new Database(CONNECTION_NAME_1,HOST_NAME_1,DATABASE_NAME_1);
+    /// Из "settingsDB.ini" файла задаются настройки подлючения к различным БД и заносятся в массивы
+    QSettings settings("settingsDB.ini", QSettings::IniFormat);
+    settings.beginGroup("ConnectionsDB");
+    //    qDebug() << " (!) TEST INI FILE READ: NUMBER_OF_DB = "      << settings.value("NUMBER_OF_DB", "").toInt();
+        int nDB = settings.value("NUMBER_OF_DB", "").toInt();
+        //this->hostName       = new QString[nDB];
+        this->databaseName   = new QString[nDB];
+        this->userName       = new QString[nDB];
+        this->password       = new QString[nDB];
+        this->connectionName = new QString[nDB];
+
+        this->connectionName[0] = settings.value("CONNECTION_NAME_0", "").toString();
+        this->connectionName[1] = settings.value("CONNECTION_NAME_1", "").toString();
+    settings.endGroup();
+
+    settings.beginGroup("Machine 0");
+        this->databaseName[0] = settings.value("DATABASE_NAME", "").toString();
+        this->userName[0]     = settings.value("USER_NAME", "").toString();
+        this->password[0]     = settings.value("PASSWORD", "").toString();
+    settings.endGroup();
+
+    settings.beginGroup("Machine 1");
+        this->databaseName[1] = settings.value("DATABASE_NAME", "").toString();
+        this->userName[1]     = settings.value("USER_NAME", "").toString();
+        this->password[1]     = settings.value("PASSWORD", "").toString();
+    settings.endGroup();
+
+
+    db0 = new Database(connectionName[0],HOST_NAME_0,databaseName[0]); /// в параметрах задается имя соединения
+    db1 = new Database(connectionName[1],HOST_NAME_1,databaseName[1]);
+
 
     db0->moveToThread(&dbThread0);
     db1->moveToThread(&dbThread1);

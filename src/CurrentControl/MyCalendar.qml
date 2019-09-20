@@ -12,19 +12,22 @@ Item {
 
     property date date_val
     property bool ready: false
-    property bool txtEmpty: false
     property alias cbwidth: id_cb.width
+
 
 
 
     /// проверка на заполненность полей даты
     function controlField () {
+        console.log("check field...")
         var isOk
 
         if (txt_day.text.length > 0) { isOk = true }
         else                         { return false }
+
         if (txt_month.text.length > 0) { isOk = true }
         else                           { return false }
+
         if (Number(txt_year.text) >= 1901) { isOk = true }
         else                               { return false }
 
@@ -93,23 +96,30 @@ Item {
                 selectByMouse: true
                 horizontalAlignment: Text.AlignHCenter
                 //placeholderText: qsTr(date_val.getDate().toString())
-                text: (!txtEmpty) ? qsTr(date_val.getDate().toString()) : ""
+                text: ""
                 font.pixelSize: 14
                 maximumLength: 2
                 validator: RegExpValidator { regExp: /[0-9A-F]+/ } /// ограничение для ввода: только числа
-                onFocusChanged: {if(focus) { select(0, text.length) } }
+                onFocusChanged: { if(focus) { select(0, text.length) } }
                 onTextEdited: {
-                    txtEmpty = false;
-                    if (cursorPosition == 2) {
-
-                            if (txt_year.text.length > 0 && txt_month.text.length > 0 && txt_day.text.length > 0) {
-                                date_val = new Date(Number(txt_year.text), Number(txt_month.text)-1, Number(txt_day.text))
-                            }
-                        txt_month.focus = true
+                    if (txt_year.text.length > 0 && txt_month.text.length > 0 && txt_day.text.length > 0) {
+                        if (Number(text) !== 0) {
+                            date_val = new Date(Number(txt_year.text), Number(txt_month.text)-1, Number(txt_day.text));
+                            txt_day.text   = qsTr(date_val.getDate().toString());
+                            txt_month.text = qsTr(( date_val.getMonth()+1 ).toString());
+                            txt_year.text  = qsTr(date_val.getFullYear().toString());
+                            console.log(" (!) txt_day: date_val = ", date_val);
+                        }
                     }
-                    console.log(" (!!!) date_val: ", date_val, " ", Number(text))
-                    ready = controlField()
+
+                    if (cursorPosition == 2) {                            
+                        txt_month.focus = true                        
+                    }
+
+                    ready = controlField();
+
                 }
+
             }
             Text {
                 anchors.bottom: parent.bottom
@@ -122,23 +132,30 @@ Item {
                 selectByMouse: true
                 horizontalAlignment: Text.AlignHCenter
                 //placeholderText: qsTr((date_val.getMonth()+1).toString())
-                text: (!txtEmpty) ? qsTr((date_val.getMonth()+1).toString()) : ""
+                text: ""
                 font.pixelSize: 14
                 maximumLength: 2
                 validator: RegExpValidator { regExp: /[0-9A-F]+/ } /// ограничение для ввода: только числа
-                onFocusChanged: {if(focus) { select(0, text.length) } }
+                onFocusChanged: { if(focus) { select(0, text.length) } }
                 onTextEdited: {
-                    txtEmpty = false;
-                    //date_val.setMonth(Number(text)-1)
-                    if (cursorPosition == 2) {
-                        if (txt_year.text.length > 0 && txt_month.text.length > 0 && txt_day.text.length > 0) {
-                            date_val = new Date(Number(txt_year.text), Number(txt_month.text)-1, Number(txt_day.text))
+                    console.log(" (!) txt_month: text = ", text);
+                    if (txt_year.text.length > 0 && txt_month.text.length > 0 && txt_day.text.length > 0) {
+                        if (Number(text) !== 0) {
+                            date_val = new Date(Number(txt_year.text), Number(txt_month.text)-1, Number(txt_day.text));
+                            txt_day.text   = qsTr(date_val.getDate().toString());
+                            txt_month.text = qsTr(( date_val.getMonth()+1 ).toString());
+                            txt_year.text  = qsTr(date_val.getFullYear().toString());
+                            console.log(" (!) txt_month: text = ", text);
+                            console.log(" (!) txt_month: date_val = ", date_val);
                         }
+
+                    }
+                    if (cursorPosition == 2) {                        
                         txt_year.focus = true
                     }
 
+                    ready = controlField();
 
-                    ready = controlField()
                 }
             }
             Text {
@@ -152,29 +169,27 @@ Item {
                 selectByMouse: true
                 horizontalAlignment: Text.AlignHCenter
                 //placeholderText: qsTr(date_val.getFullYear().toString())
-                text: (!txtEmpty) ? qsTr(date_val.getFullYear().toString()) : ""
+                text: ""
                 font.pixelSize: 14
-                //Material.accent: Material.Orange
                 maximumLength: 4
                 validator: RegExpValidator { regExp: /[0-9A-F]+/ } /// ограничение для ввода: только числа
-                onFocusChanged: {if(focus) { select(0, text.length) } }
+                onFocusChanged: { if(focus) { select(0, text.length) } }
                 onTextEdited: {
-                    txtEmpty = false;
                     if ( Number(text) >= 1901 ) {
-                        //date_val.setFullYear(Number(text))
                         if ( txt_year.text.length > 0 && txt_month.text.length > 0 && txt_day.text.length > 0 ) {
-                            date_val = new Date(Number(txt_year.text), Number(txt_month.text)-1, Number(txt_day.text))
+                            date_val = new Date(Number(txt_year.text), Number(txt_month.text)-1, Number(txt_day.text));
+                            txt_day.text   = qsTr(date_val.getDate().toString());
+                            txt_month.text = qsTr(( date_val.getMonth()+1 ).toString());
+                            txt_year.text  = qsTr(date_val.getFullYear().toString());
+                            console.log(" (!) txt_year: date_val = ", date_val);
                         Material.accent = Material.LightBlue
                         }
                     }
                     else {
                         Material.accent = Material.Red
-//                        Material.foreground = Material.Red
-//                        Material.primary = Material.Red
-//                        Material.background = Material.Red
                     }
 
-                    ready = controlField()
+                    ready = controlField();
                 }
             }
         }
@@ -197,31 +212,11 @@ Item {
             onOpened:  {
                 if ( txt_year.text.length > 0 )   grid.year  = txt_year.text;
                 if ( txt_month.text.length > 0 )  grid.month = txt_month.text - 1; // grid.month = date_val.getMonth();
-
-//                if (date_val.getFullYear() == txt_year.text)
-//                {
-//                    grid.year = date_val.getFullYear();
-//                }
-//                else {
-//                    grid.year = txt_year.text;
-//                }
-
-
             }
             onClosed: {
                 popup_findYear.close();
                 if ( txt_year.text.length > 0 )   grid.year  = txt_year.text;
                 if ( txt_month.text.length > 0 )  grid.month = txt_month.text - 1; // grid.month = date_val.getMonth();
-
-
-//                if (date_val.getFullYear() == txt_year.text)
-//                {
-//                    grid.year = date_val.getFullYear();
-//                }
-//                else {
-//                    grid.year = txt_year.text;
-//                }
-//                grid.month = date_val.getMonth();
             }
 
             ColumnLayout {
@@ -268,9 +263,6 @@ Item {
                                 for(var i_year = thisYear; i_year > 1900; i_year --) {
                                     model_year.append({ name: i_year })
                                 }
-                                //console.log("Index = ", gridYear.currentIndex);
-
-                                //popup_findYear.currentIndex = 30 //118
 
                                 var str = grid.title;
                                 str = str.split(" ");
@@ -388,23 +380,6 @@ Item {
                         verticalAlignment: Text.AlignVCenter
 
 
-                        //visible: (grid.month > model.today) ? true : false
-                        //visible: (model.day <= grid.day) ? true : false
-//                        visible: {
-//                            //console.log("model.text =  ", text);
-//                            var now = new Date();
-//                            if ( model.year > now.getFullYear()) {
-//                                if ( model.month > now.getMonth() ) {
-//                                    if ( text > now.getDate() ) {
-//                                        console.log("model.year =  ", model.year,  " ", now.getFullYear());
-//                                        console.log("model.month = ", model.month, " ", now.getMonth());
-//                                        console.log("model.day =   ", model.month, " ", now.getDate());
-//                                        return false;
-//                                    }
-//                                }
-//                            }
-//                            return true;
-//                        }
 
                         opacity: (model.month === grid.month) ? 1 : 0.5
 
@@ -440,8 +415,10 @@ Item {
                                 {
                                     date_val = date
                                     id_cb.popup.close()
-                                    ready = true                                    
-                                    txtEmpty = false
+                                    ready = true
+                                    txt_day.text   = qsTr(date_val.getDate().toString())
+                                    txt_month.text = qsTr((date_val.getMonth()+1).toString())
+                                    txt_year.text  = qsTr(date_val.getFullYear().toString())
                                 }
 
                             }
@@ -567,7 +544,9 @@ Item {
             onExited:   { parent.sourceSize.height = 21; parent.sourceSize.width = 21 }
             onClicked: {
                 ready = false
-                txtEmpty = true
+                txt_day.text   = ""
+                txt_month.text = ""
+                txt_year.text  = ""
                 date_val = new Date()
             }
         }
