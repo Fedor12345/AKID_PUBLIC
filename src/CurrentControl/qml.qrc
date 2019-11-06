@@ -37,7 +37,8 @@
         <file>Persons.qml</file>
         <file>MyFindField2.qml</file>
         <file>SICH.qml</file>
-        <file>TestConnectionSystem.qml</file>
         <file>AddPerson.qml</file>
+        <file>icons/delete-24px.svg</file>
+        <file>TestConnectionSystem.qml</file>
     </qresource>
 </RCC>

@@ -10,6 +10,9 @@
 //#include <object_thread.h>
 //#include <modeldb_thread.h>
 
+///Тесты
+#include <connectsystemtest.h>
+
 
 /// ноутбуки:
 /// "ARM_AKID_1"
@@ -51,6 +54,9 @@ public:
     // подключение к БД (тест)
     QSqlDatabase db_threadMain;
 
+    /// Тесты
+    ConnectSystemTest *connectSystemTest;
+
     // модели
     //ModelDB_thread *modelDB;   /// модель БД
 
@@ -66,6 +72,9 @@ private:
     Database *db0 = nullptr;
     Database *db1 = nullptr;
     WaitDB_thread  *waitDB;     /// объект, который ожидает соединения с БД
+
+    /// поток для тестов системы
+    QThread connectSystemTestThread;
 
     QString currentConnectionName = "";
 
@@ -103,6 +112,14 @@ signals:
     void signalStopWaitTimer(); //сигнал,чтобы остановить waitTimer в потоке WaitDB
 
 
+    /// Тесты
+    /// Сигнал для объекта(находится в своем потоке) тестов системы подключений к БД, вызывает функцию, запускающую основной цикл
+    void signalSendScript(const QMap<QString, QVariant> &scripts, const int maxLenght);
+    /// "Сквозной" сигнал, соединенный с сигналом от объекта с тестами, сообщает QML, что необходимо задать SQL запрос
+    void signalSetQuery(const QString &typeQuery, const int &nQuery, const int &numberIteration);
+
+
+
 public slots:
     void checkConnectionDB(int iConnection); /// сгенерирует сигнал для waitDB: запустит подключение к БД с номером, казанным в параметрах
     void checkAllConnectionDB();      /// сгенерирует сигнал для waitDB: запустит подключение ко всем имеющимся БД
@@ -121,6 +138,11 @@ public slots:
     /// обновление от Двитрия
     void setLoginPwd(const QString&, const QString&);   //Установить Login/Password
     QObject* createModel(const QString &str_query, const QString &nameModel);
+
+
+    /// Тесты
+    void startTest1(const QMap<QString, QVariant> &scripts, const int maxLenght);
+    void pauseTest1();
 
 
 //    //модели

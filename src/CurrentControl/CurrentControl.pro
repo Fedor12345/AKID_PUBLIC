@@ -39,7 +39,8 @@ SOURCES += \
     createreport.cpp \
     imageprovider.cpp \
     filemanager.cpp \
-    ClipboardProxy.cpp
+    ClipboardProxy.cpp \
+    connectsystemtest.cpp
 
 RESOURCES += qml.qrc
 
@@ -65,7 +66,8 @@ HEADERS += \
     createreport.h \
     imageprovider.h \
     filemanager.h \
-    ClipboardProxy.h
+    ClipboardProxy.h \
+    connectsystemtest.h
 
 
 DISTFILES +=

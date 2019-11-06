@@ -50,10 +50,10 @@ ApplicationWindow {
     Connections {
         target: managerDB
         onSignalBlockingGUI: {
-            popup_wait.open();
+            ///popup_wait.open();
         }
         onSignalUnlockingGUI: {
-            popup_wait.close();
+           /// popup_wait.close();
         }
     }
 

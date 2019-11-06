@@ -148,6 +148,21 @@ ManagerConnectDB::ManagerConnectDB()
     /// запуск потоков
     waitDBThread.start();
 
+
+
+
+    /// Тесты
+    connectSystemTest = new ConnectSystemTest();
+    QObject::connect(this,              &ManagerConnectDB::signalSendScript,
+                     connectSystemTest, &ConnectSystemTest::setSequenceQueries);
+
+    QObject::connect(connectSystemTest, &ConnectSystemTest::signalSetQuery,
+                     this,              &ManagerConnectDB::signalSetQuery);
+
+    connectSystemTest->moveToThread(&connectSystemTestThread);
+    connectSystemTestThread.start();
+
+
 }
 
 ManagerConnectDB::~ManagerConnectDB()
@@ -391,6 +406,33 @@ QObject* ManagerConnectDB::createModel(const QString &str_query, const QString &
 }
 
 
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+/// Тесты
+
+void ManagerConnectDB::startTest1(const QMap<QString, QVariant> &scripts, const int maxLenght)
+{
+    //connectSystemTest->stop = false;
+    if (connectSystemTest->stop == true) {
+        emit signalSendScript( scripts, maxLenght );
+    }
+
+//    qDebug() << " (m) scripts = " << scripts.values() << QThread::currentThreadId();
+
+//    foreach (QString key, scripts.keys()) {
+//        for ( int i = 0; i < scripts.value(key).toList().size(); i++) {
+//            qDebug() << " (!) scripts = "  << scripts.value(key).toList().value(i).toString() << " | " << key;
+//        }
+    //    }
+}
+
+void ManagerConnectDB::pauseTest1()
+{
+    connectSystemTest->stop = true;
+}
 
 
 

@@ -598,7 +598,7 @@ Page {
                     Rectangle {
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
-                        width: 15
+                        width: 50
                         color: "transparent"
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
