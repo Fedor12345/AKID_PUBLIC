@@ -38,12 +38,12 @@ Page {
     Connections {
         target: Query1
         onSignalSendResult: {
-            if (owner_name === "AddReports") {
+            if (owner_name === "q1__addReports" || owner_name === "q1__deleteReport") {
                 if (res) {
                     model_SQLQiueries.updateModel();
                 }
             }
-            if (owner_name === "UpdateReports") {
+            if (owner_name === "q1__updateReports") {
                 if (res) {
                     model_SQLQiueries.updateModel();
 
@@ -61,14 +61,14 @@ Page {
 
                 }
             }
-            if(owner_name === "loadFileForReport") {
+            if(owner_name === "q1__loadFileForReport") {
                 if (res) {
                     console.log(" loadFileForReport: ", var_res["DOCX"], var_res["DOCM"], var_res["REPORTNAME"]);
                     FileManager.saveFile(var_res["DOCX"],"","report1", "docx")
                     FileManager.saveFile(var_res["DOCM"],"","macro_1", "docm")
 
                     /// запускается создание отчета, затем данные очищаются
-                    report.beginCreateReport();
+                    report.beginCreateReportFile();
                     report.showZ();
                     report.clearZ();
                 }
@@ -883,11 +883,11 @@ Page {
 
                             console.log("data_arr: ", data_arr["DOCX"], data_arr["DOCM"], data_arr["REPORTNAME"], data_arr["SQL"], data_arr["DESCRIPTION"]);
                             if (popup_addQuery.type == "add") {
-                                Query1.insertRecordIntoTable("AddReports", "REPORTS", data_arr);
+                                Query1.insertRecordIntoTable("q1__addReports", "REPORTS", data_arr);
                             }
                             if (popup_addQuery.type == "update") {
                                 //console.log("ОБНОВИТЬ ЗАПИСЬ...пока не обновляется =)");
-                                Query1.updateRecordIntoTable("UpdateReports", "REPORTS", data_arr, "ID", model_SQLQiueries.get(list_SQLQueries.currentIndex)["ID"] );
+                                Query1.updateRecordIntoTable("q1__updateReports", "REPORTS", data_arr, "ID", model_SQLQiueries.get(list_SQLQueries.currentIndex)["ID"] );
                             }
 
 
@@ -1173,8 +1173,6 @@ Page {
                             rect_Table.destroyObj_fun();
                             model_tableReports.setQueryDB(SQLquery);
                             txt_ReportNameFromDB.reportName = model_SQLQiueries.get(list_SQLQueries.currentIndex)["REPORTNAME"]
-                            //var queryFromDB = model_SQLQiueries.get(list_SQLQueries.currentIndex)["SQL"]
-                            //Query1.setQueryAndName(querySql, "Report_");
                         }
 
                     }
@@ -1304,7 +1302,7 @@ Page {
                         onClicked: {
                             var query = "Delete from REPORTS WHERE ID = " + model_SQLQiueries.get(list_SQLQueries.currentIndex)["ID"];
                             //console.log(" (!) query: ", query);
-                            Query1.setQueryAndName(query, "deleteSQLQuery")
+                            Query1.setQueryAndName(query, "q1__deleteReport")
                             popup_deleteSQLQuery.close()
                         }
                     }
@@ -1469,12 +1467,11 @@ Page {
                         }
 
 
-
-
                         /// задается размерность массива данных
-                        var Z_lenght = model_tableReports.columnCount() * model_tableReports.rowCount();
+                        //var Z_lenght = model_tableReports.columnCount() * model_tableReports.rowCount();
                         //console.log( " (!) Z_lenght = ", Z_lenght )
-                        report.setTypeReport( Z_lenght + 1 );
+                        console.log( " (!) setTypeReport "  );
+                        report.setTypeReport( model_tableReports.columnCount(), model_tableReports.rowCount() );
 
                         var Z = {};
                         Z[1] = txt_ReportNameFromDB.text; //model_SQLQiueries.get(list_SQLQueries.currentIndex)["REPORTNAME"];
@@ -1510,7 +1507,7 @@ Page {
                         report.setZ(Z);
 
                         var query = " select DOCX, DOCM, REPORTNAME FROM REPORTS WHERE ID = " + model_SQLQiueries.get(list_SQLQueries.currentIndex)["ID"]
-                        Query1.setQueryAndName(query, "loadFileForReport")
+                        Query1.setQueryAndName(query, "q1__loadFileForReport")
                         //popup_createReport.open()
 
                     }
@@ -1664,7 +1661,7 @@ Page {
                 if(table_dynamic !== undefined){
                     table_dynamic.columnCount  = 0
                     table_dynamic.columnWidth  = 0
-                    table_dynamic.columnHeight = 0
+                    table_dynamic.headerHeight = 0
                     table_dynamic.rowHeight    = 0
                     table_dynamic.model_       = undefined
                     table_dynamic.destroy();

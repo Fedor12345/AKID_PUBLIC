@@ -38,8 +38,14 @@ void SQLquery::setQuery(const QString &query)
 
     clearqueriesGroup();
 
-    emit signalCheckConnectionDB();   /// отправляем менеджеру сигнал начать попытки подключения
+    //(at(this->iQuery)
+    qDebug() << " -> SQLquery( " << this->sender_names.last() << " ): setQuery(): query: " << query;
+    emit signalCheckConnectionDB(this->sender_names.last());   /// отправляем менеджеру сигнал начать попытки подключения
+    /// this->sender_names.last() - имя запроса, добавленного в конец очереди
     //queryExecute();
+
+
+
 }
 
 /// перегрузка функции в случае, если вопросы необходимо выполнить в группе
@@ -51,7 +57,7 @@ void SQLquery::setQuery(const QString &query, const bool &isGroup)
     if(isGroup) { this->queriesGroup.append(query); this->isGroup = isGroup; }
     else        { clearqueriesGroup(); }
 
-    emit signalCheckConnectionDB();   /// отправляем менеджеру сигнал начать попытки подключения
+    emit signalCheckConnectionDB(this->sender_names.at(this->iQuery));   /// отправляем менеджеру сигнал начать попытки подключения
     //queryExecute();
 }
 
@@ -80,12 +86,10 @@ void SQLquery::clearqueriesGroup(){
 
 
 void SQLquery::checkNameConnection(QString connectionName) //, bool isNewName
-{
+{     
     /// т.к. эта функция запускается от сигнала от менеджера при удачном подключении к бд,
     /// необходимо игнорировать выполнение функции, если перед ее запуском не была нажата соответсвующая кнопка
-
     if(!this->fl_setQuery) { return; }
-
 
     QString query;
     //qDebug() << " -> SQLquery: checkNameConnection:  " << isNewName;
@@ -114,60 +118,95 @@ void SQLquery::checkNameConnection(QString connectionName) //, bool isNewName
     this->connectionName = connectionName;
 
 
+
     /// !!!!!!!!! ПЕРЕПРОВЕРИТЬ !!!!!!!!!!!!!!!!!!
 
-//    query = this->queries.at(this->iQuery);
-//    //this->queries.removeAt(this->iQuery);
+    /// НОВЫЙ АЛГОРИТМ:
+    /// каждый запрос из списка будет запускаться с проверкой соединения
+    /// Т.е. возникает цикл,
+    /// где this->iQuery - счетчик, а условие выхода if(!this->fl_setQuery) { return; }
 
-//    if ( connectionName != "0" )
-//    {
-//        queryExecute(query);
-//    }
-//    else
-//    {
-//        emit signalSendResult(sender_name, false, NULL, "Соединение с БД отстутсвует");
-//        /// ВЫПОЛНЯТЬ В СЛУЧАЕ ЕСЛИ ИМЯ СОЕДИНЕНИЯ 0
-//    }
+    query = this->queries.at(this->iQuery);
 
-//    this->iQuery++;
+    if ( connectionName != "0" )
+    {
+        queryExecute(query);
+    }
+    else
+    {
+        emit signalSendResult(sender_name, false, NULL, "Соединение с БД отстутсвует");
+        /// ВЫПОЛНЯТЬ В СЛУЧАЕ ЕСЛИ ИМЯ СОЕДИНЕНИЯ 0
+    }
+
+    ////////////////////////////////////////////////////////////
+    if ( this->iQuery >= this->numberQuery ) {
+        qDebug() << " (!)SQL последний запрос " << this->iQuery << " = " << this->numberQuery;
+        this->queries.clear();
+        this->sender_names.clear();
+        this->byteValues.clear();
+        this->numberQuery = -1;
+        this->iQuery = 0;
+        this->fl_setQuery = false;
+    }
+    else {
+        this->iQuery++;
+        qDebug() << " (!)SQL Очередь запросов: " << this->iQuery << " из " << this->numberQuery << " | " << this->sender_names.at(this->iQuery);
+        emit signalCheckConnectionDB(this->sender_names.at(this->iQuery));   /// отправляем менеджеру сигнал начать попытки подключения
+        for (int i=0;i<sender_names.length();i++){
+            qDebug() << " (!)SQL Запросы: " <<this->sender_names.at(i);
+        }
+
+    }
+    ////////////////////////////////////////////////////////////
+    //this->fl_setQuery = false;
+    //return;
+
+
+
 //    if (this->iQuery < this->queries.length()-1) {
-//        emit signalCheckConnectionDB();   /// отправляем менеджеру сигнал начать попытки подключения
+//        emit signalCheckConnectionDB(this->sender_names.at(this->iQuery));   /// отправляем менеджеру сигнал начать попытки подключения
 //        return;
 //    }
 
     /// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-    for ( int i = 0; i < this->queries.length(); i++ )
-    {
-        this->iQuery = i;
-        query = this->queries.at(i);
-//        qDebug() << " -> SQLquery: checkNameConnection: query: " << query;
+    /// СТАРЫЙ АЛГОРИТМ:
+    /// после проверки соединения в бд посылается сразу пачка sql запросов,
+    /// т.е. каждый из них по отдельности не ожидает ответа от БД
+//    for ( int i = 0; i < this->queries.length(); i++ )
+//    {
+//        this->iQuery = i;
+//        query = this->queries.at(i);
+////        qDebug() << " -> SQLquery: checkNameConnection: query: " << query;
 
-        if(connectionName != "0")
-        {
-            queryExecute(query);
-        }
-        else
-        {
-            emit signalSendResult(sender_name, false, NULL, "Соединение с БД отстутсвует");
-            /// ВЫПОЛНЯТЬ В СЛУЧАЕ ЕСЛИ ИМЯ СОЕДИНЕНИЯ 0
-        }
-    }
-
-
-    this->queries.clear();
-    this->sender_names.clear();
-    this->byteValues.clear();
-    this->numberQuery = -1;
-    this->iQuery = 0;
-
-
-    this->fl_setQuery = false;
-
-//    if(this->isNewName){
-//        emit signalCheckConnectionDB();
+//        if(connectionName != "0")
+//        {
+//            queryExecute(query);
+//        }
+//        else
+//        {
+//            emit signalSendResult(sender_name, false, NULL, "Соединение с БД отстутсвует");
+//            /// ВЫПОЛНЯТЬ В СЛУЧАЕ ЕСЛИ ИМЯ СОЕДИНЕНИЯ 0
+//        }
 //    }
+
+
+//    this->queries.clear();
+//    this->sender_names.clear();
+//    this->byteValues.clear();
+//    this->numberQuery = -1;
+//    this->iQuery = 0;
+
+//    /// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//    /// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+//    this->fl_setQuery = false;
+
+////    if(this->isNewName){
+////        emit signalCheckConnectionDB(this->sender_names.at(this->iQuery));
+////    }
 
 
 }
@@ -202,13 +241,13 @@ void SQLquery::queryExecute(QString query)
     {
         ///Ошибка при выполнении запроса
         QString str = this->connectionName + ": error: " + querySQL.lastError().text();
-        qDebug() << " -> SQLquery: queryExecute:  "  << str << query;
+        qDebug() << " -> SQLquery(" << this->sender_names.at(this->iQuery) << " ): queryExecute:  "  << str << query;
 
-        emit signalSendResult(sender_names.at(this->iQuery), false, NULL, querySQL.lastError().text());
+        emit signalSendResult(this->sender_names.at(this->iQuery), false, NULL, querySQL.lastError().text());
     }
     else
     {
-        qDebug() << " -> SQLquery: queryExecute:  "  << "Запрос прошел: " << sender_name_current << ": " << query;
+        qDebug() << " -> SQLquery(" << this->sender_names.at(this->iQuery) << " ): queryExecute:  "  << "Запрос прошел: " << query;
 
         int numberOfRecords = 0;
 
@@ -228,6 +267,10 @@ void SQLquery::queryExecute(QString query)
                         }
                         result_data.insert(rec.fieldName(i),outByteArray);
                     }
+//                    else if (querySQL.value(i).type() == QVariant::Date) {
+
+//                        result_data.insert(rec.fieldName(i),querySQL.value(i));
+//                    }
                     else {
                         result_data.insert(rec.fieldName(i),querySQL.value(i));
                     }
@@ -333,7 +376,7 @@ void SQLquery::getMaxID(const QString& owner_name, const QString &tname, const Q
         tstr1 = "SELECT max(id_person) max_id FROM " + tname;
     }
 
-    qDebug() << " -> SQLquery: getMaxID(): query: " << tstr1;
+    qDebug() << " -> SQLquery( " << this->sender_names.at(this->iQuery) << " ): getMaxID(): query: " << tstr1;
     setQuery(tstr1);
 }
 
@@ -415,7 +458,7 @@ bool SQLquery::insertRecordIntoTable(const QString& owner_name, const QString &t
     tstr2.remove (tstr2.length()-1, 1);
     tstr1 = tstr1+") "+tstr2+")";
 
-    qDebug() << " -> SQLquery: insertRecordIntoTable(): query: " << tstr1;
+    qDebug() << " -> SQLquery( " << this->sender_names.at(this->iQuery) << " ): insertRecordIntoTable(): query: " << tstr1;
 
     setQuery(tstr1);
 
@@ -459,7 +502,7 @@ bool SQLquery::updateRecordIntoTable(const QString &owner_name, const QString &t
     tstr = tstr.remove(tstr.length()-1,1);
     tstr = tstr + " WHERE " + idWhere + " = " + QString::number(id);
 
-    qDebug() << " -> SQLquery: updateRecordIntoTable(): query: " << tstr;
+    qDebug() << " -> SQLquery( " << this->sender_names.at(this->iQuery) << " ): updateRecordIntoTable(): query: " << tstr;
 
     setQuery(tstr);
 

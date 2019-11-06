@@ -9,17 +9,39 @@ Item {
     id: root
     width: 170 //id_cb.width//+img_erase.width+8   //contentWidth
     height: id_cb.height //contentHeight
+    //border.width: 1
+    //color: "transparent"
 
     property date date_val
-    property bool ready: false
-    property alias cbwidth: id_cb.width
+    //property date date_buf: date_val
+    property bool ready: controlField()
+    property var cbwidth: width
+    property var sizeNumbers: 14
 
+    property alias openCalendarMenu: mycalendar.visible
+
+    onReadyChanged: {
+        if (ready == false) {
+            date_val = ""
+            txt_day.text   = "";
+            txt_month.text = "";
+            txt_year.text  = "";
+        }
+    }
+
+//    onDate_valChanged: {
+//        ready = true;
+//        date_buf = date_val;
+//        txt_day.text   = qsTr(date_val.getDate().toString());
+//        txt_month.text = qsTr(( date_val.getMonth()+1 ).toString());
+//        txt_year.text  = qsTr(date_val.getFullYear().toString());
+//    }
 
 
 
     /// проверка на заполненность полей даты
     function controlField () {
-        console.log("check field...")
+        //console.log("check field...")
         var isOk
 
         if (txt_day.text.length > 0) { isOk = true }
@@ -37,7 +59,9 @@ Item {
 
     ComboBox {
         id: id_cb
-        width: root.width - 20 //img_erase.width
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        width: root.cbwidth - 20 //img_erase.width
         padding: 0
         font.pixelSize: 16
         hoverEnabled: true
@@ -83,8 +107,8 @@ Item {
 
 
         Row {
-            anchors.left: parent.left
-            anchors.leftMargin: 10
+            anchors.right: parent.right
+            anchors.rightMargin: 45
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 2
             spacing: 3
@@ -96,8 +120,8 @@ Item {
                 selectByMouse: true
                 horizontalAlignment: Text.AlignHCenter
                 //placeholderText: qsTr(date_val.getDate().toString())
-                text: ""
-                font.pixelSize: 14
+                text: (root.date_val.getDate()) ? root.date_val.getDate() : ""
+                font.pixelSize: root.sizeNumbers
                 maximumLength: 2
                 validator: RegExpValidator { regExp: /[0-9A-F]+/ } /// ограничение для ввода: только числа
                 onFocusChanged: { if(focus) { select(0, text.length) } }
@@ -112,8 +136,8 @@ Item {
                         }
                     }
 
-                    if (cursorPosition == 2) {                            
-                        txt_month.focus = true                        
+                    if (cursorPosition == 2) {
+                        txt_month.focus = true
                     }
 
                     ready = controlField();
@@ -132,8 +156,8 @@ Item {
                 selectByMouse: true
                 horizontalAlignment: Text.AlignHCenter
                 //placeholderText: qsTr((date_val.getMonth()+1).toString())
-                text: ""
-                font.pixelSize: 14
+                text: (root.date_val.getMonth()) ? root.date_val.getMonth()+1 : ""
+                font.pixelSize: root.sizeNumbers
                 maximumLength: 2
                 validator: RegExpValidator { regExp: /[0-9A-F]+/ } /// ограничение для ввода: только числа
                 onFocusChanged: { if(focus) { select(0, text.length) } }
@@ -150,7 +174,7 @@ Item {
                         }
 
                     }
-                    if (cursorPosition == 2) {                        
+                    if (cursorPosition == 2) {
                         txt_year.focus = true
                     }
 
@@ -169,8 +193,8 @@ Item {
                 selectByMouse: true
                 horizontalAlignment: Text.AlignHCenter
                 //placeholderText: qsTr(date_val.getFullYear().toString())
-                text: ""
-                font.pixelSize: 14
+                text: (root.date_val.getFullYear()) ? root.date_val.getFullYear() : ""
+                font.pixelSize: root.sizeNumbers
                 maximumLength: 4
                 validator: RegExpValidator { regExp: /[0-9A-F]+/ } /// ограничение для ввода: только числа
                 onFocusChanged: { if(focus) { select(0, text.length) } }
@@ -364,8 +388,8 @@ Item {
 
                 MonthGrid {
                     id: grid
-                    month: date_val.getMonth()    //curmonth     //curdate.getMonth()//Calendar.December
-                    year:  date_val.getFullYear() //curyear
+                    month: (date_val.getMonth()) ? date_val.getMonth() : now.getMonth()  //curmonth     //curdate.getMonth()//Calendar.December
+                    year:  (date_val.getFullYear()) ? date_val.getFullYear() : now.getFullYear() //curyear
                     //property int day: date_val.getDate()
                     property var now: new Date()
 
@@ -414,6 +438,7 @@ Item {
                                 if (currentDate <=  grid.now)
                                 {
                                     date_val = date
+                                    //date_buf = date
                                     id_cb.popup.close()
                                     ready = true
                                     txt_day.text   = qsTr(date_val.getDate().toString())
@@ -544,10 +569,11 @@ Item {
             onExited:   { parent.sourceSize.height = 21; parent.sourceSize.width = 21 }
             onClicked: {
                 ready = false
-                txt_day.text   = ""
-                txt_month.text = ""
-                txt_year.text  = ""
-                date_val = new Date()
+                date_val = ""
+                txt_day.text   = "";
+                txt_month.text = "";
+                txt_year.text  = "";
+                //date_val = "" //new Date();
             }
         }
     }

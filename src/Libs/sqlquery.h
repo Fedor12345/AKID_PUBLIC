@@ -51,7 +51,7 @@ private:
 
 
 signals:
-    void signalCheckConnectionDB();
+    void signalCheckConnectionDB(QString senderName); /// senderName - имя того, кто вызвал сигнал
     void signalSendResult(const QString& owner_name, const bool& res, const QVariant& var_res, const QString& messageError);
     //void signalSendResult(const QString& owner_name, const bool& res, const QMap<QString, QVariant>& var_res, const QString& messageError);
     void signalSendImageToProvider(const QByteArray &outByteArray, const QString &nameImage);

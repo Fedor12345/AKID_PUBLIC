@@ -6,7 +6,7 @@ import QtQuick.Dialogs 1.2
 Item {
     //id: item3
     id: main_AddWorker
-    height: 800//550
+    //height: 800//550
     width:  900//690
 
     //property bool isOk: true
@@ -78,22 +78,6 @@ Item {
     }
 
 
-    Item {
-        id: modeles
-
-//        property var model_adm_status:           managerDB.createModel(" SELECT STATUS_CODE, STATUS  FROM ADM_STATUS ",                       "adm_status")
-//        property var model_adm_organisation:     managerDB.createModel(" SELECT ID, ORGANIZATION_    FROM ADM_ORGANIZATION ",                 "adm_organisation")
-//        property var model_adm_department_outer: managerDB.createModel(" SELECT ID, DEPARTMENT_OUTER FROM ADM_DEPARTMENT_OUTER WHERE ID = 0", "adm_department_outer")
-//        property var model_adm_department_inner: managerDB.createModel(" SELECT ID, DEPARTMENT_INNER FROM ADM_DEPARTMENT_INNER ",             "adm_department_inner")
-//        property var model_adm_assignment:       managerDB.createModel(" SELECT ID, ASSIGNEMENT      FROM ADM_ASSIGNEMENT ",                  "adm_department_nnp")
-
-        //property var model_adm_organisation_org: managerDB.createModel(" SELECT ORGANIZATION_        FROM ADM_ORGANIZATION ",              "adm_organisation_org")
-        //property var model_adm_organisation_dep: managerDB.createModel(" SELECT ID, DEPARTMENT       FROM ADM_ORGANIZATION WHERE ID = 1 ", "adm_organisation_dep")
-        //property var model_adm_department_nnp:   managerDB.createModel(" SELECT ID, DEPARTMENT_NPP   FROM ADM_DEPARTMENT_NPP ",            "adm_department_nnp")
-
-
-    }
-
     Connections {
         id: wc_query
         target: Query1
@@ -120,12 +104,12 @@ Item {
             }
 
             //проверка есть ли в БД запись с таким же табельным номером
-            if(owner_name == "isPersonalNumber") {
+            if(owner_name == "q1__isPersonalNumber") {
                 if ( var_res > 0 ) { nw_personalNumber.color = "#ff0000" } // краный
                 else               { nw_personalNumber.color = "#008000" } // зеленный
             }
             //проверка есть ли в БД запись с таким же ТЛД
-            if(owner_name == "isIDTLD") {
+            if(owner_name == "q1__isIDTLD") {
                 if ( var_res > 0 ) { nw_tld.color = "#ff0000" }
                 else               { nw_tld.color = "#008000" }
             }
@@ -560,7 +544,7 @@ Item {
 //                                                    console.log("...")
 //                                                }
                                                  if (nw_personalNumber.text.length > 0)
-                                                 { Query1.setQueryAndName(" Select PERSON_NUMBER FROM EXT_PERSON WHERE PERSON_NUMBER = " + nw_personalNumber.text, "isPersonalNumber"); }
+                                                 { Query1.setQueryAndName(" Select PERSON_NUMBER FROM EXT_PERSON WHERE PERSON_NUMBER = " + nw_personalNumber.text, "q1__isPersonalNumber"); }
 
                                              }
                                         }
@@ -596,7 +580,7 @@ Item {
                                             repeat: false
                                             onTriggered: {
                                                  if (nw_tld.text.length > 0)
-                                                 { Query1.setQueryAndName(" Select ID_TLD FROM EXT_PERSON WHERE ID_TLD = " + nw_tld.text, "isIDTLD"); }
+                                                 { Query1.setQueryAndName(" Select ID_TLD FROM EXT_PERSON WHERE ID_TLD = " + nw_tld.text, "q1__isIDTLD"); }
 
                                              }
                                         }
@@ -667,7 +651,7 @@ Item {
                                                 width: 170
                                                 flat: false
                                                 font.pixelSize: 16
-                                                model:  main_AddWorker.model_adm_organisation //modeles.model_adm_organisation
+                                                model:  main_AddWorker.model_adm_organisation
                                                     //["001", "002"]
                                                     //(nw_staffType.currentIndex==0) ? ["АЭС"] : modeles.model_adm_organisation
                                                 textRole:  "ORGANIZATION_" //(nw_staffType.currentIndex==0) ? "" : "ORGANIZATION_"
@@ -721,20 +705,20 @@ Item {
                                                                 width: 230
                                                             }
                                                         }
-                                                        Button {
-                                                            height: 75
-                                                            width: 65
-                                                            text: "+"
-                                                            //font.bold: true
-                                                            font.pixelSize: 40
-                                                            onClicked: { // SELECT ORGANIZATION_ FROM ADM_ORGANIZATION
-                                                                var query = " INSERT INTO ADM_ORGANIZATION VALUES ("
-                                                                               + "'" + txt_addOrganization.text + "', "
-                                                                               + "'" + txt_addDepartment.text   + "') ";
-                                                                ///Query1.setQuery(query);
-                                                                popup_addOrganisation.close();
-                                                            }
-                                                        }
+//                                                        Button {
+//                                                            height: 75
+//                                                            width: 65
+//                                                            text: "+"
+//                                                            //font.bold: true
+//                                                            font.pixelSize: 40
+//                                                            onClicked: { // SELECT ORGANIZATION_ FROM ADM_ORGANIZATION
+//                                                                var query = " INSERT INTO ADM_ORGANIZATION VALUES ("
+//                                                                               + "'" + txt_addOrganization.text + "', "
+//                                                                               + "'" + txt_addDepartment.text   + "') ";
+//                                                                ///Query1.setQuery(query);
+//                                                                popup_addOrganisation.close();
+//                                                            }
+//                                                        }
                                                     }
                                                 }
                                             }
@@ -1452,24 +1436,24 @@ Item {
 
         }
 
-        Button {
-            anchors.bottom: parent.bottom
-            anchors.right: ok_button.left
-            anchors.rightMargin: 20
-            text: "info"
-            font.pixelSize: 14
+//        Button {
+//            anchors.bottom: parent.bottom
+//            anchors.right: ok_button.left
+//            anchors.rightMargin: 20
+//            text: "info"
+//            font.pixelSize: 14
 
-            onClicked: {
-                console.log("");
-                console.log("");
-                console.log("nw_personalNumber:", nw_personalNumber.isOk);
-                console.log("nw_tld:", nw_tld.isOk);
-                console.log("nw_surname:", nw_surname.isOk);
-                console.log("nw_name:", nw_name.isOk);
-                console.log("nw_patronymic:", nw_patronymic.isOk);
+//            onClicked: {
+//                console.log("");
+//                console.log("");
+//                console.log("nw_personalNumber:", nw_personalNumber.isOk);
+//                console.log("nw_tld:", nw_tld.isOk);
+//                console.log("nw_surname:", nw_surname.isOk);
+//                console.log("nw_name:", nw_name.isOk);
+//                console.log("nw_patronymic:", nw_patronymic.isOk);
 
-            }
-        }
+//            }
+//        }
 
         Button {
             id: ok_button
@@ -1596,6 +1580,7 @@ Item {
                 //console.log(">", nw_organisation.currentText)
                 //console.log(data_arr["STATUS_CODE"]);
                 //console.log(">",nw_staffType.currentText);
+                console.log("create_confirm -> ");
                 create_confirm(data_arr)
                 clearfields()
             }
@@ -1606,7 +1591,7 @@ Item {
             width: ok_button.width
             anchors.bottomMargin: 10
             anchors.leftMargin: 20
-            text: "Отмена"
+            text: "Очистить"
             font.pixelSize: 14
             anchors.bottom: parent.bottom
             anchors.left: parent.left            

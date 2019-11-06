@@ -575,8 +575,8 @@ Page {
             console.log( "\n", " параметры дат: ",test_var, "; ", date_begin_send, " ", date_end_send, "\n" );
 
 
-            /// задается размерность массива данных
-            report.setTypeReport(64);
+            /// задается размерность массива данных (64) и число строк в текстовом файле данных (1)
+            report.setTypeReport(64,1);
             /// пол и возраст сотрудника и ин-фа за какой период времени передаются в массив с индексом ноль (он не отображается в отчете)
             var Z = {};            
             Z["Z0"] = page_main_.sex + "|" + page_main_.age + "|" + test_var;
@@ -618,7 +618,7 @@ Page {
                            " ID_PERSON IN (" + page_main_.id_currentPerson  + ")  ";
             }
 
-            Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_1");
+            Query1.setQueryAndName(querySql, "q1__report_AccumulatedDose_query2_1");
 
 
             /////////////////////////////////////////////////
@@ -632,7 +632,7 @@ Page {
                        " BURN_DATE >= TO_DATE('" + date_begin_send + "','DD/MM/YY') AND"  +
                        " BURN_DATE <= TO_DATE('" + date_end_send   + "','DD/MM/YY') ";
 
-            Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_2_1");
+            Query1.setQueryAndName(querySql, "q1__report_AccumulatedDose_query2_2_1");
 
             querySql = " SELECT " +
                        " SUM(EPD_G_HP10) Z23, SUM(EPD_N_HP10)  Z24, SUM(EPD_G_HP3)   Z28, SUM(EPD_N_HP3)   Z29, "  +
@@ -642,7 +642,7 @@ Page {
                        " TIME_OUT >= TO_DATE('" + date_begin_send + "','DD/MM/YY') AND"   +
                        " TIME_OUT <= TO_DATE('" + date_end_send   + "','DD/MM/YY') ";
 
-            Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_2_2");
+            Query1.setQueryAndName(querySql, "q1__report_AccumulatedDose_query2_2_2");
 
             /////////////////////////////////////////////////
             /// данные запроса query2_3
@@ -654,7 +654,7 @@ Page {
                        " BURN_DATE >= TO_DATE('" + date_begin_send + "','DD/MM/YY') AND" +
                        " BURN_DATE <= TO_DATE('" + date_end_send   + "','DD/MM/YY') ";
 
-            Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_3_1");
+            Query1.setQueryAndName(querySql, "q1__report_AccumulatedDose_query2_3_1");
 
             querySql = " SELECT " +
                        " SUM(EPD_G_HP10_DOWN) Z40, SUM(EPD_N_HP10_DOWN) Z41 " +
@@ -663,7 +663,7 @@ Page {
                        " TIME_OUT >= TO_DATE('" + date_begin_send + "','DD/MM/YY') AND" +
                        " TIME_OUT <= TO_DATE('" + date_end_send   + "','DD/MM/YY') ";
 
-            Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_3_2");
+            Query1.setQueryAndName(querySql, "q1__report_AccumulatedDose_query2_3_2");
 
 
             /////////////////////////////////////////////////
@@ -677,7 +677,7 @@ Page {
                        " DATE_TIME >= TO_DATE('" + date_begin_send + "','DD/MM/YY') AND" +
                        " DATE_TIME <= TO_DATE('" + date_end_send   + "','DD/MM/YY') ";
 
-            Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_4_1");
+            Query1.setQueryAndName(querySql, "q1__report_AccumulatedDose_query2_4_1");
 
             /// IN_MEASURE
             querySql = " SELECT " +
@@ -688,7 +688,7 @@ Page {
                        " DATE_TIME >= TO_DATE('" + date_begin_send + "','DD/MM/YY') AND" +
                        " DATE_TIME <= TO_DATE('" + date_end_send   + "','DD/MM/YY') ";
 
-            Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_4_2");
+            Query1.setQueryAndName(querySql, "q1__report_AccumulatedDose_query2_4_2");
 
             querySql = " SELECT " +
                        " SUM(ACTIVITY_MEASURE) Z54 " +
@@ -697,7 +697,7 @@ Page {
                        " DATE_TIME >= TO_DATE('" + date_begin_send + "','DD/MM/YY') AND" +
                        " DATE_TIME <= TO_DATE('" + date_end_send   + "','DD/MM/YY') ";
 
-            Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_4_3");
+            Query1.setQueryAndName(querySql, "q1__report_AccumulatedDose_query2_4_3");
 
             querySql = " SELECT " +
                        " SUM(ACTIVITY_MEASURE) Z59 " +
@@ -707,7 +707,7 @@ Page {
                        " DATE_TIME >= TO_DATE('" + date_begin_send + "','DD/MM/YY') AND" +
                        " DATE_TIME <= TO_DATE('" + date_end_send   + "','DD/MM/YY') ";
 
-            Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_4_4");
+            Query1.setQueryAndName(querySql, "q1__report_AccumulatedDose_query2_4_4");
 
 
             /// IN_IODINE
@@ -718,7 +718,7 @@ Page {
                        " DATE_TIME >= TO_DATE('" + date_begin_send + "','DD/MM/YY') AND" +
                        " DATE_TIME <= TO_DATE('" + date_end_send   + "','DD/MM/YY') ";
 
-            Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_4_5");
+            Query1.setQueryAndName(querySql, "q1__report_AccumulatedDose_query2_4_5");
 
             /// IN_MEASURE: EXP_EFF_DOSE_M
             querySql = " SELECT " +
@@ -729,7 +729,7 @@ Page {
                        " DATE_TIME >= TO_DATE('" + date_begin_send + "','DD/MM/YY') AND" +
                        " DATE_TIME <= TO_DATE('" + date_end_send   + "','DD/MM/YY') ";
 
-            Query1.setQueryAndName(querySql, "Report_AccumulatedDose_query2_4_6");
+            Query1.setQueryAndName(querySql, "q1__report_AccumulatedDose_query2_4_6");
 
 
 
@@ -744,28 +744,28 @@ Page {
         onSignalSendResult: {
             if (res) {
                 //completedZ = 0;
-                if (owner_name == "Report_AccumulatedDose_query2_1") {
+                if (owner_name == "q1__report_AccumulatedDose_query2_1") {
                     /// 2 4 5 6 7 8
                     report.setZ(var_res);
                     console.log(" var_res2_1 ==== ", var_res, " ", var_res["Z2"], var_res["Z4"], var_res["Z5"], var_res["Z6"], var_res["Z7"], var_res["Z8"]);
                 }
-                if (owner_name == "Report_AccumulatedDose_query2_2_1") {
+                if (owner_name == "q1__report_AccumulatedDose_query2_2_1") {
                     /// 21 22 25 26 27 31 32 33
                     report.setZ(var_res);
                     console.log(" var_res2_2_1 ==== ", var_res, " ",var_res["Z2"], var_res["Z21"], var_res["Z22"], var_res["Z25"]);
                 }
-                if (owner_name == "Report_AccumulatedDose_query2_2_2") {
+                if (owner_name == "q1__report_AccumulatedDose_query2_2_2") {
                     /// 23 24 28 29 30 34 35 36
                     report.setZ(var_res);
                     console.log(" var_res2_2_2 ==== ", var_res, " ", var_res["Z23"], var_res["Z24"], var_res["Z28"]);
                 }
 
-                if (owner_name == "Report_AccumulatedDose_query2_3_1") {
+                if (owner_name == "q1__report_AccumulatedDose_query2_3_1") {
                     /// 37 38
                     report.setZ(var_res);
                     console.log(" var_res2_3_1 ==== ", var_res, " ", var_res["Z37"], var_res["Z38"]);
                 }
-                if (owner_name == "Report_AccumulatedDose_query2_3_2") {
+                if (owner_name == "q1__report_AccumulatedDose_query2_3_2") {
                     /// 40 41
                     report.setZ(var_res);
                     console.log(" var_res2_3_2 ==== ", var_res, " ", var_res["Z40"], var_res["Z41"]);
@@ -773,12 +773,12 @@ Page {
 
                 }
 
-                if (owner_name == "Report_AccumulatedDose_query2_4_1") {
+                if (owner_name == "q1__report_AccumulatedDose_query2_4_1") {
                     /// 43 48
                     report.setZ(var_res);
                     console.log(" var_res2_4_1 ==== ", var_res, " ", var_res["Z43"], var_res["Z48"]);
                 }
-                if (owner_name == "Report_AccumulatedDose_query2_4_2") {
+                if (owner_name == "q1__report_AccumulatedDose_query2_4_2") {
                     /// 49
                     var Z = {};
                     Z["Z49"] = var_res;
@@ -786,7 +786,7 @@ Page {
                     console.log(" var_res2_4_2 ==== ", var_res);
                     Z = 0;
                 }
-                if (owner_name == "Report_AccumulatedDose_query2_4_3") {
+                if (owner_name == "q1__report_AccumulatedDose_query2_4_3") {
                     /// 54
                     var Z = {};
                     Z["Z54"] = var_res;
@@ -794,19 +794,19 @@ Page {
                     console.log(" var_res2_4_3 ==== ", var_res);
                     Z = 0;
                 }
-                if (owner_name == "Report_AccumulatedDose_query2_4_4") {
+                if (owner_name == "q1__report_AccumulatedDose_query2_4_4") {
                     /// 59
                     var Z = {};
                     Z["Z59"] = var_res;
                     report.setZ(Z);
                     console.log(" var_res2_4_4 ==== ", var_res);
                 }
-                if (owner_name == "Report_AccumulatedDose_query2_4_5") {
+                if (owner_name == "q1__report_AccumulatedDose_query2_4_5") {
                     /// 46 55
                     report.setZ(var_res);
                     console.log(" var_res2_4_5 ==== ", var_res, " ", var_res["Z46"], var_res["Z55"]);
                 }
-                if (owner_name == "Report_AccumulatedDose_query2_4_6") {
+                if (owner_name == "q1__report_AccumulatedDose_query2_4_6") {
                     /// 44
                     var Z = {};
                     Z["Z44"] = var_res;

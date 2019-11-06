@@ -11,6 +11,16 @@ Item {
 
     Component.onCompleted: console.log("Login           completed")
 
+    Text {
+        id: infoText_text
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: -300
+        font.pixelSize: 20
+        opacity: 0.7
+        text: qsTr("Информация")
+    }
+
 //    Popup {
 //        id: popup_wait
 //        modal: true
@@ -77,11 +87,14 @@ Item {
             //console.log("signal UNLOCK: " + res)
         }
         onSignalSendGUI_status: {
+            infoText_text.text = "SignalSendGUI_status 1..."
             if (login_item.flg_active_state === true) {
                 if(!status) {
+                    infoText_text.text = " SignalSendGUI_status 2 " + message
                     err_label.text = message; //"Ошибка: невозможно авторизоваться"
                 }
                 else {
+                    infoText_text.text = " SignalSendGUI_status 3  OK!"
                     err_label.text = ""
                     flg_active_state = false
                     login_item.login_OK()
@@ -174,6 +187,7 @@ Item {
 //            }
 //        }
 
+
         Button {
             id: btn_login
             text: "Вход"
@@ -181,9 +195,11 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             font.pointSize: 16
             onClicked: {
+                infoText_text.text = "начата авторизация"
                 //managerDB.setLoginPwd(uname_field.text, pass_field.text)
                 if (uname_field.text == "user" && pass_field.text == "alpha1"){
                     flg_active_state = true;
+                    infoText_text.text = "проверка соединения..."
                     managerDB.checkAllConnectionDB();
                 }
 

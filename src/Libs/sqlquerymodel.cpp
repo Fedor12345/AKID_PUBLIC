@@ -124,13 +124,13 @@ int SQLQueryModel::getIndexRow(const QString &columnName, const QString &value)
     /////////////////////////////////
 
 
-    qDebug() << " --> SQLmodel: getIndexRow(): columnName = " << columnName <<  " value = " << value;
-    qDebug() << " --> SQLmodel: getIndexRow(): roleNames().value(0)= "  << this->roleNames().values(); //this->roleNames().values().value(0);
+    qDebug() << " --> SQLmodel(" << this->nameModel << "): getIndexRow(): columnName = " << columnName <<  " value = " << value;
+    qDebug() << " --> SQLmodel(" << this->nameModel << "): getIndexRow(): roleNames().value(0)= "  << this->roleNames().values(); //this->roleNames().values().value(0);
 
     int iColumn = 0;
     for (int i=0; i<record().count(); i++) {
         if( this->roleNames().values().value(i) == columnName ) {
-            qDebug() << " --> SQLmodel: getIndexRow(): roleNames().value(0) = "  << this->roleNames().values().value(i); //this->roleNames().values().value(0);
+            qDebug() << " --> SQLmodel(" << this->nameModel << "): getIndexRow(): roleNames().value(0) = "  << this->roleNames().values().value(i); //this->roleNames().values().value(0);
             iColumn = i;
         }
     }
@@ -140,7 +140,7 @@ int SQLQueryModel::getIndexRow(const QString &columnName, const QString &value)
         indexRow++;
     }
 //    indexRow = this->data(this->index(i, iColumn), this->i_ID).toInt();  /// this->i_ID = Qt::UserRole + 1
-    qDebug() << " --> SQLmodel: getIndexRow(): indexRow = "  << indexRow;
+    qDebug() << " --> SQLmodel(" << this->nameModel << "): getIndexRow(): indexRow = "  << indexRow;
 
 
     return NULL;
@@ -172,30 +172,19 @@ QVariantMap SQLQueryModel::get(int row)
 
 /// обновление модели
 void SQLQueryModel:: updateModel() {
-    qDebug() << " -> SQLmodel: обновление модели... | thread = " << QThread::currentThreadId();
+    qDebug() << " -> SQLmodel(" << this->nameModel << "): обновление модели... | thread = " << QThread::currentThreadId();
     //this->setQuery(this->query().lastQuery());
     setQueryDB( this->querySQL );
 
-    if (this->lastError().isValid()) {
-        qDebug() << " -> SQLmodel: ОШИБКА ОБНОВЛЕНИЯ МОДЕЛИ : "<<this->lastError();
-    }
-    else {
-        qDebug()<<" -> SQLmodel: обновление модели прошло удачно";
-    }
-}
 
-//void SQLQueryModel:: updateModel(QString query) {
-//    qDebug() << " -> SQLmodel: обновление модели... | thread = " << QThread::currentThreadId();
-////    qDebug() << query;
-//    this->setQuery(query);
-//    qDebug() << "lastQuery = " << this->query().lastQuery();
 //    if (this->lastError().isValid()) {
-//        qDebug() << " -> SQLmodel: ОШИБКА ОБНОВЛЕНИЯ МОДЕЛИ : "<<this->lastError();
+//        qDebug() << " -> SQLmodel(" << this->nameModel << "): (это неточно) ОШИБКА ОБНОВЛЕНИЯ МОДЕЛИ : "<<this->lastError();
 //    }
 //    else {
-//        qDebug() << " -> SQLmodel: обновление модели прошло удачно";
+//        qDebug()<<" -> SQLmodel(" << this->nameModel << "): (это неточно) обновление модели прошло удачно";
 //    }
-//}
+
+}
 
 
 
@@ -205,7 +194,7 @@ bool SQLQueryModel::setQueryDB(QString query)
 
     this->fl_setQuery = true;
     this->querySQL = query;
-    emit signalCheckConnectionDB(); /// отправляем менеджеру сигнал начать попытки подключения
+    emit signalCheckConnectionDB(this->nameModel); /// отправляем менеджеру сигнал начать попытки подключения
 
 
     //this->setQuery(query);
@@ -223,7 +212,7 @@ void SQLQueryModel::checkNameConnection(QString connectionName)
     /// т.к. эта функция запускается от сигнала от менеджера при удачном подключении к бд,
     /// необходимо игнорировать выполнение функции, если перед ее запуском не была нажата соответсвующая кнопка
     if(!this->fl_setQuery) { return; }
-    qDebug() << "\n -> SQLmodel(" << this->nameModel << "): checkNameConnection()" << "| thread = " << QThread::currentThreadId();
+    //qDebug() << "\n -> SQLmodel(" << this->nameModel << "): checkNameConnection()" << "| thread = " << QThread::currentThreadId();
 
 
     if(connectionName != "0"){  // !="local"
@@ -251,9 +240,12 @@ void SQLQueryModel::queryExecute()
     bool res = true;
     QString errorMessage = "";
     if (this->lastError().isValid()) {
-        qDebug() << this->lastError();
+        qDebug() << " -> SQLmodel(" << this->nameModel << "): ОШИБКА ОБНОВЛЕНИЯ МОДЕЛИ : "<<this->lastError();
         errorMessage = this->lastError().text();
         res = false;
+    }
+    else {
+        qDebug()<<" -> SQLmodel(" << this->nameModel << "): обновление модели прошло успешно";
     }
 
 
@@ -278,22 +270,22 @@ void SQLQueryModel::printInfo() {
     QString nameColumn;
 
 
-    qDebug() << " -> SQLmodel: colimnsNumber = " << columnsNumber;
+    qDebug() << " -> SQLmodel(" << this->nameModel << "):: colimnsNumber = " << columnsNumber;
 
     //qDebug()<<"type: "<< typeid(roles).name();
 
     for ( int i=0; i<columnsNumber; i++ ) {
         nameColumn = this->headerData(i, Qt::Horizontal, 0).toString();
-        qDebug() << " -> SQLmodel: nameColumn = " << nameColumn;
+        qDebug() << " -> SQLmodel(" << this->nameModel << "): nameColumn = " << nameColumn;
     }
-    qDebug() << " -> SQLmodel: roleNames: " << this->roleNames();
-    qDebug() << " -> SQLmodel: roleNames: " << this->roleNames().values().value(0);
+    qDebug() << " -> SQLmodel(" << this->nameModel << "): roleNames: " << this->roleNames();
+    qDebug() << " -> SQLmodel(" << this->nameModel << "): roleNames: " << this->roleNames().values().value(0);
     //qDebug()<<"modelDB : record(0)"<<this->record(0)<<"|"; //.value(1).toString()
 //    qDebug()<<"modelDB : record(0)"<<this->record(0).value(0)<<"|"; //.value(1).toString()
 
     //печать SQL запроса, посланного в модель
-    qDebug() << " -> SQLmodel: query = " << this->query().lastQuery(); //qDebug()<<"query : "<<__query__.lastQuery();
-    qDebug() << " -> SQLmodel: i_ID = "  << i_ID;
+    qDebug() << " -> SQLmodel(" << this->nameModel << "): query = " << this->query().lastQuery(); //qDebug()<<"query : "<<__query__.lastQuery();
+    qDebug() << " -> SQLmodel(" << this->nameModel << "): i_ID = "  << i_ID;
 
     qDebug() << "***************************** \n";
 }

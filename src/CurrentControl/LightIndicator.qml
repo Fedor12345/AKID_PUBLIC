@@ -88,24 +88,26 @@ Rectangle {
     }
 
 
-
     function lightTrue() {
         //lightIndicator.color = lightIndicator.colorTRUE;
-        lightIndicator.shadowTemp = lightIndicator.shadowTRUE
+        lightIndicator.shadowTemp = lightIndicator.shadowTRUE;
+        animationTRUE.stop();
         animationTRUE.running = true;
-        //animationShTRUE.running = true;
+        lightIndicator.color = lightIndicator.colorTRUE;
     }
 
     function lightFalse() {
         //lightIndicator.color = lightIndicator.colorFALSE;
-        lightIndicator.shadowTemp = lightIndicator.shadowFALSE
+        lightIndicator.shadowTemp = lightIndicator.shadowFALSE;
+        animationTRUE.stop();
         animationFALSE.running = true;
     }
 
     function lightOff() {
         lightIndicator.color = lightIndicator.colorOFF;
-        lightIndicator.shadowTemp = lightIndicator.shadowOFF
+        lightIndicator.shadowTemp = lightIndicator.shadowOFF;
         //lightIndicator.shadowRadius = 0.0
+        animationTRUE.stop();
         animationOFF.running = true;
     }
 

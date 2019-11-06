@@ -11,17 +11,28 @@ import MyTools 1.0
 Rectangle {
     id: main_
     anchors.fill: parent
-    property var isEmpty: false            // в случае если таблица пустая, можно задать информационный текст в поле заголовка таблицы заместо заголовков
-    property var columnCount               // количество столбцов (модель для рипитора, создающего столбцы в строке)
-    property int columnWidth: 120          // ширина одного столбца
-    property int columnHeight: 30          // высота заголовка столбцов
-    property int rowHeight: 25             // высота строк
-    property var roles_                    // названия столбцов (имена ролей, тип string)
-    property alias model_: listview.model_ // модель
+    property var  isEmpty: false              /// в случае если таблица пустая, можно задать информационный текст в поле заголовка таблицы заместо заголовков
+    property var  columnCount                 /// количество столбцов (модель для рипитора, создающего столбцы в строке)
+    property int  columnWidth: 120            /// ширина одного столбца
+    property bool automaticСolumnWidth: true  /// если true, то ширина каждого отдельного столбца будет автоматически подстраиваться под длину его заголовка,
+                                              /// если false, то  ширина всех столбцов будет равна columnWidth
+
+    property int   rowHeight: 25            /// высота строк
+    property var   roles_                   /// названия столбцов (имена ролей, тип string)
+    property alias model_: listview.model_  /// модель
+
+    property string headerColor: "#7c7c7c" /// цвет заголовков столбцов
+    property int    headerHeight: 30       /// высота заголовков столбцов
+    property var    headerNames            /// имена столбцов, если параметр не заданн, то имена берутся такие же как названия ролей (из параметра roles_)
+
+    property bool abilitySelectRow: false               /// параметр влияет на то можно ли выделять любую строку в таблице кликом мыши
+    property int  currentIndex_: listview.currentIndex  /// номер выбранной строки
 
 
-    //border {color: "#B0BEC5" /*ColorSettings.colorBorder*/}
+
+
     color: "transparent"
+//    border {color: "#B0BEC5" /*ColorSettings.colorBorder*/}
 //    radius: 7
 //    clip: true
 
@@ -31,7 +42,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         color: "#7c7c7c" //ColorSettings.colorHederTable
-        height: columnHeight
+        height: headerHeight
         //anchors.margins: 5
     }
     // скрол по горизонтали
@@ -45,24 +56,26 @@ Rectangle {
 
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOn //.AlwaysOn .AsNeeded
         ScrollBar.horizontal.interactive: true
-        ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+        ScrollBar.vertical.policy: ScrollBar.AlwaysOff //ScrollBar.AsNeeded //
 
 
         bottomPadding: 14
 
 
-        // заголовки таблицы
+        // заголовки столбцов таблицы
         Rectangle {
             id: header
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            height: columnHeight //; width: main_.width
+            height: headerHeight //; width: main_.width
             //border.width: 1
-            color: "#7c7c7c" //ColorSettings.colorHederTable
+            color: main_.headerColor //"#7c7c7c" //ColorSettings.colorHederTable
 
             Row {
                 id: row_header
+                height: parent.height
+                //anchors.verticalCenter: parent.verticalCenter
                 //anchors.fill: parent
                 Rectangle {
                     width: 20
@@ -83,9 +96,21 @@ Rectangle {
                     id: repeter_headers
                     model : main_.columnCount
                     Rectangle {
-                        height: main_.columnHeight
-                        width: isEmpty ? label_header.width + 100 : main_.columnWidth  //main_.columnWidth
-                        //(index === 0) ? 20 :
+                        height: main_.headerHeight
+//                        width: isEmpty ? label_header.width + 100 : main_.columnWidth  //main_.columnWidth
+                        width: {
+                            if (automaticСolumnWidth) {
+                                var widthForAll = label_header.width + 15;
+                                if ( widthForAll > 200 ) { widthForAll = 200 }
+                                isEmpty ? label_header.width + 100 : widthForAll; // main_.columnWidth
+                                listview.widthRowElements[index] = widthForAll;
+                            }
+                            else {
+                                width: isEmpty ? label_header.width + 100 : main_.columnWidth
+                            }
+                        }
+
+
                         color: "transparent"
                         //border.width: 1
                         clip: true
@@ -94,10 +119,18 @@ Rectangle {
                             anchors.centerIn: parent
                             text: {
                                 // index - тут (в данном рипиторе) это будет номер столбца
-//                                if(index === 0)
-//                                    return ""
-//                                else
+                                //                                if(index === 0)
+                                //                                    return ""
+                                //                                else
+
+                                if ( headerNames ) {
+                                    if (headerNames[index]) {
+                                        return headerNames[index]
+                                    }
+                                }
+                                else {
                                     return main_.roles_[index];
+                                }
                                 //return eval(main_.roles_[index]); // создает переменную с именем из текстовой строки
                             }
                             color: isEmpty ? "#ffbfbf" : "white"
@@ -172,6 +205,7 @@ Rectangle {
 
                 }
             }
+
         }
 
 
@@ -223,14 +257,19 @@ Rectangle {
 
             clip: true
             focus: true
-            highlightFollowsCurrentItem: true
+            highlightFollowsCurrentItem: abilitySelectRow ? true : false
+            highlight: Rectangle {
+                color: "#b2b2b2" // "transparent" // "#FF5722" //"#c9c9c9" // "#B0BEC5" //Material.color(Material.Grey, Material.Shade700)
+                //border.color: "#FF5722"
+            }
+            highlightMoveDuration: 100
             //    highlight: Rectangle {
             //        color: Material.color(Material.Teal)
             //        radius: 5
             //    }
 
             ScrollBar.vertical: ScrollBar {
-                policy: "AlwaysOn" //policy: ScrollBar.AlwaysOn
+                policy: "AsNeeded" //"AlwaysOn" //policy: ScrollBar.AlwaysOn
                 parent: scrollView
                 anchors.top: parent.top; anchors.topMargin: header.height
                 anchors.bottom: parent.bottom
@@ -245,8 +284,6 @@ Rectangle {
             //        //interactive: true
             //        policy: "AlwaysOn"
             //    }
-
-
 
             model: listview.model_  //ModelDB //listModel
 
@@ -270,6 +307,12 @@ Rectangle {
 
                     }
 
+                    onClicked: {
+                        if (listview.currentIndex !== index) {
+                            listview.currentIndex = index
+                        }
+                    }
+
                     //border {width: 1; color:"#B0BEC5"}
                     //color: "transparent"
 
@@ -284,7 +327,7 @@ Rectangle {
                                 Label {
                                     anchors.centerIn: parent
                                     text: delegate_comp.row
-                                    color: "#b2b2b2"
+                                    color: abilitySelectRow ? (listview.currentIndex == index ? "white" : "#b2b2b2" )  : "#b2b2b2"
                                 }
                                 Rectangle {
                                     anchors.right: parent.right

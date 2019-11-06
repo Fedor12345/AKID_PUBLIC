@@ -16,12 +16,57 @@ Page {
     property string sex
     property string burn_date_lost
 
+    property var model_person
+
     property int sizeHeader: 14
     property int sizeTxt: 14
     property int heightAll: 60
     property int widthAll: 400
 
+    signal insertIntoDB_DoseTLD(var nameQuery, var nameTable, var data)
+
     Component.onCompleted: console.log("InputDoseTLD    completed")
+
+
+    Connections{
+        target: model_person
+        onSignalUpdateDone: {
+            if (model_person.get(0)["SEX"] != undefined)
+            {
+                main_.sex = model_person.get(0)["SEX"]
+            }
+            //main_.sex = model_person.get(0)["SEX"];
+        }
+    }
+
+    /// ЗАГОЛОВОК
+    Rectangle {
+        id: rect_headerPersons
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: 40
+        //color: Material.color(Material.Grey) //"transparent" //"Material.color(Material.Grey, Material.Shade800)"
+        color: "#EEEEEE" //"transparent" //Material.color(Material.Grey, Material.Shade800)
+        //border.color: "LightGray"
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: 1
+            color: "LightGray"
+        }
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            font.pixelSize: 20
+            font.bold: true
+            color: "#808080" //"white" //"#808080"
+            text: qsTr("Ввод доз ТЛД")
+        }
+
+    }
 
 
     Item {
@@ -29,70 +74,9 @@ Page {
         anchors.left: parent.left
         anchors.right: parent.right
         //anchors.rightMargin: 260
-        anchors.top: parent.top
+        anchors.top: rect_headerPersons.bottom
         anchors.bottom: parent.bottom
 
-//        Frame {
-//            id:frame_headerNamePerson
-
-//            height: 50
-//            anchors.left: parent.left
-//            anchors.right: parent.right
-//            anchors.top: parent.top
-//            anchors.margins: space_margin
-//            padding: 1
-//            topPadding: 1
-//            bottomPadding: 1
-//            leftPadding: 20
-
-//            background: Rectangle {
-//                anchors.fill: parent
-//                color: "#EEEEEE"//"White" Material.color(Material.Grey, Material.Shade200)
-//                border.color: "LightGray"
-//                radius: 7
-//                //border.width: 1
-//            }
-
-//            Row {
-//                //anchors.fill: parent
-//                spacing: 10
-//                Image {
-//                    id: img_photoPerson
-//                    anchors.verticalCenter: parent.verticalCenter
-//                    width: 40
-//                    height: 40
-//                    fillMode: Image.PreserveAspectFit
-//                    opacity: 0.2
-//                    sourceSize.height: 100
-//                    sourceSize.width:  100
-//                    source: "icons/face.svg"
-//                }
-//                ToolSeparator {}
-//                TextEdit {
-//                    id: inputDose_FIO_person
-//                    anchors.verticalCenter: parent.verticalCenter
-//                    font.pixelSize: 20 //main_.sizeTxt
-//                    font.bold: true
-//                    font.capitalization: Font.AllUppercase // в верхний регистр
-//                    color: ( main_.fio_currentPerson === "Сотрудник не выбран" ) ? "LightGray" : "#474747" // "Black" //Material.color(Material.DeepOrange)
-//                    //color: Material.color(Material.Teal)
-//                    selectByMouse: true
-//                    selectionColor: Material.color(Material.Red)
-//                    text: main_.fio_currentPerson //.toUpperCase()
-//                }
-//                TextEdit {
-//                    id: id_person
-//                    anchors.top: parent.top
-//                    color: ( main_.fio_currentPerson === "Сотрудник не выбран" ) ? "LightGray" : "#474747"
-//                    font.pixelSize: 12
-//                    text: "id =" + main_.id_currentPerson
-//                }
-
-
-////                ToolSeparator {}
-//            }
-
-//        }
 
         Frame {
             id:frame_InsertDose
@@ -128,6 +112,57 @@ Page {
 //                    height: 1
 //                    color: "LightGray"
 //                }
+//                Item {
+//                    Layout.minimumHeight: 50
+//                    Layout.alignment: Qt.AlignLeft
+//                    Layout.alignment: Qt.AlignRight
+//                    Flow {
+//                        anchors.top: parent.top
+//                        anchors.right: parent.right
+//                        anchors.left: parent.left
+//                        RowLayout {
+//                            spacing: 10
+//                            Item {
+//                                //Layout.minimumHeight:
+//                                Layout.minimumWidth: 100
+//                                Text {
+//                                    anchors.centerIn: parent
+//                                    text: qsTr("text 1")
+//                                }
+//                            }
+//                            Item {
+//                                //Layout.minimumHeight:
+//                                Layout.minimumWidth: 100
+//                                Text {
+//                                    anchors.centerIn: parent
+//                                    text: qsTr("123.48")
+//                                }
+//                            }
+//                        }
+
+//                        RowLayout {
+//                            spacing: 10
+//                            Item {
+//                                //Layout.minimumHeight:
+//                                Layout.minimumWidth: 100
+//                                Text {
+//                                    anchors.centerIn: parent
+//                                    text: qsTr("text 2")
+//                                }
+//                            }
+//                            Item {
+//                                //Layout.minimumHeight:
+//                                Layout.minimumWidth: 100
+//                                Text {
+//                                    anchors.centerIn: parent
+//                                    text: qsTr("456.81")
+//                                }
+//                            }
+//                        }
+//                    }
+
+//                }
+
                 Row {
                     spacing: 50
                     Row {
@@ -301,7 +336,10 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    placeholderText: qsTr("0")
+                                    placeholderText: qsTr("0.0")
+                                    onFocusChanged: {
+                                        if (focus) { select(0, text.length) }
+                                    }
                                 }
 
                                 Label {
@@ -319,8 +357,8 @@ Page {
                                 text: qsTr("Низ живота женщин_ (до 45 лет)")
                                 font.pixelSize: main_.sizeTxt
 
-                                enabled: (main_.sex === "M") ? false : true
-                                opacity: (main_.sex === "M") ? 0.4 : 1
+                                enabled: (main_.model_person.get(0)["SEX"] === "M") ? false : true //(main_.sex === "M") ? false : true
+                                opacity: (main_.model_person.get(0)["SEX"] === "M") ? 0.4 : 1 //(main_.sex === "M") ? 0.4 : 1
                             }
                                 TextField {
                                     id: inputDose_tld_g_hp10_down
@@ -330,12 +368,15 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    placeholderText: qsTr("0")
+                                    placeholderText: qsTr("0.0")
                                     opacity: (main_.sex === "M") ? 0.3 : 1
                                     enabled: (main_.sex === "M") ? false : true
                                     onEnabledChanged: {
                                         var str = inputDose_tld_g_hp10_down.text;
-                                        inputDose_tld_g_hp10_down.text = (enabled) ? str : "0"
+                                        inputDose_tld_g_hp10_down.text = (enabled) ? str : "0.0"
+                                    }
+                                    onFocusChanged: {
+                                        if (focus) { select(0, text.length) }
                                     }
                                 }
                                 Label {
@@ -372,7 +413,10 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    placeholderText: qsTr("0")
+                                    placeholderText: qsTr("0.0")
+                                    onFocusChanged: {
+                                        if (focus) { select(0, text.length) }
+                                    }
                                 }
                                 Label {
                                     //leftPadding: 5
@@ -397,7 +441,10 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    placeholderText: qsTr("0")
+                                    placeholderText: qsTr("0.0")
+                                    onFocusChanged: {
+                                        if (focus) { select(0, text.length) }
+                                    }
                                 }
                                 Label {
                                     //leftPadding: 5
@@ -453,7 +500,10 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    placeholderText: qsTr("0")
+                                    placeholderText: qsTr("0.0")
+                                    onFocusChanged: {
+                                        if (focus) { select(0, text.length) }
+                                    }
                                 }
 
                                 Label {
@@ -482,12 +532,15 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    placeholderText: qsTr("0")
+                                    placeholderText: qsTr("0.0")
                                     opacity: (main_.sex === "M") ? 0.3 : 1
                                     enabled: (main_.sex === "M") ? false : true
                                     onEnabledChanged: {
                                         var str = text;
-                                        text = (enabled) ? str : "0"
+                                        text = (enabled) ? str : "0.0"
+                                    }
+                                    onFocusChanged: {
+                                        if (focus) { select(0, text.length) }
                                     }
                                 }
                                 Label {
@@ -524,7 +577,10 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    placeholderText: qsTr("0")
+                                    placeholderText: qsTr("0.0")
+                                    onFocusChanged: {
+                                        if (focus) { select(0, text.length) }
+                                    }
 
                                 }
                                 Label {
@@ -550,7 +606,10 @@ Page {
                                     selectByMouse: true
                                     selectionColor: Material.color(Material.Red)
                                     horizontalAlignment: Text.AlignHCenter
-                                    placeholderText: qsTr("0")
+                                    placeholderText: qsTr("0.0")
+                                    onFocusChanged: {
+                                        if (focus) { select(0, text.length) }
+                                    }
                                 }
                                 Label {
                                     //leftPadding: 5
@@ -560,61 +619,6 @@ Page {
                         }
 
                     }
-
-
-//                    Label {
-//                        width: 220
-//                        text: qsTr("ИЭД нейтронного излучения")
-//                        font.pixelSize: main_.sizeTxt
-//                    }
-//                    TextField {
-//                        id: inputDose_tld_n_hp10
-//                        font.pixelSize: main_.sizeTxt
-//                        font.bold: true
-//                        color: Material.color(Material.Teal)
-//                        selectByMouse: true
-//                        selectionColor: Material.color(Material.Red)
-//                        horizontalAlignment: Text.AlignHCenter
-//                        text: "0"
-
-//                    }
-//                    Label {
-//                        //leftPadding: 5
-//                        text: qsTr("мЗв")
-//                        font.pixelSize: main_.sizeTxt
-//                    }
-
-////                    Rectangle {
-////                        width: 1
-////                        height: parent.height
-////                        color: "LightGray"
-////                    }
-
-
-//                    Label {
-//                        leftPadding: 91
-//                        width: 240
-//                        text: qsTr("Низ живота женщин\n(до 45 лет лет)")
-//                        font.pixelSize: main_.sizeTxt
-//                        //background: Rectangle {color: "red"}
-//                    }
-//                    TextField {
-//                        id: inputDose_tld_n_hp10_down
-//                        font.pixelSize: main_.sizeTxt
-//                        font.bold: true
-//                        color: Material.color(Material.Teal)
-//                        selectByMouse: true
-//                        selectionColor: Material.color(Material.Red)
-//                        horizontalAlignment: Text.AlignHCenter
-//                        text: "0"
-
-//                    }
-//                    Label {
-//                        //leftPadding: 5
-//                        text: qsTr("мЗв")
-//                        font.pixelSize: main_.sizeTxt
-//                    }
-
 
                 }
 
@@ -659,7 +663,10 @@ Page {
                         selectByMouse: true
                         selectionColor: Material.color(Material.Red)
                         horizontalAlignment: Text.AlignHCenter
-                        placeholderText: qsTr("0")
+                        placeholderText: qsTr("0.0")
+                        onFocusChanged: {
+                            if (focus) { select(0, text.length) }
+                        }
 
                     }
                     Label {
@@ -685,7 +692,10 @@ Page {
                         selectByMouse: true
                         selectionColor: Material.color(Material.Red)
                         horizontalAlignment: Text.AlignHCenter
-                        placeholderText: qsTr("0")
+                        placeholderText: qsTr("0.0")
+                        onFocusChanged: {
+                            if (focus) { select(0, text.length) }
+                        }
 
                     }
                     Label {
@@ -732,8 +742,8 @@ Page {
 
                 //(const QString& owner_name, const bool& res)
                 onSignalSendResult: {
-                    if ( owner_name === "InputDoseTLD" ) {
-                        //console.log(" >>>>>>>>>>>>>>>>>>>>>>>>> InputDoseTLD ", res);
+                    if ( owner_name === "q1__inputDoseTLD" ) {
+                        //console.log(" >>>>>>>>>>>>>>>>>>>>>>>>> q1__inputDoseTLD ", res);
                         if(!res) {
                             popup_checkAdd.isAdd = false
                             popup_checkAdd.messageError = owner_name + ": " + messageError
@@ -743,6 +753,13 @@ Page {
                             popup_checkAdd.messageError = ""
                         }
                         popup_checkAdd.open()
+                    }
+
+                    if ( owner_name === "q1__getBurnDate_last" ) {
+                        if(res) {
+                            main_.burn_date_lost = var_res.getDate() + "." +(var_res.getMonth()+1)  + "." + var_res.getFullYear()
+                                    //var_res
+                        }
                     }
 
 //                    if (owner_name === "ChekAddDose") {
@@ -781,6 +798,9 @@ Page {
                     {
                         var isOk
 
+                        if (main_.id_currentPerson != undefined) { isOk = true                }
+                        else                                     { isOk = false; return isOk; }
+
                         if (inputDose_tld_holder.isOk) { isOk = true                }
                         else                           { isOk = false; return isOk; }
 
@@ -794,28 +814,30 @@ Page {
                     onClicked: {
                         var data_arr = {}
 
+                        //parseFloat( txt_element_1.text(",", ".") );
 
                         data_arr["ID_PERSON"]       = parseFloat(main_.id_currentPerson)
                         data_arr["TLD_HOLDER"]      = inputDose_tld_holder.currentText
                         //data_arr["DATE_FROM"]       = calendar_date_from.date_val
                         //data_arr["DATE_UNTIL"]      = calendar_date_until.date_val
-                        data_arr["TLD_G_HP10"]      = (inputDose_tld_g_hp10.text.length > 0)      ? parseFloat(inputDose_tld_g_hp10.text)       : parseFloat(0)
-                        data_arr["TLD_G_HP10_DOWN"] = (inputDose_tld_g_hp10_down.text.length > 0) ? parseFloat(inputDose_tld_g_hp10_down.text)  : parseFloat(0)
-                        data_arr["TLD_G_HP3"]       = (inputDose_tld_g_hp3.text.length > 0)       ? parseFloat(inputDose_tld_g_hp3.text)        : parseFloat(0)
-                        data_arr["TLD_G_HP007"]     = (inputDose_tld_g_hp007.text.length > 0)     ? parseFloat(inputDose_tld_g_hp007.text)      : parseFloat(0)
-                        data_arr["TLD_N_HP10"]      = (inputDose_tld_n_hp10.text.length > 0)      ? parseFloat(inputDose_tld_n_hp10.text)       : parseFloat(0)
-                        data_arr["TLD_N_HP10_DOWN"] = (inputDose_tld_n_hp10_down.text.length > 0) ? parseFloat(inputDose_tld_n_hp10_down.text)  : parseFloat(0)
-                        data_arr["TLD_N_HP3"]       = (inputDose_tld_n_hp3.text.length > 0)       ? parseFloat(inputDose_tld_n_hp3.text)        : parseFloat(0)
-                        data_arr["TLD_N_HP007"]     = (inputDose_tld_n_hp007.text.length > 0)     ? parseFloat(inputDose_tld_n_hp007.text)      : parseFloat(0)
-                        data_arr["TLD_B_HP3"]       = (inputDose_tld_b_hp3.text.length > 0)       ? parseFloat(inputDose_tld_b_hp3.text)        : parseFloat(0)
-                        data_arr["TLD_B_HP007"]     = (inputDose_tld_b_hp007.text.length > 0)     ? parseFloat(inputDose_tld_b_hp007.text)      : parseFloat(0)
+                        data_arr["TLD_G_HP10"]      = (inputDose_tld_g_hp10.text.length > 0)      ? parseFloat(inputDose_tld_g_hp10.text.replace(",", ".") )       : parseFloat(0)
+                        data_arr["TLD_G_HP10_DOWN"] = (inputDose_tld_g_hp10_down.text.length > 0) ? parseFloat(inputDose_tld_g_hp10_down.text.replace(",", ".") )  : parseFloat(0)
+                        data_arr["TLD_G_HP3"]       = (inputDose_tld_g_hp3.text.length > 0)       ? parseFloat(inputDose_tld_g_hp3.text.replace(",", ".") )        : parseFloat(0)
+                        data_arr["TLD_G_HP007"]     = (inputDose_tld_g_hp007.text.length > 0)     ? parseFloat(inputDose_tld_g_hp007.text.replace(",", ".") )      : parseFloat(0)
+                        data_arr["TLD_N_HP10"]      = (inputDose_tld_n_hp10.text.length > 0)      ? parseFloat(inputDose_tld_n_hp10.text.replace(",", ".") )       : parseFloat(0)
+                        data_arr["TLD_N_HP10_DOWN"] = (inputDose_tld_n_hp10_down.text.length > 0) ? parseFloat(inputDose_tld_n_hp10_down.text.replace(",", ".") )  : parseFloat(0)
+                        data_arr["TLD_N_HP3"]       = (inputDose_tld_n_hp3.text.length > 0)       ? parseFloat(inputDose_tld_n_hp3.text.replace(",", ".") )        : parseFloat(0)
+                        data_arr["TLD_N_HP007"]     = (inputDose_tld_n_hp007.text.length > 0)     ? parseFloat(inputDose_tld_n_hp007.text.replace(",", ".") )      : parseFloat(0)
+                        data_arr["TLD_B_HP3"]       = (inputDose_tld_b_hp3.text.length > 0)       ? parseFloat(inputDose_tld_b_hp3.text.replace(",", ".") )        : parseFloat(0)
+                        data_arr["TLD_B_HP007"]     = (inputDose_tld_b_hp007.text.length > 0)     ? parseFloat(inputDose_tld_b_hp007.text.replace(",", ".") )      : parseFloat(0)
                         //data_arr["FON_DOSE"]        = parseFloat(inputDose_fon_dose.text)
                         if (calendar_burn_date.ready) data_arr["BURN_DATE"] = calendar_burn_date.date_val
 
                         console.log(" (!) ready: ", calendar_burn_date.ready)
                         console.log(" (!) date_val: ", calendar_burn_date.date_val)
 
-                        Query1.insertRecordIntoTable("InputDoseTLD", "EXT_DOSE", data_arr)
+                        insertIntoDB_DoseTLD("q1__inputDoseTLD", "EXT_DOSE", data_arr)
+//                        Query1.insertRecordIntoTable("q1__inputDoseTLD", "EXT_DOSE", data_arr)
 
 
                         /// проверка
@@ -1004,7 +1026,7 @@ Page {
                                 //calendar_date_from.ready  = false
                                 //calendar_date_until.ready = false
                                 calendar_burn_date.ready    = false
-                                calendar_burn_date.txtEmpty = true
+                                //calendar_burn_date.txtEmpty = true
 
                                 popup_clearFilds.close();
                             }

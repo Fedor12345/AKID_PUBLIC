@@ -171,7 +171,7 @@ ManagerConnectDB::~ManagerConnectDB()
 
 void ManagerConnectDB::checkConnectionDB(int iConnection)
 {
-    emit signalSendGUI_status("begin",nullptr,NULL);
+    emit signalSendGUI_status("begin_",nullptr,NULL);
 
     qDebug()<<" @ Manager: checkConnectionDB() | thread = " << QThread::currentThreadId();
 
@@ -193,9 +193,9 @@ void ManagerConnectDB::checkConnectionDB(int iConnection)
 
 void ManagerConnectDB::checkAllConnectionDB()
 {
-    qDebug()<<" @ Manager: startConnectionDB() | thread = " << QThread::currentThreadId();
+    //qDebug()<<" @ Manager: startConnectionDB() | thread = " << QThread::currentThreadId();
 
-    emit signalSendGUI_status("begin",nullptr,NULL);
+    emit signalSendGUI_status("Begin",nullptr,NULL);
     waitDB->fl_connect = false;
     //emit signalCloseDB0();
     //emit signalCloseDB1();
@@ -204,11 +204,12 @@ void ManagerConnectDB::checkAllConnectionDB()
 
 
 
-void ManagerConnectDB::checkConnectionCurrentDB()
+void ManagerConnectDB::checkConnectionCurrentDB(QString senderName)
 {
-    qDebug()<<" @ Manager: connectionCurrentDB(): connName = " << this->currentConnectionName << " | thread = " << QThread::currentThreadId();
+    qDebug()<<" @ Manager: connectionCurrentDB(): connName = " << this->currentConnectionName << " senderName = " <<  senderName << " | thread = " << QThread::currentThreadId();
 
-    emit signalSendGUI_status("begin",nullptr,NULL);
+    QString message = "begin|" + senderName;
+    emit signalSendGUI_status(message,nullptr,NULL);
     // alreadyTrytoconnect = true и waitDB->fl_waitConnection - флаги указывают, что в данный момент уже идет проверка подключения,
     // и вызывающей функции незачем отправлять еще один запрос
     // достаточно только дождаться ответного сигнала
@@ -270,15 +271,18 @@ void ManagerConnectDB::connectionDB_TRUE(QString connectionName)
     waitDB->fl_connect = true;
     emit signalStopWaitTimer(); //!!!
 
+    /// говорим, что данные попытки подключения завершились, можно, запускать новые
+    alreadyTrytoconnect = false;
+
     if(connectionName == CONNECTION_NAME_0) {
         fl_connection_0 = true;  //временное решение
         waitDB->fl_connectionStates[0] = false;
-        qDebug() << " @ Manager: (TRUE connect)  waitDB->fl_connectionStates[0] = " << waitDB->fl_connectionStates[0];
+        //qDebug() << " @ Manager: (TRUE connect)  waitDB->fl_connectionStates[0] = " << waitDB->fl_connectionStates[0];
     }
     if(connectionName == CONNECTION_NAME_1) {
         fl_connection_1 = true;  //временное решение
         waitDB->fl_connectionStates[1] = false;
-        qDebug() << " @ Manager: (TRUE connect)  waitDB->fl_connectionStates[1] = " << waitDB->fl_connectionStates[1];
+        //qDebug() << " @ Manager: (TRUE connect)  waitDB->fl_connectionStates[1] = " << waitDB->fl_connectionStates[1];
     }
 
     /// проверка является ли установившееся новое подключение новым
@@ -288,13 +292,15 @@ void ManagerConnectDB::connectionDB_TRUE(QString connectionName)
     else
         { isNewName = false; }
     this->currentConnectionName = connectionName;
+
+    QString message = "УСПЕХ | текущее соединение: " + this->currentConnectionName;
+    //qDebug()<< " @ Manager: " <<  message << " | waitDB->fl_connect = " << waitDB->fl_connect;
+    emit signalSendGUI_status(message, this->currentConnectionName, true);
+
     /// отправляем сигнал в SQLquery с именем текущего соединения и говорим новое оно или нет
     emit signalSendConnectionName(this->currentConnectionName); //, isNewName
-    alreadyTrytoconnect = false;
+    //alreadyTrytoconnect = false; (!!!! в случае ошибок перепроверить до или после сигнала менять флаг)
 
-    qDebug()<<" @ Manager: waitDB->fl_connect = "<<waitDB->fl_connect << "| currentConnectionName = " << this->currentConnectionName;
-    QString message = "текущее соединение: " + this->currentConnectionName;
-    emit signalSendGUI_status(message, this->currentConnectionName, true);
 
     // обновление моделей
     //updateModelDB();
@@ -315,7 +321,7 @@ void ManagerConnectDB::connectionDB_FALSE(QString connectionName)
         waitDB->fl_connectionStates[1] = false;
         qDebug() << " @ Manager: (FALSE connect)  waitDB->fl_connectionStates[1] = " << waitDB->fl_connectionStates[1];
     }
-    QString message = "нет соединения c: " + connectionName;
+    QString message = "ПРОВАЛ | нет соединения c: " + connectionName;
     qDebug() << message;
     emit signalSendGUI_status(message, connectionName, false);
 }
@@ -351,8 +357,9 @@ void ManagerConnectDB::connectionIsEmpty() {
 
     this->currentConnectionName = "0";
     /// отправляем сигнал в SQLquery с именем текущего соединения и говорим новое оно или нет
-    emit signalSendConnectionName(this->currentConnectionName); //, isNewName
     alreadyTrytoconnect = false;
+    emit signalSendConnectionName(this->currentConnectionName); //, isNewName
+    //alreadyTrytoconnect = false; (!!!! в случае ошибок перепроверить до или после сигнала менять флаг)
 
     /// сиглнал с сообщениями для интерфейса
     emit signalSendGUI_status("Cоединения отсутствуют", this->currentConnectionName, true);

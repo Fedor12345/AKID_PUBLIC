@@ -62,7 +62,7 @@ private:
 
 
 signals:
-    void signalCheckConnectionDB();
+    void signalCheckConnectionDB(QString senderName); //senderName - имя того кто сигнал вызвал
     void signalUpdateDone(QString nameModel, const bool &res, const QString &errorMessage);
 
 public slots:    

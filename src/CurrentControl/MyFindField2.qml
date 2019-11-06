@@ -7,12 +7,19 @@ import QtQuick.Controls.Material 2.3
 import QtQuick.Dialogs 1.2
 
 Item {
-    id: frame_search
+    id: main_
 
     property bool open: true
 
+    property var model_perosn
     property var model_ext_person_list
     property var model_adm_assignment
+
+
+    property string id_currentPerson //: model_ext_person_list.getFirstColumnInt(currentIndex)
+    property string pn_currentPerson
+    property string tld_currentPerson
+    property string fio_currentPerson
 
     signal sendIDPerson(var id_currentPerson)
     signal openListPerson(var isOpen)
@@ -78,7 +85,7 @@ Item {
             if ( comboBox_ASSIGNEMENT.currentIndex >= 0 ) {
                 if ( isAnd ) advancedSearch = advancedSearch + " AND ";
                 isAnd = true;
-                dataCurrent = parseInt( frame_search.model_adm_assignment.getFirstColumnInt(comboBox_ASSIGNEMENT.currentIndex), 10 )
+                dataCurrent = parseInt( main_.model_adm_assignment.getFirstColumnInt(comboBox_ASSIGNEMENT.currentIndex), 10 )
                 advancedSearch = advancedSearch + " ID_ASSIGNEMENT = '" + dataCurrent + "'";
             }
 
@@ -92,7 +99,7 @@ Item {
     function updatePersonList_fun(text, textLenght) {
         //if (field_PersonSearch.text.length == 0) return;
 
-        var advancedSearch = frame_search.advancedSearch_fun(); /// строка с добавочными условиями по поиску сотрудников
+        var advancedSearch = main_.advancedSearch_fun(); /// строка с добавочными условиями по поиску сотрудников
 
         //if (field_PersonSearch.text.length > 0) {
         if (textLenght > 0) {
@@ -138,59 +145,68 @@ Item {
         }
     }
 
-    /// фнкция вытаскивает выбранного сотрудника
+    /// фнкция вытаскивает данные по выбранному сотруднику
     function searchPerson(id_currentPerson) {
-        var query;
-
-        query = " SELECT W_NAME, W_SURNAME, W_PATRONYMIC from EXT_PERSON WHERE ID_PERSON = " + id_currentPerson;
-        Query1.setQueryAndName(query, "FIO");
-
-        query = " SELECT PHOTO from EXT_PERSON WHERE ID_PERSON = " + id_currentPerson;
-        Query1.setQueryAndName(query, "pullOutPhotoCurrentPerson");
-        query = " select max(BURN_DATE) FROM EXT_DOSE WHERE ID_PERSON = " + id_currentPerson;
-        Query1.setQueryAndName(query, "getDATA_BURN_lust");
-
-        frame_search.sendIDPerson(id_currentPerson)
-        //main_.workerModelQuery(list_Persons.id_currentPerson);
+        /// сигнал с id выбранного сотрудника посылается в CurrentControl.qml,
+        /// где вызывается функции запросов SQL и моделей в БД
+        main_.sendIDPerson(id_currentPerson)
 
 
-        var now = new Date();
-        var date_begin = new Date((now.getFullYear()-1),now.getMonth(),now.getDate()).toLocaleDateString("ru_RU", "dd.MM.yyyy");
-        var date_end   = now.toLocaleDateString("ru_RU", "dd.MM.yyyy");
+//        return;
+//        /// (!) удалить дальнейший код
 
-        query = " SELECT " +
-                " SUM(TLD_G_HP10) Z21, SUM(TLD_N_HP10)  Z22, SUM(TLD_G_HP3)   Z25, SUM(TLD_N_HP3)   Z26, "  +
-                " SUM(TLD_B_HP3)  Z27, SUM(TLD_G_HP007) Z31, SUM(TLD_N_HP007) Z32, SUM(TLD_B_HP007) Z33, "  +
-                " SUM(TLD_G_HP10_DOWN) Z37, SUM(TLD_N_HP10_DOWN) Z38 "  + //, SUM(TLD_B_HP10_DOWN) Z39
-                " FROM EXT_DOSE WHERE " +
+//        var query;
+//        /// ФИО
+//        query = " SELECT W_NAME, W_SURNAME, W_PATRONYMIC from EXT_PERSON WHERE ID_PERSON = " + id_currentPerson;
+//        Query1.setQueryAndName(query, "q1__FIO");
 
-                " ID_PERSON IN (" + id_currentPerson  + ")"
-                /// если отбор по датам то последнюю строку заменить на:
-//                                " ID_PERSON IN (" + list_Persons.id_currentPerson  + ") AND " +
-//                                " BURN_DATE >= TO_DATE('" + date_begin + "','DD/MM/YY') AND"  +
-//                                " BURN_DATE <= TO_DATE('" + date_end   + "','DD/MM/YY') ";
-        Query1.setQueryAndName(query, "getMainPersonParam1");
+//        /// фото
+//        query = " SELECT PHOTO from EXT_PERSON WHERE ID_PERSON = " + id_currentPerson;
+//        Query1.setQueryAndName(query, "q1__pullOutPhotoCurrentPerson");
+
+//        /// последняя дата отжига касетницы (убрать отсюда?)
+//        query = " select max(BURN_DATE) FROM EXT_DOSE WHERE ID_PERSON = " + id_currentPerson;
+//        Query1.setQueryAndName(query, "q1__getDATA_BURN_lust");
 
 
-        query = " SELECT " +
-                " SUM(EPD_G_HP10) Z23, SUM(EPD_N_HP10)  Z24, SUM(EPD_G_HP3)   Z28, SUM(EPD_N_HP3)   Z29, "  +
-                " SUM(EPD_B_HP3)  Z30, SUM(EPD_G_HP007) Z34, SUM(EPD_N_HP007) Z35, SUM(EPD_B_HP007) Z36, "  +
-                " SUM(EPD_G_HP10_DOWN) Z40, SUM(EPD_N_HP10_DOWN) Z41 " +
-                " FROM OP_DOSE WHERE " +
+//        /// запросы на данные по дозам выбранного сотрудника
+//        var now = new Date();
+//        var date_begin = new Date((now.getFullYear()-1),now.getMonth(),now.getDate()).toLocaleDateString("ru_RU", "dd.MM.yyyy");
+//        var date_end   = now.toLocaleDateString("ru_RU", "dd.MM.yyyy");
 
-                " ID_PERSON IN (" + id_currentPerson  + ") "
-                /// если отбор по датам то последнюю строку заменить на:
-//                                " ID_PERSON IN (" + list_Persons.id_currentPerson  + ") AND "  +
-//                                " TIME_OUT >= TO_DATE('" + date_begin + "','DD/MM/YY')  AND "  +
-//                                " TIME_OUT <= TO_DATE('" + date_end   + "','DD/MM/YY') ";
-        Query1.setQueryAndName(query, "getMainPersonParam2");
+//        query = " SELECT " +
+//                " SUM(TLD_G_HP10) Z21, SUM(TLD_N_HP10)  Z22, SUM(TLD_G_HP3)   Z25, SUM(TLD_N_HP3)   Z26, "  +
+//                " SUM(TLD_B_HP3)  Z27, SUM(TLD_G_HP007) Z31, SUM(TLD_N_HP007) Z32, SUM(TLD_B_HP007) Z33, "  +
+//                " SUM(TLD_G_HP10_DOWN) Z37, SUM(TLD_N_HP10_DOWN) Z38 "  + //, SUM(TLD_B_HP10_DOWN) Z39
+//                " FROM EXT_DOSE WHERE " +
+
+//                " ID_PERSON IN (" + id_currentPerson + ")"
+//                /// если отбор по датам то последнюю строку заменить на:
+////                                " ID_PERSON IN (" + id_currentPerson  + ") AND " +
+////                                " BURN_DATE >= TO_DATE('" + date_begin + "','DD/MM/YY') AND"  +
+////                                " BURN_DATE <= TO_DATE('" + date_end   + "','DD/MM/YY') ";
+//        Query1.setQueryAndName(query, "q1__getMainPersonParam1");
+
+
+//        query = " SELECT " +
+//                " SUM(EPD_G_HP10) Z23, SUM(EPD_N_HP10)  Z24, SUM(EPD_G_HP3)   Z28, SUM(EPD_N_HP3)   Z29, "  +
+//                " SUM(EPD_B_HP3)  Z30, SUM(EPD_G_HP007) Z34, SUM(EPD_N_HP007) Z35, SUM(EPD_B_HP007) Z36, "  +
+//                " SUM(EPD_G_HP10_DOWN) Z40, SUM(EPD_N_HP10_DOWN) Z41 " +
+//                " FROM OP_DOSE WHERE " +
+
+//                " ID_PERSON IN (" + id_currentPerson  + ") "
+//                /// если отбор по датам то последнюю строку заменить на:
+////                                " ID_PERSON IN (" + id_currentPerson  + ") AND "  +
+////                                " TIME_OUT >= TO_DATE('" + date_begin + "','DD/MM/YY')  AND "  +
+////                                " TIME_OUT <= TO_DATE('" + date_end   + "','DD/MM/YY') ";
+//        Query1.setQueryAndName(query, "q1__getMainPersonParam2");
 
 
     }
 
 
     Connections {
-        target: list_Persons.model
+        target: main_.model_ext_person_list //list_Persons.model
         onSignalUpdateDone: {
             if (res) {
                 if (field_PersonSearch.text.length > 0) {
@@ -203,16 +219,16 @@ Item {
         }
     }
 
-    Connections {
-        target: Query1
-        onSignalSendResult: {
-            if (owner_name === "FIO") {
-                if (res) {
-                    //txt_FIO.text = var_res;
-                }
-            }
-        }
-    }
+//    Connections {
+//        target: Query1
+//        onSignalSendResult: {
+//            if (owner_name === "q1__FIO") {
+//                if (res) {
+//                    //txt_FIO.text = var_res;
+//                }
+//            }
+//        }
+//    }
 
     /// поле со списоком выбранных дополнительных фильтров поиска
     Item {
@@ -224,7 +240,7 @@ Item {
         anchors.rightMargin: 20
         height: 30
 
-        visible: frame_search.open ? true : false
+        visible: main_.open ? true : false
 
         RowLayout {
             spacing: 20
@@ -275,7 +291,7 @@ Item {
         id: button_OpenListAllPersons
         property bool open: false
         property var currentColor
-        visible: frame_search.open ? true : false
+        visible: main_.open ? true : false
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 1
         anchors.right: parent.right
@@ -314,14 +330,14 @@ Item {
     Rectangle {
         id: rect_field_PersonSearch
         //anchors.top: parent.top
-        //anchors.topMargin: frame_search.height - height
+        //anchors.topMargin: main_.height - height
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 1
         anchors.right: button_OpenListAllPersons.left
         width: 300
         height: 40
 
-        visible: frame_search.open ? true : false
+        visible: main_.open ? true : false
 
         color: "transparent" //"#adadad" //"#009688"
         //border.color: "green" //"LightGray"
@@ -368,7 +384,7 @@ Item {
                 rightPadding: 8
 
 
-                visible: frame_search.open ? true : false
+                visible: main_.open ? true : false
 
                 font.pixelSize: 16
                 placeholderText: qsTr("Поиск сотрудника..")
@@ -410,7 +426,7 @@ Item {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.margins: 1
-            visible: frame_search.open ? true : false
+            visible: main_.open ? true : false
             color: "transparent"
             width: 40
             Text {
@@ -458,13 +474,13 @@ Item {
             anchors.fill: parent
             anchors.leftMargin: 5
 
-            visible: frame_search.open ? true : false
+            visible: main_.open ? true : false
 
             currentIndex: -1 //0
-            property string id_currentPerson: model_ext_person_list.getFirstColumnInt(currentIndex)
-            property string pn_currentPerson
-            property string tld_currentPerson
-            property string fio_currentPerson
+//            property string id_currentPerson: model_ext_person_list.getFirstColumnInt(currentIndex)
+//            property string pn_currentPerson
+//            property string tld_currentPerson
+//            property string fio_currentPerson
 
 
             highlightFollowsCurrentItem: true
@@ -533,9 +549,9 @@ Item {
                     if (list_Persons.currentIndex !== index) {
                         list_Persons.currentIndex = index
                     }
-                    list_Persons.id_currentPerson = model_ext_person_list.getFirstColumnInt(index)
+                    main_.id_currentPerson = model_ext_person_list.getFirstColumnInt(index)
 
-                    list_Persons.fio_currentPerson = W_SURNAME + "\n" + W_NAME + " " + W_PATRONYMIC
+                    main_.fio_currentPerson = W_SURNAME + "\n" + W_NAME + " " + W_PATRONYMIC
 
 //                            model_ext_person_list.get(list_Persons.currentIndex)["W_NAME"]    + "\n" +
 //                            model_ext_person_list.get(list_Persons.currentIndex)["W_SURNAME"] + " "  +
@@ -545,10 +561,11 @@ Item {
 //                            model_ext_person_list.getCurrentDate(1,list_Persons.currentIndex) + " "  +
 //                            model_ext_person_list.getCurrentDate(3,list_Persons.currentIndex);
 
-                    list_Persons.pn_currentPerson  = PERSON_NUMBER
-                    list_Persons.tld_currentPerson = ID_TLD
+                    main_.pn_currentPerson  = PERSON_NUMBER
+                    main_.tld_currentPerson = ID_TLD
 
-                    sendIDPerson(list_Persons.id_currentPerson);
+
+                    //sendIDPerson(main_.id_currentPerson);
                     timer_persons.restart()
                 }
             }
@@ -578,7 +595,7 @@ Item {
             interval: 100
             repeat: false
             onTriggered: {
-                list_Persons.id_currentPerson = model_ext_person_list.getFirstColumnInt(0);
+                main_.id_currentPerson = model_ext_person_list.getFirstColumnInt(0);
                 stop();
             }
         }
@@ -587,7 +604,8 @@ Item {
             interval: 410
             repeat: false
             onTriggered: {
-                searchPerson(list_Persons.id_currentPerson);
+                //console.log(" (!) timer_persons сработал ")
+                searchPerson(main_.id_currentPerson);
                 stop();
              }
         }
@@ -601,17 +619,17 @@ Item {
         id: rect_AdvancedSearch
         property bool open: false
         property int heightOpen: 400
-        property int heightClose: 40 //frame_search.height
+        property int heightClose: 40 //main_.height
         property int speedAnimation: 200
 
         anchors.top: parent.top
-        anchors.topMargin: frame_search.height - heightClose - 1
+        anchors.topMargin: main_.height - heightClose - 1
         anchors.right: rect_field_PersonSearch.left
 
-        visible: frame_search.open ? true : false
+        visible: main_.open ? true : false
 
         width: 400
-        height: 40 //frame_search.height
+        height: 40 //main_.height
         clip: true
 
         color: height == heightClose ? "transparent" : "white" // rect_AdvancedSearch.open ? "white" : "transparent" //"#e8e8e8" // "#d1d1d1" // "#adadad" "Transparent" //
@@ -823,7 +841,7 @@ Item {
                         enabled: (checkBox_ASSIGNEMENT.checked) ? true : false
                         anchors.verticalCenter: parent.verticalCenter
                         width: 160
-                        model: frame_search.model_adm_assignment
+                        model: main_.model_adm_assignment
                         textRole: "ASSIGNEMENT"
                     }
                 }
@@ -861,8 +879,8 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            height: 40 //frame_search.height //rect_AdvancedSearch.open ? 30 : 50
-            visible: frame_search.open ? true : false
+            height: 40 //main_.height //rect_AdvancedSearch.open ? 30 : 50
+            visible: main_.open ? true : false
             //border.color: "black"
             color: "transparent"
             Text {
@@ -904,9 +922,10 @@ Item {
         anchors.left: parent.left
         anchors.leftMargin: 20
 
-        visible: frame_search.open ? true : false
+        visible: main_.open ? true : false
 
-        text: list_Persons.currentIndex >= 0 ? list_Persons.fio_currentPerson : "Сотрудник\nне выбран "
+        text: main_.fio_currentPerson.length >= 0 ? main_.fio_currentPerson : "Сотрудник\nне выбран "
+            //list_Persons.currentIndex >= 0 ? list_Persons.fio_currentPerson : "Сотрудник\nне выбран "
         font.pointSize: 20
         font.bold: true
         font.capitalization: Font.AllUppercase // в верхний регистр
@@ -924,7 +943,7 @@ Item {
         anchors.leftMargin: 40
         anchors.margins: 10
         width: 100
-        visible: frame_search.open ? true : false
+        visible: main_.open ? true : false
 //    RowLayout {
 //        //anchors.verticalCenter: parent.verticalCenter
 //        anchors.top: parent.top
@@ -939,8 +958,8 @@ Item {
             //border.width: 1
             TextEdit {
                 id: txt_PN
-                visible: frame_search.open ? true : false
-                text: "Таб. № " + list_Persons.pn_currentPerson
+                visible: main_.open ? true : false
+                text: "Таб. № " + main_.pn_currentPerson
                 font.pointSize: 14
                 //font.bold: true
                 font.capitalization: Font.AllUppercase // в верхний регистр
@@ -955,9 +974,9 @@ Item {
             color: "transparent" //Material.color(Material.Red)
             TextEdit {
                 id: txt_TLD
-                visible: frame_search.open ? true : false
+                visible: main_.open ? true : false
 
-                text: "ТЛД № " + list_Persons.tld_currentPerson
+                text: "ТЛД № " + main_.tld_currentPerson
                 font.pointSize: 14
                 //font.bold: true
                 font.capitalization: Font.AllUppercase // в верхний регистр

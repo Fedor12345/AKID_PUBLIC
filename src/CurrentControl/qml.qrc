@@ -36,5 +36,8 @@
         <file>EmptyPage.qml</file>
         <file>Persons.qml</file>
         <file>MyFindField2.qml</file>
+        <file>SICH.qml</file>
+        <file>TestConnectionSystem.qml</file>
+        <file>AddPerson.qml</file>
     </qresource>
 </RCC>

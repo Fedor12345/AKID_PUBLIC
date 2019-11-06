@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("Query1", query1);
     engine.rootContext()->setContextProperty("managerDB", managerDB);
 
-    engine.rootContext()->setContextProperty("workersModel", managerDB->createModel("","model_PERSON"));
+    //engine.rootContext()->setContextProperty("workersModel", managerDB->createModel("","m__model_PERSON"));
 
 //    engine.rootContext()->setContextProperty("adm_status_Model", managerDB->createModel("","adm_status"));
 //    engine.rootContext()->setContextProperty("adm_organisation_org_Model", managerDB->createModel("","adm_organisation_org"));
@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
     /// Объект для буфера обмена
     engine.rootContext()->setContextProperty("clipboard",
     new ClipboardProxy(QGuiApplication::clipboard()));
+
 
 
 

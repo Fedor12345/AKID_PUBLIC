@@ -12,6 +12,13 @@ Page {
         }
     }
 
+    Text {
+        id: txt_1231
+        anchors.top: parent.top
+        font.pixelSize: 20
+        text: qsTr("text")
+    }
+
     Login {
         id: login
         anchors.horizontalCenter: parent.horizontalCenter
@@ -19,6 +26,7 @@ Page {
 
         onLogin_OK: {
             stackView.popup_waitON = true
+            txt_1231.text = "OK! " + stackView.popup_waitON
             stackView.push("CurrentControl.qml")
         }
     }

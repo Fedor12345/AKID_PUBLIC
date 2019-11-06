@@ -433,11 +433,19 @@ Page {
         target: Query1
 
         onSignalSendResult: {
-            if (res) {
-                //completedZ = 0;
-                if (owner_name == "Report_1DOZ") {
+            //completedZ = 0;
+            if ( owner_name === "q1__getBurnDate_last" ) {
+                if (res) {
+                    var date_burn = var_res.toLocaleDateString("ru_RU", "dd.MM.yyyy");
+                    //currentPersonChange_date_burn(date_burn);
+                }
+            }
+            if (owner_name == "q1__report_1DOZ") {  //q1__getBurnDate_EXT_DOSE
+                if (res) {
                     console.log("Генерируем отчет...");
                     console.log(" var_res ==== ", var_res, " ", var_res["Z1"], var_res["Z2"], var_res["Z3"], var_res["Z4"]);
+                    var date = var_res["Z2"].toLocaleDateString("ru_RU", "dd.MM.yyyy"); //var_res["Z2"].getDate() + "." +(var_res["Z2"].getMonth()+1)  + "." + var_res["Z2"].getFullYear();
+                    var_res["Z2"] = date;
                     report.setZ(var_res);
                     report.beginCreateReport1DOZ();
                     report.showZ();
@@ -457,15 +465,15 @@ Page {
         text: "СОЗДАТЬ ОТЧЕТ"
         onClicked: {
             //report.createReport(idWorker.text)
-            report.setTypeReport(12);
+            report.setTypeReport(12,1);
             var querySQL =
                     " SELECT SNILS Z1, BIRTH_DATE Z2, " +
-                    " ADM_ASSIGNEMENT.ASSIGNEMENT_CODE Z3, ADM_ASSIGNEMENT.ASSIGNEMENT Z4," +
+                    " ADM_ASSIGNEMENT.ASSIGNEMENT_CODE Z3, ADM_ASSIGNEMENT.ASSIGNEMENT Z4, " +
                     " STATUS_CODE Z5, SEX Z6, "  +
                     " ( COALESCE(EXT_DOSE.TLD_B_HP3,0) + COALESCE(EXT_DOSE.TLD_B_HP007,0) + COALESCE(OP_DOSE.EPD_B_HP3,0) + COALESCE(OP_DOSE.EPD_B_HP007,0) ) Z7, " +
                     " ( COALESCE(EXT_DOSE.TLD_G_HP10,0) + COALESCE(OP_DOSE.EPD_G_HP10,0) ) Z8, "  +
                     " ( COALESCE(EXT_DOSE.TLD_N_HP10,0) + COALESCE(OP_DOSE.EPD_N_HP10,0) ) Z9, "  +
-                    " ( COALESCE(IN_CONTROL.EXP_EFF_DOSE_C,0) + COALESCE(IN_MEASURE.EXP_EFF_DOSE_M,0) + COALESCE(IN_IODINE.EXP_EFF_DOSE_I,0) ) Z10 " +
+                    " ( COALESCE(IN_CONTROL.EXP_EFF_DOSE_C,0) + COALESCE(IN_MEASURE.EXP_EFF_DOSE_M,0) + COALESCE(IN_IODINE.EXP_EFF_DOSE_I,0) ) Z10, " +
                     " ( COALESCE(EXT_DOSE.TLD_G_HP007,0) + COALESCE(EXT_DOSE.TLD_N_HP007,0) + COALESCE(EXT_DOSE.TLD_B_HP007,0) + COALESCE(OP_DOSE.EPD_G_HP007,0) + COALESCE(OP_DOSE.EPD_N_HP007,0)  + COALESCE(OP_DOSE.EPD_B_HP007,0) ) Z11 " +
 
                     " FROM EXT_PERSON "  +
@@ -477,7 +485,7 @@ Page {
                     " LEFT JOIN IN_IODINE ON EXT_PERSON.ID_PERSON = IN_IODINE.ID_PERSON "             +
 
                     " WHERE EXT_PERSON.ID_PERSON IN (" + page_report_ESKID.id_currentPerson + ") ";
-            Query1.setQueryAndName(querySQL, "Report_1DOZ");
+            Query1.setQueryAndName(querySQL, "q1__report_1DOZ");
 
         }
 
