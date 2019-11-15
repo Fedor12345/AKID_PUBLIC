@@ -8,36 +8,58 @@ Page {
 
     property string text_color: "#808080"
     property int numberAddPerson: 0
+     property int numberSelectPerson: 0
 
     transformOrigin: Item.Center
 
     Connections {
         target: Query1
         onSignalSendResult: {
-            if (owner_name === "q1__AddPerson_test") {
-                //console.log(" (!) q1__AddPerson_test");
+
+            if ( owner_name === "q1__AddPerson_test" ) {
+                //console.log(" (!) q1__AddPerson_test_Result");
                 listModel_infoTest.append({ nameQuery: owner_name,
                                             executeQuery: res
                                           })
                 list_infoTest.positionViewAtEnd();
 
             }
+
+            if ( owner_name === "q1__SelectPerson_test" ) {
+                console.log(" (!) q1__SelectPerson_test_Result ", res , " ", var_res, " ", messageError);
+                listModel_infoTest.append({ nameQuery: owner_name,
+                                            executeQuery: res
+                                          })
+                list_infoTest.positionViewAtEnd();
+            }
+
         }
     }
 
 
     Connections {
         target: managerDB
+
         onSignalSetQuery: {
             //console.log(typeQuery);
-//            listModel_infoTest.append({ name: typeQuery
-//                                      })
-//            list_infoTest.positionViewAtEnd();
+            //            listModel_infoTest.append({ name: typeQuery
+            //                                      })
+            //            list_infoTest.positionViewAtEnd();
+
+
+            /// выполнение SQL запроса Select из таблицы EXT_PERSON по полю PERSON_NUMBER
+            if ( typeQuery == "Select" ) {
+                var query = " SELECT * FROM EXT_PERSON WHERE PERSON_NUMBER = " + main_.numberSelectPerson ;
+                console.log(" (!) q1__SelectPerson_test: ", numberSelectPerson);
+
+                Query1.setQueryAndName(query, "q1__SelectPerson_test");
+                main_.numberSelectPerson++;
+            }
 
 
             /// создание и выполнение SQL запроса для добавления случайно генерируемых данных в таблицу EXT_PERSON
             if (typeQuery == "AddPerson") {
-
+                console.log(" (!) q1__AddPerson_test: ", numberAddPerson);
                 ////////////////////////////////////////////////////////////////////////////
                 /// генерация псевдослучайного числа от min до max (включительно)
                 function randomInteger(min, max) {
@@ -102,7 +124,7 @@ Page {
                 var patronymicM = ["Алексевич", "Андреевич", "Антонович", "Дмитриевич", "Иванович", "Михаилович", "Федорович"]
 
 
-                data_arr["PERSON_NUMBER"] = 12 + numberAddPerson;
+                data_arr["PERSON_NUMBER"] = numberAddPerson; //12 +
                 data_arr["SEX"] = (randomInteger(0,1) === 0) ? "M" : "F";
                 data_arr["W_NAME"]       = ((data_arr["SEX"] === "M") ? randomArray(nameM) : randomArray(nameF))
                 data_arr["W_SURNAME"]    = randomArray(surname) + ((data_arr["SEX"] === "M") ? "" : "а");
@@ -116,7 +138,7 @@ Page {
                 data_arr["ID_DEPARTMENT_OUTER"] = 0
                 data_arr["ID_ORGANIZATION"] = randomArray([1,3,5]);
                 data_arr["ID_ASSIGNEMENT"] = randomArray([1,3,5,7]);
-                data_arr["ID_TLD"] = 12 + numberAddPerson;
+                data_arr["ID_TLD"] = numberAddPerson; //12 +
                 data_arr["DOSE_BEFORE_NPP"] = random(0, 5) //.replace(".", ",");
                 data_arr["DOSE_CHNPP"] = random(0, 5) //.replace(".", ",");
                 data_arr["IKU_YEAR"] = random(0, 5) //.replace(".", ",");
@@ -236,6 +258,20 @@ Page {
         onFocusChanged: {
             if (focus) { select(0, text.length) }
         }
+
+        ToolTip {
+            //parent: slider.handle
+            visible: parent.focus
+            //text: "Добавляет скрипт в список на выполнение\nв данный момент работают Select и AddPerson"
+            contentItem: Text {
+                text:"Число итераций\n\n0 - означает, что будет выполняться\nпока не будет нажата кнопка STOP TEST"
+                    //parent.text
+                font.pixelSize: 15
+                color: "white" //"#21be2b"
+            }
+        }
+
+
     }
 
 
@@ -470,11 +506,21 @@ Page {
                     onEntered: { img_deleteScript.opacity = 0.7 }
                     onExited:  { img_deleteScript.opacity = 0.3 }
                     onClicked: { listModel_scripts.remove(list_scripts.currentIndex) }
+
+                    ToolTip {
+                        visible: parent.containsMouse
+                        contentItem: Text {
+                            text: "Удалить выбранную строку"
+                            font.pixelSize: 15
+                            color: "white"
+                        }
+                    }
                 }
+
+
+
+
             }
-
-
-
 
 
         }
@@ -791,8 +837,18 @@ Page {
                             selectByMouse: true
                             selectionColor: Material.color(Material.Red)
                             horizontalAlignment: Text.AlignHCenter
-                            placeholderText: qsTr("0")
-                            text: "0"
+                            placeholderText: qsTr("100")
+                            text: "100"
+
+                            onTextChanged: {
+                                if (text < 10)     { text = 10 }
+                                if (text > 300000) { text = 30000 }
+                            }
+//                            validator:
+//                                //IntValidator {bottom: 10; top: 20 }
+////                                RegExpValidator {
+////                                    regExp: /[10-300000]+/
+////                                }
                             width: 90
                             onFocusChanged: {
                                 if (focus) { select(0, text.length) }
@@ -978,6 +1034,11 @@ Page {
                             value: 0 // "Select"
 
                             property var items: ["Select", "Add", "Delete", "AddPerson"]
+                            onDisplayTextChanged: {
+                                if ( displayText == "AddPerson") {
+                                popup_setPERSON_NUMBER.open();
+                                }
+                            }
 
 //                            validator: RegExpValidator {
 //                                regExp: new RegExp("(Select|Add|Delete)", "i")
@@ -1051,6 +1112,63 @@ Page {
                                 }
                             }
                         }
+
+
+                        Popup {
+                            id: popup_setPERSON_NUMBER
+                            width: itrm_setPERSON_NUMBER.width + padding*2
+                            height: itrm_setPERSON_NUMBER.height + padding*2
+                            modal: true
+                            focus: true
+                            closePolicy: Popup.NoAutoClose //Popup.CloseOnEscape
+                            parent: Overlay.overlay
+                            x: Math.round((parent.width - width) / 2)
+                            y: Math.round((parent.height - height) / 2)
+                            padding: 0
+
+                            Item {
+                                id: itrm_setPERSON_NUMBER
+                                height: 80
+                                width:  400
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 10
+                                    spacing: 20
+                                    Text {
+                                        color: main_.text_color
+                                        font.pixelSize: 15
+                                        text: qsTr("PERSON_NUMBER:")
+                                    }
+                                    TextField {
+                                        id: txt_setPERSON_NUMBER
+                                        Layout.minimumWidth: 100
+                                        font.bold: true
+                                        color: main_.text_color // Material.color(Material.Teal)
+                                        selectByMouse: true
+                                        selectionColor: Material.color(Material.Red)
+                                        horizontalAlignment: Text.AlignHCenter
+                                        placeholderText: qsTr("NUMBER")
+                                        validator: RegExpValidator { regExp: /[0-9]+/ }
+                                        onFocusChanged: {
+                                            if (focus) { select(0, text.length) }
+                                        }
+                                    }
+                                    Button {
+                                        text: "ok"
+                                        onClicked: {
+                                            if (txt_setPERSON_NUMBER.text > 0) {
+                                                main_.numberAddPerson = txt_setPERSON_NUMBER.text;
+                                                popup_setPERSON_NUMBER.close();
+                                            }
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+                        }
+
                     }
                 }
                 RowLayout {
@@ -1070,6 +1188,10 @@ Page {
                             color: main_.text_color
                             text: qsTr("Число запросов:")
                             font.pixelSize: 15
+
+                            ////////////
+                            enabled: false
+                            opacity: 0.5
                         }
                     }
                     Item {
@@ -1091,6 +1213,10 @@ Page {
                             onFocusChanged: {
                                 if (focus) { select(0, text.length) }
                             }
+
+                            ////////////
+                            enabled: false
+                            opacity: 0.5
                         }
                     }
                 }
@@ -1119,6 +1245,8 @@ Page {
                 height: 40
                 width: 80
 
+                color: Material.color(Material.LightGreen)
+
                 Behavior on color {
                     ColorAnimation { duration: 200 } //NumberAnimation //ColorAnimation
                 }
@@ -1126,7 +1254,7 @@ Page {
 
             Text {
                 anchors.centerIn: parent
-                color: main_.text_color
+                color: "White" //main_.text_color
                 font.pixelSize: 17
                 text: "Добавить последовательность"
             }
@@ -1134,8 +1262,8 @@ Page {
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true
-                onEntered:  { color_addScript.color = "#e3e3e3" } //cfcfcf //#e3e3e3
-                onExited:   { color_addScript.color = "white" }
+                onEntered:  { color_addScript.color = Material.color(Material.Lime) /*"#e3e3e3"*/ } //cfcfcf //#e3e3e3
+                onExited:   { color_addScript.color = Material.color(Material.LightGreen) /*"white"*/ }
                 onPressed:  {  }
                 onReleased: {  }
                 onClicked:  {
@@ -1146,7 +1274,22 @@ Page {
                                              })
                     list_scripts.positionViewAtEnd();
                 }
+
+
+                ToolTip {
+                    //parent: slider.handle
+                    visible: parent.containsMouse
+                    contentItem: Text {
+                        text:"Добавляет скрипт в список на выполнение\n\nВ данный момент работают:\nSelect и AddPerson"
+                            //parent.text
+                        font.pixelSize: 15
+                        color: "white" //"#21be2b"
+                    }
+                }
             }
+
+
+
 
 
         }
@@ -1176,9 +1319,69 @@ Page {
             border.color: "LightGray"
         }
 
+        Rectangle {
+            id: header_listResult
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 40
+            color: "#ececec"  //Transparent
+            border.color: "LightGray"
+            Text {
+                anchors.centerIn: parent
+                text: qsTr("Результаты")
+                font.pixelSize: 17
+                font.bold: true
+                color: main_.text_color
+            }
+
+            Rectangle {
+                id: item_deleteResult
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                width: 30
+                height: 30
+                border.color: "LightGray"
+                Image {
+                    id: img_deleteResult
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.margins: 5
+                    height: width
+                    source: "icons/delete-24px.svg"
+                    opacity: 0.3
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: { img_deleteResult.opacity = 0.7 }
+                    onExited:  { img_deleteResult.opacity = 0.3 }
+                    onClicked: { listModel_infoTest.clear(); }
+                    ToolTip {
+                        visible: parent.containsMouse
+                        contentItem: Text {
+                            text: "Очистить весь список"
+                            font.pixelSize: 15
+                            color: "white"
+                        }
+                    }
+                }
+            }
+
+
+        }
+
+
         ListView {
             id: list_infoTest
-            anchors.fill: parent
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.top: header_listResult.bottom
+
+            //anchors.fill: parent
             clip: true
 
 //            onCountChanged: {

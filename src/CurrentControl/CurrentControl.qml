@@ -204,7 +204,8 @@ Page {
 
         property var model_person:  managerDB.createModel("", "m__select_person")
 
-        property var model_ext_person_list:      managerDB.createModel(" SELECT ID_PERSON, W_NAME, W_SURNAME, W_PATRONYMIC, PERSON_NUMBER, ID_TLD FROM EXT_PERSON ORDER BY W_SURNAME", "m__ext_person_list" )
+        property var model_ext_person_list:      managerDB.createModel("", "m__ext_person_list" )
+            //managerDB.createModel(" SELECT ID_PERSON, W_NAME, W_SURNAME, W_PATRONYMIC, PERSON_NUMBER, ID_TLD FROM EXT_PERSON ORDER BY W_SURNAME", "m__ext_person_list" )
 
         //property var doseModel: managerDB.createModel(" ")
 

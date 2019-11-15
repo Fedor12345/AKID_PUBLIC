@@ -278,7 +278,9 @@ void SQLquery::queryExecute(QString query)
                 value = result_data;
             }
             else {
-                emit signalSendResult(sender_name_current, true, NULL, "error: Нет такой записи");
+                //emit signalSendResult(sender_name_current, true, NULL, "error: Нет такой записи");
+                value = NULL;
+                message ="error: Нет такой записи";
             }
 
             /// Если поле только одно (число столбцов в результате запроса),

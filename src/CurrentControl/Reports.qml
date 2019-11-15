@@ -11,6 +11,8 @@ import MyTools 1.0
 
 Page {
     id: page_reports
+
+    property string text_color: "#808080"
     property int space_margin: 15
     property var model_SQLQiueries
     property var model_tableReports
@@ -61,7 +63,7 @@ Page {
 
                 }
             }
-            if(owner_name === "q1__loadFileForReport") {
+            if (owner_name === "q1__loadFileForReport") {
                 if (res) {
                     console.log(" loadFileForReport: ", var_res["DOCX"], var_res["DOCM"], var_res["REPORTNAME"]);
                     FileManager.saveFile(var_res["DOCX"],"","report1", "docx")
@@ -295,6 +297,136 @@ Page {
                     height: 700
                     width:  600
 
+                    /// функция формирует из словаря и открывает(или не открывает если параметр word пустой) список-подсказку ключевых слов
+                    function openHelpWordList(word,x,y) {
+                        //console.log(" (!) openHelpWordList...",word,x,y)
+                        listModel_helpWorldList.clear();
+                        if(word.length>0) {
+                            /// словарь ключевых слов
+                            var wordbook = ["SELECT","WHERE","FROM","EXT_PERSON","EXT_DOSE","ADM_ASSIGNEMENT","ADM_NUCLIDE","ADM_ORGANIZATION","ADM_DEPARTMENT_INNER","ADM_STATUS"]
+                            for (var i = 0; i < wordbook.length; i ++) {
+                                if (wordbook[i].indexOf(word) === 0) {
+                                    //console.log(" (!) word true : ", word, wordbook[i], wordbook[i].indexOf(word), i)
+                                    listModel_helpWorldList.append( { helpWord: wordbook[i] })
+                                }
+                                //if ( i === wordbook.length - 1) { popup_helpWorldList.close(); }
+                            }
+
+                            /// открываем окно с подсказками
+                            var x_helpWorldList = x - word.length * 7;
+                            var y_helpWorldList = y + 25;
+                            popup_helpWorldList.word = word;
+                            popup_helpWorldList.x = x_helpWorldList;
+                            popup_helpWorldList.y = y_helpWorldList;
+                            popup_helpWorldList.open();
+                        }
+                        else {
+                            if ( popup_helpWorldList.opened ) popup_helpWorldList.close();
+                        }
+
+                    }
+
+
+                    /// Всплывающий лист-подсказка с набором слов, начинающихся на символы, вводимые в txt_FieldQuerySQL
+                    Popup {
+                        id: popup_helpWorldList
+                        property string word
+
+                        width: 0 //listView_helpWorldList.width
+                        height: listView_helpWorldList.contentHeight + 5
+                        //modal: true
+                        //focus: true
+
+
+                        opacity: 0.8
+                        clip: true
+                        background: Rectangle {
+                            anchors.fill: parent
+                            //radius: 5
+                            color: "LightGray"
+                        }
+
+                        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                        parent: flickable_txt_QuerySQL // txt_FieldQuerySQL //popup_addQuery // //Overlay.overlay
+                        x: 100 // Math.round((parent.width - width) / 2)
+                        y: 200 // Math.round((parent.height - height) / 2)
+                        //z: 3
+                        onClosed: { width = 0 }
+                        padding: 0
+
+
+
+                        ListView {
+                            id: listView_helpWorldList
+                            anchors.fill: parent
+                            //property var currentItemTxt
+//                            anchors.top:     parent.top
+//                            anchors.bottom:  parent.bottom
+//                            anchors.left:    parent.left
+//                            width: 0
+                            //anchors.leftMargin: 5
+
+
+                            highlightFollowsCurrentItem: true
+                            highlight: Rectangle {
+                                color: "#ebebeb"
+                            }
+                            highlightMoveDuration: 100
+
+
+                            model: //["SLELCT","WHERE","FROM","EXT_PERSON","EXT_DOSE"]
+                                   ListModel {
+                                id: listModel_helpWorldList
+                            }
+                            delegate: ItemDelegate {
+                                id: delegate_helpWorldList
+                                height: 30
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                //width: txt_helpWorldList.contentWidth + 50
+
+                                Component.onCompleted: {
+                                    var width = txt_helpWorldList.contentWidth + 20;
+                                    if ( index == 0 ) {
+                                        popup_helpWorldList.width = width;
+                                        //console.log(" (!) index = ", index, width)
+                                    }
+                                    if ( popup_helpWorldList.width < width )
+                                    {
+                                        popup_helpWorldList.width = width;
+                                    }
+                                    //console.log(" (!) width: ", width, popup_helpWorldList.width);
+                                }
+
+                                Text {
+                                    id: txt_helpWorldList
+                                    //anchors.centerIn: parent
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 5
+                                    color: page_reports.text_color
+                                    font.pixelSize: 12
+                                    text: helpWord // modelData //helpWord
+                                }
+
+                                onClicked: {
+                                    if (listView_helpWorldList.currentIndex !== index) {
+                                        listView_helpWorldList.currentIndex = index
+                                    }
+
+                                    var wordChange = helpWord.slice(popup_helpWorldList.word.length, helpWord.length);
+                                    txt_FieldQuerySQL.insert( txt_FieldQuerySQL.cursorPosition, wordChange ) //append(wordChange)
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+
+
 
                     /// Рамка с полем имени отчета
                     Rectangle {
@@ -343,147 +475,536 @@ Page {
 
                     }
 
-                    /// ФОРМА ДЛЯ НАПИСАНИЯ SQL ЗАПРОСА
-                    Rectangle {
-                        id: rect_QuerySQL
+                    TabBar {
+                        id: tabbar_typeGetQuery
                         anchors.top: parent.top
                         anchors.topMargin: 80
-                        height: 300
                         anchors.right: parent.right
                         anchors.left: parent.left
-                        anchors.margins: 10
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
+                        contentHeight: 30
+                        currentIndex: 1 //0
+                        font.pixelSize: 14
+                        background: Rectangle { color: "LightGray" }
+                        TabButton {
+                            text: "Конструктор запроса"
+//                            contentItem: Text {
+//                                text: parent.text
+//                                font.pixelSize: 14
+//                                horizontalAlignment: Text.AlignHCenter
+//                                verticalAlignment: Text.AlignVCenter
+//                            }
+                            width: implicitWidth
+                            //height: 30//implicitHeight
+                        }
+                        TabButton {
+                            text: "SQL запрос"
+                            width: implicitWidth
+                            //height: 30 //implicitHeight
+                        }
 
-                        /// заголовок запроса
-                        Rectangle {
-                            id: rect_header_QuerySQL
-                            anchors.top: parent.top
-                            height: 30
-                            anchors.right: parent.right
-                            anchors.left: parent.left
-                            color: "LightGray"
-                            Label {
-                                id: label_QuerySQL
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.left: parent.left
-                                anchors.leftMargin: 40
-                                text: "SQL вопрос"
-                            }
+                    }
+
+                    StackLayout {
+                        id: stackLayout_typeSetQuery
+                        height: 300
+                        //anchors.bottom: parent.bottom
+                        anchors.top: tabbar_typeGetQuery.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
+                        //anchors.margins: 10
+                        currentIndex: tabbar_typeGetQuery.currentIndex
+
+                        Item {
                             Rectangle {
-                                id: button_loadSQLquery
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.right: parent.right
-                                anchors.rightMargin: 20
-                                width: 200
-                                height: parent.height - 2
-                                color: "transparent"
-                                border.color: "#a1a1a1"
-                                //border.width: 0
-
-                                Label {
-                                    id: labelLoadSQLquery
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    text: "Загрузить вопрос из файла"
-                                    color: "#a1a1a1"
-                                }
-                                MouseArea {
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    onEntered:  { parent.border.color = "#444444"; labelLoadSQLquery.color =  "#444444"}
-                                    onExited:   { parent.border.color = "#a1a1a1"; labelLoadSQLquery.color =  "#a1a1a1"  }
-                                    //onPressed:  { parent.color = "#f6ffed" }
-                                    //onReleased: { parent.color = "transparent" }
-                                    onClicked:  {
-                                        openFileDialog.typeFile = "sql"
-                                        openFileDialog.nameFilters = [ "SQL file (*.txt *.sql)" ] //, "All files (*)"
-                                        openFileDialog.open();
-                                    }
-
-                                }
-
+                                id: rect_constructorQuery
+                                anchors.fill: parent
+                                border.color: "LightGray"
                             }
                         }
-                        Rectangle {
-                            id: rect_FieldQuerySQL
-                            anchors.top: rect_header_QuerySQL.bottom
-                            anchors.bottom: parent.bottom
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            border.color: "LightGrey"
 
-                            clip: true
-
-                            Flickable {
-                                id: flickable_txt_QuerySQL
+                        /// ФОРМА ДЛЯ НАПИСАНИЯ SQL ЗАПРОСА
+                        Item {
+                            Rectangle {
+                                id: rect_QuerySQL
                                 anchors.fill: parent
-                                //anchors.margins: 2
-                                anchors.leftMargin: 5
-                                anchors.rightMargin: 5
+//                                anchors.top: parent.top
+//                                anchors.topMargin: 80
+//                                height: 300
+//                                anchors.right: parent.right
+//                                anchors.left: parent.left
+//                                anchors.margins: 10
 
-                                ScrollBar.vertical: ScrollBar { }
+                                Rectangle {
+                                    id: rect_FieldQuerySQL
+                                    anchors.fill: parent
+                                    border.color: "LightGrey"
 
-                                TextArea.flickable: TextArea {
-                                    id: txt_FieldQuerySQL
-                                    property bool isOk
-                                    property var censure: ""
-                                    selectByMouse: true
-                                    wrapMode: TextEdit.WrapAnywhere // TextEdit.WordWrap
-                                    font.capitalization: Font.AllUppercase
-                                    //Material.accent: Material.LightGreen
-                                    selectionColor: Material.color(Material.LightGreen)
-                                    background: Rectangle {
-                                        color:"transparent"
-                                        //border.color: "red"
-                                    }
-                                    //color: "#eeeeee"
-                                    onTextChanged: {                                        
-                                        if (text.length > 0) {
-                                            var txt = text.toUpperCase();
+                                    clip: true
 
-                                            if(~txt.indexOf("DELETE")  || ~txt.indexOf("INSERT") || ~txt.indexOf("UPDATE")) {
-                                                //console.log(" --!CENSURE!-- ");
-                                                color = "#ff0000";
-                                                isOk = false;
-                                                censure = "Некорректный запрос: недопускается использование слов DELETE, INSERT, UPDATE"
+                                    Rectangle {
+                                        id: rect_menuQuerySQL
+                                        anchors.top: parent.top
+                                        height: 30
+                                        anchors.right: parent.right
+                                        anchors.left: parent.left
+                                        anchors.margins: 1
+                                        color: "Transparent" // "LightGray"
+
+                                        Rectangle {
+                                            anchors.bottom: parent.bottom
+                                            anchors.left:   parent.left
+                                            anchors.right:  parent.right
+                                            height: 1
+                                            anchors.bottomMargin: -1
+                                            color: "LightGray"
+                                        }
+
+                                        RowLayout {
+                                            anchors.fill: parent
+                                            spacing: 0
+
+                                            /// кнопка: добаить имя поля из таблицы
+                                            Rectangle {
+                                                id: button_AddField
+                                                Layout.minimumHeight: parent.height
+                                                Layout.minimumWidth: labelAddField.width
+                                                Layout.fillWidth: true
+                                                color: "white" // "LightGray"
+
+                                                Behavior on color {
+                                                    ColorAnimation { duration: 200 } //NumberAnimation //ColorAnimation
+                                                }
+
+                                                Text  {
+                                                    id: labelAddField
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    anchors.horizontalCenter: parent.horizontalCenter
+                                                    text: "Добавить поле"
+                                                    color: page_reports.text_color //"#a1a1a1"
+                                                    font.pixelSize: 14
+                                                }
+                                                MouseArea {
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    onEntered:  { parent.color = "LightGray"; }
+                                                    onExited:   { parent.color = "white";     }
+                                                    //onPressed:  { parent.color = "#f6ffed" }
+                                                    //onReleased: { parent.color = "transparent" }
+                                                    onClicked:  {
+
+                                                    }
+                                                }
                                             }
-                                            else {
-                                                color = "black";
-                                                isOk = true;
-                                                censure = "";
+
+                                            /// кнопка: добаить имя таблицы
+                                            Rectangle {
+                                                id: button_addTable
+                                                Layout.minimumHeight: parent.height
+                                                Layout.minimumWidth: labeladdTable.width
+                                                Layout.fillWidth: true
+                                                color: "white" // "LightGray"
+
+                                                Behavior on color {
+                                                    ColorAnimation { duration: 200 }
+                                                }
+
+                                                Text  {
+                                                    id: labeladdTable
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    anchors.horizontalCenter: parent.horizontalCenter
+                                                    text: "Добавить таблицу"
+                                                    color: page_reports.text_color
+                                                    font.pixelSize: 14
+                                                }
+                                                MouseArea {
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    onEntered:  { parent.color = "LightGray"; }
+                                                    onExited:   { parent.color = "white";     }
+                                                    //onPressed:  { }
+                                                    //onReleased: { }
+                                                    onClicked:  {
+
+                                                    }
+                                                }
+                                            }
+
+                                            /// кнопка: добаить параметр
+                                            Rectangle {
+                                                id: button_addParam
+                                                Layout.minimumHeight: parent.height
+                                                Layout.minimumWidth: labeladdParam.width
+                                                Layout.fillWidth: true
+                                                color: "white" // "LightGray"
+
+                                                Behavior on color {
+                                                    ColorAnimation { duration: 200 }
+                                                }
+
+                                                Text  {
+                                                    id: labeladdParam
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    anchors.horizontalCenter: parent.horizontalCenter
+                                                    text: "Добавить параметр"
+                                                    color: page_reports.text_color
+                                                    font.pixelSize: 14
+                                                }
+                                                MouseArea {
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    onEntered:  { parent.color = "LightGray"; }
+                                                    onExited:   { parent.color = "white";     }
+                                                    //onPressed:  { }
+                                                    //onReleased: { }
+                                                    onClicked:  {
+                                                        popup_setParam.open();
+                                                    }
+                                                }
+                                            }
+
+                                            Rectangle {
+                                                Layout.minimumHeight: parent.height
+                                                Layout.minimumWidth: 1
+                                                //Layout.fillWidth: true
+                                                color: "LightGray"
+                                            }
+
+                                            /// кнопка: вытащить текст SQL запроса из файла
+                                            Rectangle {
+                                                id: button_LoadSQLquery
+                                                Layout.minimumHeight: parent.height
+                                                Layout.minimumWidth: labelLoadSQLquery.width + 10
+                                                color: "white" // "LightGray"
+
+                                                Behavior on color {
+                                                    ColorAnimation { duration: 200 } //NumberAnimation //ColorAnimation
+                                                }
+
+                                                Text  {
+                                                    id: labelLoadSQLquery
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    anchors.horizontalCenter: parent.horizontalCenter
+                                                    text: "Загрузить запрос из файла"
+                                                    color: page_reports.text_color //"#a1a1a1"
+                                                    font.pixelSize: 14
+                                                }
+                                                MouseArea {
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    onEntered:  { parent.color = "LightGray";   /*labelLoadSQLquery.color =  "#444444"*/ }
+                                                    onExited:   { parent.color = "white";       /*labelLoadSQLquery.color =  "#a1a1a1"*/ }
+                                                    //onPressed:  { parent.color = "#f6ffed" }
+                                                    //onReleased: { parent.color = "transparent" }
+                                                    onClicked:  {
+                                                        openFileDialog.typeFile = "sql"
+                                                        openFileDialog.nameFilters = [ "SQL file (*.txt *.sql)" ] //, "All files (*)"
+                                                        openFileDialog.open();
+                                                    }
+                                                }
+                                            }
+
+                                        }
+
+                                        Popup {
+                                            id: popup_setParam
+                                            width: itrm_setParam.width + padding*2
+                                            height: itrm_setParam.height + padding*2
+                                            modal: true
+                                            focus: true
+                                            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside //Popup.NoAutoClose
+                                            parent: Overlay.overlay
+                                            x: Math.round((parent.width - width) / 2)
+                                            y: Math.round((parent.height - height) / 2)
+                                            padding: 0
+
+                                            background:
+                                                Rectangle {
+                                                anchors.fill: parent
+                                                radius: 5
+                                            }
+
+                                            Item {
+                                                id: itrm_setParam
+                                                height: 180 //contentHeight //100
+                                                width:  300
+
+
+
+                                                ColumnLayout {
+                                                    anchors.fill: parent
+                                                    anchors.margins: 5
+
+                                                    Item {
+                                                        Layout.fillWidth: true
+                                                        Layout.fillHeight: true
+                                                        //Layout.minimumHeight: 20
+                                                        Text {
+                                                            anchors.verticalCenter:   parent.verticalCenter
+                                                            anchors.horizontalCenter: parent.horizontalCenter
+                                                            font.pixelSize: 16
+                                                            color: page_reports.text_color
+                                                            text: qsTr("Название параметра")
+                                                        }
+                                                    }
+                                                    Item {
+                                                        Layout.fillWidth: true
+                                                        Layout.fillHeight: true
+                                                        //Layout.minimumHeight: 20
+                                                        TextField {
+                                                            id: txt_setParam
+                                                            anchors.verticalCenter:   parent.verticalCenter
+                                                            anchors.horizontalCenter: parent.horizontalCenter
+                                                            font.pixelSize: 14
+                                                            color: page_reports.text_color
+                                                            selectByMouse: true
+                                                            selectionColor: Material.color(Material.Red)
+                                                            horizontalAlignment: Text.AlignHCenter
+                                                            text: qsTr("Parameter")
+                                                            onFocusChanged: {
+                                                                if (focus) { select(0, text.length) }
+                                                            }
+                                                        }
+                                                    }
+                                                    Item {
+                                                        Layout.fillWidth: true
+                                                        Layout.minimumHeight: 90
+                                                        Button {
+                                                            anchors.verticalCenter:   parent.verticalCenter
+                                                            anchors.horizontalCenter: parent.horizontalCenter
+                                                            font.pixelSize: 14
+                                                            text: qsTr("OK")
+                                                            onClicked: {
+                                                                var txtparam = "#param(" + txt_setParam.text + ")#"
+                                                                txt_FieldQuerySQL.insert(txt_FieldQuerySQL.cursorPosition, txtparam)
+                                                                popup_setParam.close();
+                                                            }
+                                                        }
+                                                    }
+
+
+                                                }
+
+
                                             }
                                         }
-                                        else { isOk = false }
+
                                     }
 
-                                    ToolTip {
-                                        id: toolTip_CENSURE
-                                        parent: txt_FieldQuerySQL //.handle
-                                        text: (txt_FieldQuerySQL.censure === "") ? qsTr("OK") : qsTr(txt_FieldQuerySQL.censure)  //qsTr("Некорректный запрос")
-                                        y: parent.y - 35 //parent.height
-                                        //x: parent.x
-                                        font.pixelSize: 15
-                                        visible: txt_FieldQuerySQL.censure
-                                        delay: 200 //задержка
-                                        contentItem: Text {
-                                            text: toolTip_CENSURE.text
-                                            font: toolTip_CENSURE.font
-                                            color: "white" // "white" //"#21be2b"
+
+                                    Flickable {
+                                        id: flickable_txt_QuerySQL
+                                        anchors.top: rect_menuQuerySQL.bottom
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.bottom: parent.bottom
+                                        //anchors.fill: parent
+                                        //anchors.margins: 2
+                                        anchors.leftMargin: 5
+                                        anchors.rightMargin: 5
+
+                                        ScrollBar.vertical: ScrollBar { }
+
+                                        TextArea.flickable: TextArea { //TextArea
+                                            id: txt_FieldQuerySQL
+                                            property bool isOk
+                                            property var censure: ""
+                                            property bool processing: false
+                                            selectByMouse: true
+                                            wrapMode: TextEdit.WrapAnywhere // TextEdit.WordWrap
+                                            font.capitalization: Font.AllUppercase
+                                            selectionColor: Material.color(Material.LightGreen)
+                                            textFormat: Text.RichText /// для использования html форматирования текста
+
+                                            background: Rectangle {
+                                                color:"transparent"
+                                                //border.color: "red"
+                                            }
+
+
+
+                                            Keys.onPressed: {
+                                                if (event.key == Qt.Key_Down) {
+                                                    if (popup_helpWorldList.opened) {
+                                                        if (listView_helpWorldList.currentIndex < listView_helpWorldList.count) {
+                                                            listView_helpWorldList.currentIndex++;
+                                                        }
+                                                    }
+                                                    else { txt_FieldQuerySQL.cursorPosition = txt_FieldQuerySQL.cursorPosition + txt_FieldQuerySQL.lineCount }
+                                                    event.accepted = true;
+                                                }
+                                                else if (event.key == Qt.Key_Up) {
+                                                    if (popup_helpWorldList.opened) {
+                                                        if (listView_helpWorldList.currentIndex > 0) {
+                                                            listView_helpWorldList.currentIndex--;
+                                                        }
+                                                    }
+                                                    else {
+                                                        console.log(" (!) txt_FieldQuerySQL.lineCount = ", txt_FieldQuerySQL.lineCount );
+                                                        txt_FieldQuerySQL.cursorPosition = txt_FieldQuerySQL.cursorPosition - txt_FieldQuerySQL.lineCount
+                                                    }
+                                                    event.accepted = true;
+                                                }
+                                                else if ( event.key == Qt.Key_Return ) {
+                                                    if (popup_helpWorldList.opened) {
+                                                        if ( listModel_helpWorldList.get(listView_helpWorldList.currentIndex) !== undefined ) {
+//                                                            console.log(" (!) listView_helpWorldList = ", listModel_helpWorldList.get(listView_helpWorldList.currentIndex).helpWord);
+                                                            var wordChange = listModel_helpWorldList.get(listView_helpWorldList.currentIndex).helpWord;
+                                                            wordChange = wordChange.slice(popup_helpWorldList.word.length, wordChange.length);
+                                                            txt_FieldQuerySQL.insert( txt_FieldQuerySQL.cursorPosition, wordChange ) //append(wordChange)
+                                                        }
+
+                                                    }
+                                                    else {
+                                                        //txt_FieldQuerySQL.cursorPosition = txt_FieldQuerySQL.cursorPosition + txt_FieldQuerySQL.length*txt_FieldQuerySQL.lineCount;
+                                                        //txt_FieldQuerySQL.insert(txt_FieldQuerySQL.cursorPosition, "<br>");
+                                                    }
+                                                    event.accepted = true;
+                                                }
+
+                                            }
+
+                                            onTextChanged: {
+                                                if (!processing) {
+                                                    processing = true;
+                                                    var cursorPosition = txt_FieldQuerySQL.cursorPosition;
+                                                    var txt = getText(0, length).toUpperCase();
+
+                                                    if (txt.length > 0) {
+
+                                                        /// всплывающее окно-подсказка со словами из базы, начинающиеся на напечатаннные символы
+                                                        var begin_word = false;
+                                                        var print_word = "";
+                                                        var i_print_word = cursorPosition - 1; //txt.length;
+                                                        //                                                        var re = new RegExp(txt_param.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "gi");
+                                                        //                                                        var re = new RegExp(/[.*+?^${}()|[\]\\]/);
+                                                        //                                                        var simbols = "[.*+?^${}()|[\]\\] ";
+                                                        var simbols = "QWERTYUIOPASDFGHJKLZXCVBNMЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ._";
+                                                        while (!begin_word) {
+                                                            //console.log(" (!) txt.charAt(i_print_word) = ", txt.charAt(i_print_word), i_print_word )
+                                                            //if ( txt.charAt(i_print_word) !== " ") {
+                                                            if ( ~simbols.indexOf(txt.charAt(i_print_word)) ) {
+                                                                print_word = print_word + txt.charAt(i_print_word);
+                                                            }
+                                                            else {
+                                                                begin_word = true;
+                                                            }
+
+                                                            if(i_print_word <= 0) {
+                                                                break;
+                                                            }
+                                                            i_print_word --;
+
+                                                        }
+                                                        print_word = print_word.split("").reverse().join(""); /// переворачивает слово
+                                                        //console.log(" (!) print_word = ", print_word);
+
+                                                        /// вызываем функцию, которая открывает список-подсказку со словами
+                                                        addQuery.openHelpWordList(print_word,cursorRectangle.x,cursorRectangle.y);
+
+
+                                                        ///////////////////////////////////////////////////////////////////////////////////////
+                                                        /// выделяет красным цветом текст, в случае нахождения в нем недопустимых SQL команд
+                                                        if(~txt.indexOf("DELETE")  || ~txt.indexOf("ADD") || ~txt.indexOf("INSERT") || ~txt.indexOf("UPDATE")) {
+                                                            //console.log(" --!CENSURE!-- ");
+                                                            color = "#ff0000";
+                                                            isOk = false;
+                                                            censure = "Некорректный запрос: недопускается использование слов DELETE, ADD, INSERT, UPDATE"
+                                                        }
+                                                        else {
+                                                            color = "black";
+                                                            isOk = true;
+                                                            censure = "";
+                                                        }
+
+                                                        ///////////////////////////////////////////////////////////////////////////////////////
+                                                        /// выделяет цветом параметры (заменяя текст на текст с html тегами цвета)
+                                                        var txt_tmp = txt;
+
+                                                        if(~txt.indexOf("#PARAM(")) {
+                                                            //                                                            var txt_param = "#PARAM(";
+                                                            //                                                            var txt_param_color = "<span  style='color:#9cc17f'>" + txt_param + "</span >";
+                                                            //                                                            var re = new RegExp(txt_param.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "gi");
+                                                            //                                                            txt = txt.replace(re, txt_param_color);
+                                                            //                                                            console.log("(!) txt_replace = ", txt);
+
+
+                                                            var txt_param = "";
+                                                            var count_param = 0; //число параметров
+                                                            var i_param = txt.indexOf("#PARAM(");
+
+                                                            while (i_param !== -1) {
+                                                                if (~txt_tmp.indexOf( ")#", i_param + 7 )) {
+                                                                    txt_param = "";
+                                                                    for ( var i = i_param; i < txt_tmp.indexOf( ")#", i_param + 7 ) + 2; i++) {
+                                                                        txt_param = txt_param + txt_tmp.charAt(i);
+                                                                    }
+                                                                    //console.log("(!) txt_param = ", txt_param);
+                                                                    var txt_param_color = "<span style='color:#9cc17f'>" + txt_param + "</span>" //" (!)ЗАМЕНА(!) " //
+                                                                    //var txt_param_re = new RegExp(txt_param.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "gi");
+                                                                    txt_tmp = txt_tmp.replace(txt_param,txt_param_color) //txt_param_re
+                                                                    i_param = txt_tmp.indexOf('#PARAM(', i_param + txt_param_color.length);
+                                                                    //console.log( "(!) txt_tmp = ", txt_tmp , " i_param = ", i_param);
+                                                                }
+                                                                else {
+                                                                    i_param = -1;
+                                                                }
+                                                                count_param ++;
+                                                            }
+                                                        }
+
+
+                                                    }
+                                                    else { isOk = false }
+
+                                                    //console.log("(!) txt_tmp = ", txt_tmp);
+                                                    if(txt_tmp != undefined) {                                                        
+                                                        txt_FieldQuerySQL.text = txt_tmp;
+                                                        txt_FieldQuerySQL.cursorPosition = cursorPosition;
+                                                    }
+                                                    processing = false;
+                                                }
+
+
+                                            }
+
+                                            ToolTip {
+                                                id: toolTip_CENSURE
+                                                parent: txt_FieldQuerySQL //.handle
+                                                text: (txt_FieldQuerySQL.censure === "") ? qsTr("OK") : qsTr(txt_FieldQuerySQL.censure)  //qsTr("Некорректный запрос")
+                                                y: parent.y - 35 //parent.height
+                                                //x: parent.x
+                                                font.pixelSize: 15
+                                                visible: txt_FieldQuerySQL.censure
+                                                delay: 200 //задержка
+                                                contentItem: Text {
+                                                    text: toolTip_CENSURE.text
+                                                    font: toolTip_CENSURE.font
+                                                    color: "white" // "white" //"#21be2b"
+                                                }
+                                                //  background: Rectangle {
+                                                //      border.color: "#21be2b"
+                                                //  }
+                                            }
                                         }
-                                        //  background: Rectangle {
-                                        //      border.color: "#21be2b"
-                                        //  }
                                     }
                                 }
+
                             }
 
                         }
 
                     }
 
+
+
                     /// ФОРМА ДЛЯ НАПИСАНИЯ ОПИСАНИЯ ЗАПРОСА
                     Rectangle {
                         id: rect_description
-                        anchors.top: rect_QuerySQL.bottom
+                        anchors.top: stackLayout_typeSetQuery.bottom
                         anchors.bottom: rect_ScriptPattern.top
                         anchors.right: parent.right
                         anchors.left: parent.left
@@ -877,7 +1398,7 @@ Page {
 
 
                             data_arr["REPORTNAME"] = txt_ReportName.text
-                            data_arr["SQL"] = txt_FieldQuerySQL.text
+                            data_arr["SQL"] = txt_FieldQuerySQL.getText(0, txt_FieldQuerySQL.length) //text
                             data_arr["DESCRIPTION"] = txt_FieldQueryDescription.text
 
 
@@ -933,6 +1454,15 @@ Page {
             color: "#EEEEEE"//"White" Material.color(Material.Grey, Material.Shade200)
             border.color: "LightGray"
             radius: 7
+
+
+            ListModel {
+                id: listModel_params
+//                ListElement {
+//                    name: "Apple"
+//                    cost: 2.45
+//                }
+            }
 
             ListView {
                 id: list_SQLQueries
@@ -1163,17 +1693,49 @@ Page {
                         }
                         list_SQLQueries.id_currentPerson = page_reports.model_SQLQiueries.getFirstColumnInt(index)
 
-                        var SQLquery = model_SQLQiueries.getCurrentDateByName( "SQL", list_SQLQueries.currentIndex );
-                        console.log(" SQLquery ===== ",SQLquery);
-                        if ( SQLquery.lenght <= 0 ) { //if ( SQLquery === "" || SQLquery === " " )
-                            rect_Table.createEmptyTable_fun("<- Выберите SQL запрос из списка слева");
+//                        var SQLquery = model_SQLQiueries.getCurrentDateByName( "SQL", list_SQLQueries.currentIndex );
+                        var SQLquery = model_SQLQiueries.get(list_SQLQueries.currentIndex)["SQL"];
+                        list_SQLQueries.sqlQuery = SQLquery;
+                        console.log( " (!) SQLquery ===== ", SQLquery) ;
+
+
+                        /// парсим полученный SQL запрос из модели данных (из БД) на параметров по ключевому символам #PARAM(имя_парамтера)#
+                        if(~SQLquery.indexOf("#PARAM(")) {
+                            listModel_params.clear();
+                            rect_Table.destroyObj_fun();
+
+                            var txt_param = "";
+                            var i_param = SQLquery.indexOf("#PARAM(");
+                            while (i_param !== -1) {
+                                if (~SQLquery.indexOf( ")#", i_param + 7 )) {
+                                    txt_param = "";
+                                    for ( var i = i_param + 7; i < SQLquery.indexOf( ")#", i_param + 7 ); i++) {
+                                        txt_param = txt_param + SQLquery.charAt(i);
+                                    }
+                                    listModel_params.append( { nameParams : txt_param } )
+                                    i_param = SQLquery.indexOf('#PARAM(', i_param + txt_param.length);
+                                    //console.log( "(!) txt_param = ", txt_param , " i_param = ", i_param);
+                                }
+                                else {
+                                    i_param = -1;
+                                }
+                            }
+
+                            /// открываем окно с сформировавшимися полями ввода параметров
+                            popup_getParams.open();
                         }
                         else {
-                            SQLquery = " " + SQLquery + " ";
-                            rect_Table.destroyObj_fun();
-                            model_tableReports.setQueryDB(SQLquery);
-                            txt_ReportNameFromDB.reportName = model_SQLQiueries.get(list_SQLQueries.currentIndex)["REPORTNAME"]
+                            if ( SQLquery.lenght <= 0 ) { //if ( SQLquery === "" || SQLquery === " " )
+                                rect_Table.createEmptyTable_fun("<- Выберите SQL запрос из списка слева");
+                            }
+                            else {
+                                SQLquery = " " + SQLquery + " ";
+                                rect_Table.destroyObj_fun();
+                                model_tableReports.setQueryDB(SQLquery);
+                                txt_ReportNameFromDB.reportName = model_SQLQiueries.get(list_SQLQueries.currentIndex)["REPORTNAME"]
+                            }
                         }
+                        //console.log(" (!) txt_param = ", txt_param);
 
                     }
 
@@ -1186,6 +1748,149 @@ Page {
                 highlightMoveDuration: 200
 
             }
+
+
+            Popup {
+                id: popup_getParams
+                property string querySQL: ""
+                property string queryDescription: ""
+                width:  getParams.width + padding * 2
+                height: getParams.height + padding * 2
+                modal: true
+                focus: true
+                closePolicy: Popup.CloseOnEscape
+                parent: Overlay.overlay
+                x: Math.round((parent.width - width) / 2)
+                y: Math.round((parent.height - height) / 2)
+                padding: 0
+
+                background:
+                    Rectangle {
+                    anchors.fill: parent
+                    //color: "Transparent" //"White" Material.color(Material.Grey, Material.Shade200)
+
+                    radius: 5
+                    opacity: 0.9
+                }
+
+                Item {
+                    id: getParams
+                    height: repeater_params.count * 80 + repeater_params.count * 20 + button_getParams.height + 20 //el_1__deleteSQLQuery.height + el_2__deleteSQLQuery.height + 130 //250 //implicitHeight
+                    width:  500
+                    ColumnLayout {
+                        anchors.fill: parent
+                        spacing: 5
+
+                        Repeater {
+                            id: repeater_params
+                            model: listModel_params // 3
+                            Rectangle {
+                                width: getParams.width; height: 80
+                                border.width: 1
+                                property alias textProperty: txt_param.text
+                                //color: "yellow"
+                                RowLayout {
+                                    anchors.fill: parent
+                                    spacing: 10
+
+                                    Rectangle {
+                                        Layout.minimumWidth: 350
+                                        Layout.fillHeight: true
+                                        border.color: "LightGray"
+                                        color: "Transparent"
+                                        Text {
+                                            anchors.centerIn: parent
+                                            width: 300
+                                            horizontalAlignment: Text.AlignHCenter
+                                            wrapMode: Text.WordWrap
+                                            color: page_reports.text_color
+                                            font.pixelSize: 14
+                                            text: qsTr(nameParams)
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        Layout.fillWidth:  true
+                                        Layout.minimumWidth: 150
+                                        Layout.fillHeight: true
+                                        border.color: "LightGray"
+                                        color: "Transparent"
+                                        TextField {
+                                            id: txt_param
+                                            anchors.centerIn: parent
+                                           // width: parent.width
+                                            font.bold: true
+                                            color: Material.color(Material.Teal)
+                                            selectByMouse: true
+                                            selectionColor: Material.color(Material.Red)
+                                            horizontalAlignment: Text.AlignHCenter
+                                            placeholderText: qsTr("0")
+                                            onFocusChanged: {
+                                                if (focus) { select(0, text.length) }
+                                            }
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+
+
+                        Button {
+                            id: button_getParams
+                            Layout.alignment: Qt.AlignHCenter
+                            text: "OK"
+                            onClicked: {
+                                var SQLquery = list_SQLQueries.sqlQuery;
+                                if ( SQLquery.lenght <= 0 ) { //if ( SQLquery === "" || SQLquery === " " )
+                                    rect_Table.createEmptyTable_fun("<- Выберите SQL запрос из списка слева");
+                                }
+                                else {
+
+                                    //var param1 = repeater_params.itemAt(0).textProperty;
+                                    //console.log(" (!) params = ", param1, param2);
+
+                                    var iParams = 0;
+                                    var SQLquery_tmp = SQLquery;
+                                    var txt_param = "";
+                                    var i_param = SQLquery.indexOf("#PARAM(");
+                                    while (i_param !== -1) {
+                                        if (~SQLquery.indexOf( ")#", i_param + 7 )) {
+                                            txt_param = "";
+                                            for ( var i = i_param ; i < SQLquery.indexOf( ")#", i_param + 7 ) + 2; i++) {
+                                                txt_param = txt_param + SQLquery.charAt(i);
+                                            }
+                                            var param = "'" + repeater_params.itemAt(iParams).textProperty + "'";
+                                            console.log( "(!) param = ", param);
+                                            SQLquery_tmp = SQLquery_tmp.replace(txt_param, param)
+
+                                            i_param = SQLquery_tmp.indexOf('#PARAM(', i_param + param.length);
+
+                                            console.log( "(!) txt_param = ", txt_param , " i_param = ", i_param);
+
+                                        }
+                                        else {
+                                            i_param = -1;
+                                        }
+                                        iParams ++;
+                                    }
+
+                                    console.log( " (!) SQLquery_final = ", SQLquery_tmp);
+                                    SQLquery = " " + SQLquery_tmp + " ";
+                                    rect_Table.destroyObj_fun();
+                                    model_tableReports.setQueryDB(SQLquery);
+                                    txt_ReportNameFromDB.reportName = model_SQLQiueries.get(list_SQLQueries.currentIndex)["REPORTNAME"]
+                                }
+                                popup_getParams.close();
+                            }
+                        }
+
+
+                    }
+                }
+            }
+
+
 
             Popup {
                 id: popup_deleteSQLQuery
@@ -1513,60 +2218,7 @@ Page {
                     }
                 }
 
-            }
-            Popup {
-                id: popup_createReport
-                width:  createReport.width + padding*2
-                height: createReport.height + padding*2
-                modal: true
-                focus: true
-                closePolicy: Popup.CloseOnEscape
-                parent: Overlay.overlay
-                x: Math.round((parent.width - width) / 2)
-                y: Math.round((parent.height - height) / 2)
-                padding: 0
-
-                background:
-                    Rectangle {
-                    anchors.fill: parent
-                    //color: "Transparent" //"White" Material.color(Material.Grey, Material.Shade200)
-
-                    radius: 5
-                    opacity: 0.9
-                }
-
-                Item {
-                    id: createReport
-                    height: 400
-                    width:  600
-
-                    Label {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.top: parent.top
-                        anchors.topMargin: 20
-                        text: "ФОРМА ДЛЯ СОЗДАНИЯ ФАЙЛА ОТЧЕТА"
-                    }
-
-                    Label {
-                       anchors.horizontalCenter: parent.horizontalCenter
-                       anchors.top: parent.top
-                       anchors.topMargin: 60
-                       font.pixelSize: 12
-                       text: "Тут пока что пусто..."
-                    }
-
-                    Button {
-                        anchors.centerIn: parent
-                        text: "Отмена"
-                        onClicked: {
-                            popup_createReport.close()
-                        }
-                    }
-                }
-            }
-
-
-
+            }           
 
 
         }

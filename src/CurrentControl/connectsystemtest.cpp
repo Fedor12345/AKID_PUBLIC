@@ -46,8 +46,16 @@ void ConnectSystemTest::setSequenceQueries(const QMap<QString, QVariant> &script
             if(this->stop) break;
             QThread::msleep(intervalTime[i]); //мс
             if(this->stop) break;
-            emit signalSetQuery(queriesType[i],nQueries[i],l);
+            /// если необходимо задавать число запросов за один скрипт то:
+            /// emit signalSetQuery(queriesType[i],nQueries[i],l);
+            emit signalSetQuery(queriesType[i],1,l);
         }
+
+//        if(this->stop) break;
+//        QThread::msleep(intervalTime[0]); //мс
+//        if(this->stop) break;
+//        emit signalSetQuery(queriesType[0],1,l);
+
         if(this->stop) break;
         qDebug() << " (t) test: " << l;
         l++;
