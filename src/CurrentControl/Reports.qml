@@ -297,32 +297,120 @@ Page {
                     height: 700
                     width:  600
 
-                    /// функция формирует из словаря и открывает(или не открывает если параметр word пустой) список-подсказку ключевых слов
-                    function openHelpWordList(word,x,y) {
-                        //console.log(" (!) openHelpWordList...",word,x,y)
+                    /// функция формирует из словарей модель listModel_helpWorldList слов с типами секций
+                    function setModelHelpWordList(word,openAlways) {
                         listModel_helpWorldList.clear();
-                        if(word.length>0) {
-                            /// словарь ключевых слов
-                            var wordbook = ["SELECT","WHERE","FROM","EXT_PERSON","EXT_DOSE","ADM_ASSIGNEMENT","ADM_NUCLIDE","ADM_ORGANIZATION","ADM_DEPARTMENT_INNER","ADM_STATUS"]
-                            for (var i = 0; i < wordbook.length; i ++) {
-                                if (wordbook[i].indexOf(word) === 0) {
-                                    //console.log(" (!) word true : ", word, wordbook[i], wordbook[i].indexOf(word), i)
-                                    listModel_helpWorldList.append( { helpWord: wordbook[i] })
-                                }
-                                //if ( i === wordbook.length - 1) { popup_helpWorldList.close(); }
-                            }
 
-                            /// открываем окно с подсказками
-                            var x_helpWorldList = x - word.length * 7;
-                            var y_helpWorldList = y + 25;
-                            popup_helpWorldList.word = word;
-                            popup_helpWorldList.x = x_helpWorldList;
-                            popup_helpWorldList.y = y_helpWorldList;
-                            popup_helpWorldList.open();
+                        /// словари по разделам
+                        var wordbook_instruction = ["SELECT","WHERE","FROM"];
+                        var wordbook_tables = ["EXT_PERSON","EXT_DOSE","ADM_ASSIGNEMENT","ADM_NUCLIDE","ADM_ORGANIZATION","ADM_DEPARTMENT_INNER","ADM_STATUS"];
+                        var wordbook_table_EXT_PERSON = ["ID_PERSON","W_NAME","W_SURNAME","W_PATRONYMIC","PHOTO","STATUS_CODE","SEX","BIRTH_DATE","WEIGHT","HEIGHT"];
+
+                        if (!openAlways) {
+                            for (var i = 0; i < wordbook_instruction.length; i ++) {
+                                if (wordbook_instruction[i].indexOf(word) === 0) {
+                                    listModel_helpWorldList.append( { helpWord: wordbook_instruction[i], type: "команды" })
+                                }
+                            }
+                            for (var i = 0; i < wordbook_tables.length; i ++) {
+                                if (wordbook_tables[i].indexOf(word) === 0) {
+                                    listModel_helpWorldList.append( { helpWord: wordbook_tables[i], type: "таблицы" })
+                                }
+                            }
+                            for (var i = 0; i < wordbook_table_EXT_PERSON.length; i ++) {
+                                if (wordbook_table_EXT_PERSON[i].indexOf(word) === 0) {
+                                    listModel_helpWorldList.append( { helpWord: wordbook_table_EXT_PERSON[i], type: "EXT_PERSON" })
+                                }
+                            }
                         }
+                        /// если необходимо вывести весь список слов.
+                        /// в listModel_helpWorldList записывается весь словарь (при нажатии ctrl + пробел открывается список со всеми возможными словами)
                         else {
-                            if ( popup_helpWorldList.opened ) popup_helpWorldList.close();
+                            for (var i = 0; i < wordbook_instruction.length; i ++) {
+                                listModel_helpWorldList.append( { helpWord: wordbook_instruction[i], type: "команды" })
+                            }
+                            for (var i = 0; i < wordbook_tables.length; i ++) {
+                                listModel_helpWorldList.append( { helpWord: wordbook_tables[i], type: "таблицы" })
+                            }
+                            for (var i = 0; i < wordbook_table_EXT_PERSON.length; i ++) {
+                                listModel_helpWorldList.append( { helpWord: wordbook_table_EXT_PERSON[i], type: "EXT_PERSON" })
+                            }
                         }
+                    }
+
+                    /// функция формирует из словаря и открывает(или не открывает если параметр word пустой) список-подсказку ключевых слов
+                    function openHelpWordList(word,x,y, openAlways) {
+                        //console.log(" (!) openHelpWordList...",word,x,y,openAlways)
+//                        listModel_helpWorldList.clear();
+                        if ( word === undefined) {
+                            if ( popup_helpWorldList.opened ) popup_helpWorldList.close();
+                            return;
+                        }
+
+                        /// словарь ключевых слов
+                        var wordbook = ["SELECT","WHERE","FROM","EXT_PERSON","EXT_DOSE","ADM_ASSIGNEMENT","ADM_NUCLIDE","ADM_ORGANIZATION","ADM_DEPARTMENT_INNER","ADM_STATUS"]
+                        /// словари по разделам
+                        var wordbook_instruction = ["SELECT","WHERE","FROM"];
+                        var wordbook_tables = ["EXT_PERSON","EXT_DOSE","ADM_ASSIGNEMENT","ADM_NUCLIDE","ADM_ORGANIZATION","ADM_DEPARTMENT_INNER","ADM_STATUS"];
+                        var wordbook_table_EXT_PERSON = ["ID_PERSON","W_NAME","W_SURNAME","W_PATRONYMIC","PHOTO","STATUS_CODE","SEX","BIRTH_DATE","WEIGHT","HEIGHT"];
+
+
+
+                        if ( word.length > 0 ) {
+                            setModelHelpWordList(word,false)
+                        }
+                        /// если длинна слова меньше нуля, то смотрим на openAlways
+                        else {
+                            /// если openAlways = true, то в listModel_helpWorldList записывается весь словарь (при нажатии ctrl + пробел открывается список со всеми возможными словами)
+                            if (openAlways) {
+                                setModelHelpWordList(word,true)
+                            }
+                             /// если openAlways = flse, закрываем список(если он октрыт) и завершаем функцию
+                            else {
+                                if ( popup_helpWorldList.opened ) popup_helpWorldList.close();
+                                return;
+                            }
+                        }
+
+//                        /// если openAlways = true, то в listModel_helpWorldList записывается весь словарь (при нажатии ctrl + пробел открывается список со всеми возможными словами)
+//                        if (openAlways) {
+//                            if ( word.length > 0 ) {
+//                                for (var i = 0; i < wordbook.length; i ++) {
+//                                    if (wordbook[i].indexOf(word) === 0) {
+//                                        listModel_helpWorldList.append( { helpWord: wordbook[i] })
+//                                    }
+//                                }
+//                            }
+//                            else {
+//                                for (var i = 0; i < wordbook.length; i ++) {
+//                                    listModel_helpWorldList.append( { helpWord: wordbook[i] })
+//                                }
+//                            }
+
+//                        }
+//                        else {
+//                            if ( word.length > 0 ) {
+//                                for (var i = 0; i < wordbook.length; i ++) {
+//                                    if (wordbook[i].indexOf(word) === 0) {
+//                                        listModel_helpWorldList.append( { helpWord: wordbook[i] })
+//                                    }
+//                                }
+//                            }
+//                            /// если длина слова < 0 закрываем список(если он октрыт) и завершаем функцию
+//                            else {
+//                                if ( popup_helpWorldList.opened ) popup_helpWorldList.close();
+//                                return;
+//                            }
+//                        }
+
+                        /// открываем окно с подсказками
+                        var x_helpWorldList = x - word.length * 7;
+                        var y_helpWorldList = y + 25;
+                        popup_helpWorldList.word = word;
+                        popup_helpWorldList.x = x_helpWorldList;
+                        popup_helpWorldList.y = y_helpWorldList;
+                        popup_helpWorldList.open();
+
 
                     }
 
@@ -332,7 +420,7 @@ Page {
                         id: popup_helpWorldList
                         property string word
 
-                        width: 0 //listView_helpWorldList.width
+                        width: 80 //listView_helpWorldList.width
                         height: listView_helpWorldList.contentHeight + 5
                         //modal: true
                         //focus: true
@@ -388,8 +476,7 @@ Page {
                                 Component.onCompleted: {
                                     var width = txt_helpWorldList.contentWidth + 20;
                                     if ( index == 0 ) {
-                                        popup_helpWorldList.width = width;
-                                        //console.log(" (!) index = ", index, width)
+                                        popup_helpWorldList.width = 80; //width;
                                     }
                                     if ( popup_helpWorldList.width < width )
                                     {
@@ -420,6 +507,24 @@ Page {
                                 }
 
                             }
+
+
+
+                            section.property: "type"
+                            section.criteria: ViewSection.FullString
+                            section.delegate: Rectangle {
+                                width: parent.width
+                                height: 20 //childrenRect.height
+                                color: "Transparent" //"lightsteelblue"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "- " + section + " -"
+                                    font.bold: true
+                                    font.pixelSize: 11
+                                    color: page_reports.text_color
+                                }
+                            }
+
 
                         }
 
@@ -825,11 +930,72 @@ Page {
                                             }
 
 
+                                            /// определяет напечатанное слово до местоположения курсора
+                                            function printWord() {
+                                                var cursorPosition = txt_FieldQuerySQL.cursorPosition;
+                                                var txt = getText(0, length).toUpperCase();
+                                                var i_print_word = "";
+
+                                                if (txt.length > 0) {
+                                                    var begin_word = false;
+                                                    var print_word = "";
+                                                    i_print_word = cursorPosition - 1; //txt.length;
+                                                    // var re = new RegExp(txt_param.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "gi");
+                                                    // var re = new RegExp(/[.*+?^${}()|[\]\\]/);
+                                                    // var simbols = "[.*+?^${}()|[\]\\] ";
+                                                    var simbols = "QWERTYUIOPASDFGHJKLZXCVBNMЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ._";
+                                                    while (!begin_word) {
+                                                        if ( ~simbols.indexOf(txt.charAt(i_print_word)) ) {
+                                                            print_word = print_word + txt.charAt(i_print_word);
+                                                        }
+                                                        else {
+                                                            begin_word = true;
+                                                        }
+                                                        if(i_print_word <= 0) {
+                                                            break;
+                                                        }
+                                                        i_print_word --;
+                                                    }
+                                                    print_word = print_word.split("").reverse().join(""); /// переворачивает слово
+                                                    //console.log(" (!) print_word = ", print_word);
+                                                }
+
+                                                return print_word;
+                                            }
+
+                                            Keys.onReleased: {
+                                                var print_word;
+                                                if (event.key == Qt.Key_Left) {
+                                                    /// определяем слово напечатанное до изменившегося местоположения курсора
+                                                    if (txt_FieldQuerySQL.cursorPosition > 0) {
+                                                        print_word = printWord();
+                                                        /// вызываем функцию, которая открывает список-подсказку со словами
+                                                        addQuery.openHelpWordList(print_word,cursorRectangle.x,cursorRectangle.y, false);
+                                                    }
+                                                }
+                                                if (event.key == Qt.Key_Right) {
+                                                    /// определяем слово напечатанное до изменившегося местоположения курсора
+                                                    if (txt_FieldQuerySQL.cursorPosition < length) {
+                                                        print_word = printWord();
+                                                        /// вызываем функцию, которая открывает список-подсказку со словами
+                                                        addQuery.openHelpWordList(print_word,cursorRectangle.x,cursorRectangle.y, false);
+                                                    }
+                                                }
+                                            }
 
                                             Keys.onPressed: {
+                                                if (event.key == Qt.ControlModifier || event.key == Qt.Key_Space) {
+                                                    /// определяем слово напечатанное до местоположения курсора
+                                                    var print_word = printWord();
+                                                    if (print_word === undefined) {
+                                                        print_word = "";
+                                                    }
+                                                    addQuery.openHelpWordList(print_word,cursorRectangle.x,cursorRectangle.y, true)
+                                                }
+
                                                 if (event.key == Qt.Key_Down) {
                                                     if (popup_helpWorldList.opened) {
-                                                        if (listView_helpWorldList.currentIndex < listView_helpWorldList.count) {
+                                                        if (listView_helpWorldList.currentIndex < listView_helpWorldList.count-1) {
                                                             listView_helpWorldList.currentIndex++;
                                                         }
                                                     }
@@ -874,36 +1040,11 @@ Page {
                                                     var txt = getText(0, length).toUpperCase();
 
                                                     if (txt.length > 0) {
-
-                                                        /// всплывающее окно-подсказка со словами из базы, начинающиеся на напечатаннные символы
-                                                        var begin_word = false;
-                                                        var print_word = "";
-                                                        var i_print_word = cursorPosition - 1; //txt.length;
-                                                        //                                                        var re = new RegExp(txt_param.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "gi");
-                                                        //                                                        var re = new RegExp(/[.*+?^${}()|[\]\\]/);
-                                                        //                                                        var simbols = "[.*+?^${}()|[\]\\] ";
-                                                        var simbols = "QWERTYUIOPASDFGHJKLZXCVBNMЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ._";
-                                                        while (!begin_word) {
-                                                            //console.log(" (!) txt.charAt(i_print_word) = ", txt.charAt(i_print_word), i_print_word )
-                                                            //if ( txt.charAt(i_print_word) !== " ") {
-                                                            if ( ~simbols.indexOf(txt.charAt(i_print_word)) ) {
-                                                                print_word = print_word + txt.charAt(i_print_word);
-                                                            }
-                                                            else {
-                                                                begin_word = true;
-                                                            }
-
-                                                            if(i_print_word <= 0) {
-                                                                break;
-                                                            }
-                                                            i_print_word --;
-
-                                                        }
-                                                        print_word = print_word.split("").reverse().join(""); /// переворачивает слово
+                                                        /// определяем слово напечатанное до местоположения курсора
+                                                        var print_word = printWord();
                                                         //console.log(" (!) print_word = ", print_word);
-
                                                         /// вызываем функцию, которая открывает список-подсказку со словами
-                                                        addQuery.openHelpWordList(print_word,cursorRectangle.x,cursorRectangle.y);
+                                                        addQuery.openHelpWordList(print_word,cursorRectangle.x,cursorRectangle.y, false);
 
 
                                                         ///////////////////////////////////////////////////////////////////////////////////////
