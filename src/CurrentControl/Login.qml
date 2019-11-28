@@ -11,6 +11,42 @@ Item {
 
     Component.onCompleted: console.log("Login           completed")
 
+    function authorization() {
+        infoText_text.text = "начата авторизация"
+        //managerDB.setLoginPwd(uname_field.text, pass_field.text)
+        if (uname_field.text == "user" && pass_field.text == "alpha1"){
+            flg_active_state = true;
+            infoText_text.text = "проверка соединения..."
+            managerDB.checkAllConnectionDB();
+        }
+
+        //                if (database.connectToDataBase() === true) {
+        //                    //myModel.updateModel()
+        //                    login_item.login_OK()
+        //                } else {
+        //                    err_label.text = "Ошибка: невозможно авторизоваться"
+        //                }
+
+        //                uname_field.enabled = true
+        //                pass_field.enabled = true
+        //                busy_control.running = false
+        //                enabled = true
+
+        //login_item.login_OK()
+    }
+
+
+    focus: true
+    Keys.onReleased: {
+        if ( event.key == Qt.Key_Return ) {
+            authorization();
+        }
+    }
+
+
+
+
+
     Text {
         id: infoText_text
         anchors.horizontalCenter: parent.horizontalCenter
@@ -57,6 +93,8 @@ Item {
                 uname_field.enabled = false
                 pass_field.enabled = false
                 err_label.text = "подключение к базе данных.."
+                //listModel_message.append( { message: "подключение к базе данных.." } )
+                //infoText_tumbler.currentIndex++;
             }
 //            else {
 //                popup_wait.open()
@@ -92,10 +130,14 @@ Item {
                 if(!status) {
                     infoText_text.text = " SignalSendGUI_status 2 " + message
                     err_label.text = message; //"Ошибка: невозможно авторизоваться"
+                    //listModel_message.append({ message: message });
+                    //infoText_tumbler.currentIndex++;
                 }
                 else {
                     infoText_text.text = " SignalSendGUI_status 3  OK!"
                     err_label.text = ""
+                    //listModel_message.append( { message: ""} );
+                    //infoText_tumbler.currentIndex++;
                     flg_active_state = false
                     login_item.login_OK()
                 }
@@ -139,6 +181,12 @@ Item {
                 clip: false
                 font.pointSize: 16
                 selectByMouse: true
+
+                Keys.onReleased: {
+                    if ( event.key == Qt.Key_Return ) {
+                        authorization();
+                    }
+                }
             }
 
             Label {
@@ -164,6 +212,12 @@ Item {
                 selectByMouse: true
                 echoMode: TextInput.Password
                 passwordCharacter: "\u25cf"
+
+                Keys.onReleased: {
+                    if ( event.key == Qt.Key_Return ) {
+                        authorization();
+                    }
+                }
             }
 
         }
@@ -195,27 +249,8 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             font.pointSize: 16
             onClicked: {
-                infoText_text.text = "начата авторизация"
-                //managerDB.setLoginPwd(uname_field.text, pass_field.text)
-                if (uname_field.text == "user" && pass_field.text == "alpha1"){
-                    flg_active_state = true;
-                    infoText_text.text = "проверка соединения..."
-                    managerDB.checkAllConnectionDB();
-                }
+                authorization();
 
-//                if (database.connectToDataBase() === true) {
-//                    //myModel.updateModel()
-//                    login_item.login_OK()
-//                } else {
-//                    err_label.text = "Ошибка: невозможно авторизоваться"
-//                }
-
-//                uname_field.enabled = true
-//                pass_field.enabled = true
-//                busy_control.running = false
-//                enabled = true
-
-                //login_item.login_OK()
             }
         }
 
@@ -224,8 +259,44 @@ Item {
             height: 70
             anchors.horizontalCenter: parent.horizontalCenter
 
+//            background: Rectangle {
+//                anchors.fill: parent
+//                color: "green"
+//            }
+
+
+//            Tumbler {
+//                id: infoText_tumbler
+//                //visible: false
+//                width: 400
+//                height: 70
+//                anchors.verticalCenter: parent.verticalCenter
+//                anchors.horizontalCenter: parent.horizontalCenter
+//                visibleItemCount: 4
+//                model: ListModel { id: listModel_message
+//                    ListElement { message: "" }
+//                }
+//                delegate: ItemDelegate {
+//                    height: 20
+//                    Text {
+//                        anchors.centerIn: parent
+//                        text: message //modelData
+//                        //horizontalAlignment: Text.AlignHCenter
+//                        //verticalAlignment: Text.AlignVCenter
+//                        font.pixelSize: 16
+//                        color: busy_control.running ? "dimgray":"indianred"
+//                    }
+//                }
+//            }
+//            FontMetrics {
+//                id: fontMetrics
+//                font.family: "Arial"
+//            }
+
+
             Text {
                 id: err_label
+               // visible: false
                 text: ""
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter

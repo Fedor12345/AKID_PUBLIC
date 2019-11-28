@@ -420,8 +420,8 @@ Page {
                         id: popup_helpWorldList
                         property string word
 
-                        width: 80 //listView_helpWorldList.width
-                        height: listView_helpWorldList.contentHeight + 5
+                        width: 90 //listView_helpWorldList.width
+                        height: ( listView_helpWorldList.contentHeight + 5  <= 200) ? listView_helpWorldList.contentHeight + 5 : 200
                         //modal: true
                         //focus: true
 
@@ -440,6 +440,7 @@ Page {
                         y: 200 // Math.round((parent.height - height) / 2)
                         //z: 3
                         onClosed: { width = 0 }
+                        //onOpened: { listView_helpWorldList.determinewidth() }
                         padding: 0
 
 
@@ -447,13 +448,66 @@ Page {
                         ListView {
                             id: listView_helpWorldList
                             anchors.fill: parent
-                            //property var currentItemTxt
-//                            anchors.top:     parent.top
-//                            anchors.bottom:  parent.bottom
-//                            anchors.left:    parent.left
-//                            width: 0
-                            //anchors.leftMargin: 5
+                            property var item_first
+                            property var item_last
 
+
+                            function determinewidth_First () {
+                            }
+                            function determinewidth_Last () {
+                            }
+                            /// определение ширины списка по максимально широкому элементу из тех, что отображаются в данный момент
+                            function determinewidth () {
+                                var i = 0;
+
+                                /// По положению скрола определяем координаты для первого и последнего элементов, отображаемых на экране,
+                                /// относительно contentHeight (реальное значение высоты listView определяется как сумма высоты всех элементов списка)
+                                var y_first = contentHeight * scrol_listView_helpWorldList.position;
+                                var y_last = y_first + popup_helpWorldList.height - 15;
+
+//                                if ( listView_helpWorldList.itemAt(1, y_first) !== null )   {
+//                                    if ( item_first !== listView_helpWorldList.itemAt(1, y_first)) {
+//                                        item_first = listView_helpWorldList.itemAt(1, y_first);
+//                                        console.log( "first : ", item_first.name, item_first.width_delegate );
+//                                    }
+//                                }
+//                                if ( listView_helpWorldList.itemAt(1, y_last) !== null )   {
+//                                    if ( item_last !== listView_helpWorldList.itemAt(1, y_last)) {
+//                                        item_last = listView_helpWorldList.itemAt(1, y_last);
+//                                        console.log( "last  : ", item_last.name, item_last.width_delegate );
+//                                    }
+//                                }
+
+                                var width_max = 0;
+
+                                for (var y_i = y_first; y_i < y_last; y_i ++ ) {
+                                    if ( listView_helpWorldList.itemAt(1, y_i) !== null )   {
+                                        if ( item_first !== listView_helpWorldList.itemAt(1, y_i)) {
+                                            item_first = listView_helpWorldList.itemAt(1, y_i);
+                                            if ( width_max < listView_helpWorldList.itemAt(1, y_i).width_delegate ) {
+                                                width_max = listView_helpWorldList.itemAt(1, y_i).width_delegate;
+                                            }
+                                            //console.log( "width_max : ", item_first.name, item_first.width_delegate, width_max );
+                                        }
+                                    }
+                                }
+                                popup_helpWorldList.width = width_max;
+                                //console.log( " ---------  MAX : ", popup_helpWorldList.width );
+                            }                            
+
+
+//                            onCurrentIndexChanged: {
+//                                determinewidth();
+//                            }
+
+
+                            ScrollBar.vertical: ScrollBar {
+                                id: scrol_listView_helpWorldList
+                                policy: "AsNeeded" //"AlwaysOn"
+                                onPositionChanged: {
+                                    listView_helpWorldList.determinewidth()
+                                }
+                            }
 
                             highlightFollowsCurrentItem: true
                             highlight: Rectangle {
@@ -471,19 +525,23 @@ Page {
                                 height: 30
                                 anchors.left: parent.left
                                 anchors.right: parent.right
-                                //width: txt_helpWorldList.contentWidth + 50
+                                property var width_delegate: txt_helpWorldList.contentWidth + 20
+                                property var name: txt_helpWorldList.text
 
                                 Component.onCompleted: {
-                                    var width = txt_helpWorldList.contentWidth + 20;
-                                    if ( index == 0 ) {
-                                        popup_helpWorldList.width = 80; //width;
-                                    }
+                                    listView_helpWorldList.determinewidth();
+                                    var width = txt_helpWorldList.contentWidth + 40;
+                                    if ( width < 100 ) width = 100;
                                     if ( popup_helpWorldList.width < width )
                                     {
                                         popup_helpWorldList.width = width;
                                     }
-                                    //console.log(" (!) width: ", width, popup_helpWorldList.width);
+                                    //console.log(" (!) width: ", width, popup_helpWorldList.width, "     ", txt_helpWorldList.text);
+                                    //console.log(" (!) onCompleted: ", txt_helpWorldList.text);
                                 }
+//                                Component.onDestruction: {
+//                                    console.log(" (!) onDestruction: ", txt_helpWorldList.text);
+//                                }
 
                                 Text {
                                     id: txt_helpWorldList
@@ -878,15 +936,37 @@ Page {
                                                         Layout.fillWidth: true
                                                         Layout.minimumHeight: 90
                                                         Button {
+                                                            property bool block: false
                                                             anchors.verticalCenter:   parent.verticalCenter
                                                             anchors.horizontalCenter: parent.horizontalCenter
                                                             font.pixelSize: 14
                                                             text: qsTr("OK")
                                                             onClicked: {
+                                                                block = false;
                                                                 var txtparam = "#param(" + txt_setParam.text + ")#"
-                                                                txt_FieldQuerySQL.insert(txt_FieldQuerySQL.cursorPosition, txtparam)
-                                                                popup_setParam.close();
+                                                                var txt = txt_FieldQuerySQL.getText(0,txt_FieldQuerySQL.length);
+                                                                if ( ~txt.indexOf(txtparam.toUpperCase()) == 0 ) {
+                                                                    txt_FieldQuerySQL.insert(txt_FieldQuerySQL.cursorPosition, txtparam);
+                                                                    popup_setParam.close();
+                                                                    block = false;
+                                                                }
+                                                                else {
+                                                                    block = true;
+                                                                }
+
+
                                                             }
+
+                                                            ToolTip {
+                                                                visible: parent.block
+                                                                y: -20
+                                                                contentItem: Text {
+                                                                    text: "параметр с таким именем уже существует"
+                                                                    font.pixelSize: 15
+                                                                    color: "white"
+                                                                }
+                                                            }
+
                                                         }
                                                     }
 
@@ -984,8 +1064,9 @@ Page {
                                             }
 
                                             Keys.onPressed: {
-                                                if (event.key == Qt.ControlModifier || event.key == Qt.Key_Space) {
+                                                if (Qt.ControlModifier && event.key == Qt.Key_Space) {
                                                     /// определяем слово напечатанное до местоположения курсора
+                                                    console.log(" (!) ControlModifier");
                                                     var print_word = printWord();
                                                     if (print_word === undefined) {
                                                         print_word = "";
@@ -1042,7 +1123,7 @@ Page {
                                                     if (txt.length > 0) {
                                                         /// определяем слово напечатанное до местоположения курсора
                                                         var print_word = printWord();
-                                                        //console.log(" (!) print_word = ", print_word);
+                                                        console.log(" (!) print_word = ", print_word);
                                                         /// вызываем функцию, которая открывает список-подсказку со словами
                                                         addQuery.openHelpWordList(print_word,cursorRectangle.x,cursorRectangle.y, false);
 
@@ -1099,7 +1180,10 @@ Page {
 
 
                                                     }
-                                                    else { isOk = false }
+                                                    else {
+                                                        if ( popup_helpWorldList.opened ) popup_helpWorldList.close();
+                                                        isOk = false;
+                                                    }
 
                                                     //console.log("(!) txt_tmp = ", txt_tmp);
                                                     if(txt_tmp != undefined) {                                                        
